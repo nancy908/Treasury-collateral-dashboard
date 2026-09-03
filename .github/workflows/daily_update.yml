@@ -2,14 +2,14 @@ name: Daily Dashboard Auto-Update
 
 on:
   schedule:
-    - cron: '10 * * *'
-  workflow_dispatch: # 允許讓你隨時手動點擊按鈕立即執行
+    - cron: '30 8,9 * * *'
+  workflow_dispatch:
 
 jobs:
   update-dashboard:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 賦予程式修改並推回儲存庫的權限
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
