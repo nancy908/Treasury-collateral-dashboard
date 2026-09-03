@@ -1,0 +1,36 @@
+name: Daily Dashboard Auto-Update
+
+on:
+  schedule:
+    - cron: '10 * * *'
+  workflow_dispatch: # 允許讓你隨時手動點擊按鈕立即執行
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 賦予程式修改並推回儲存庫的權限
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run dashboard update script
+        run: |
+          python update_dashboard_final.py
+
+      - name: Commit and push changes if index.html updated
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git add index.html
+          git diff --staged --quiet || (git commit -m "Automated daily dashboard update: $(date +'%Y-%m-%d')" && git push)
