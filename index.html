@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collateral Dashboard - Tibber</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tibber-blue: #1ED0E7;
+    --tibber-black: #000000;
+    --tibber-soft-black: #16191D;
+    --tibber-light-blue: #BEFBFF;
+    --tibber-light-purple: #F0DAFE;
+    --tibber-medium-purple: #C86DFF;
+    --tibber-dark-purple: #490F6C;
+    --tibber-white: #FFFFFF;
+    --tibber-light-grey: #F3F6F9;
+    --tibber-medium-grey: #D4D9E0;
+    --tibber-dark-grey: #686C73;
+    --tibber-font: "Poppins", system-ui, sans-serif;
+
+    /* Chart data colors using Tibber palette */
+    --c-dnb-nok:   #1ED0E7;
+    --c-dnb-eur:   #BEFBFF;
+    --c-atradius:  #C86DFF;
+    --c-cash:      #490F6C;
+    --c-cash2:     #8B4BBE;
+    --c-cash3:     #F0DAFE;
+    --c-limit:     #FF5A5A;
+    --c-hist:      #686C73;
+    --c-cash-fc:   #10B981;
+    --c-cash-coll: #F59E0B;
+    --c-cash-after: #10B981;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--tibber-soft-black);
+    color: var(--tibber-white);
+    font-family: var(--tibber-font);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--tibber-black);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border-bottom: 3px solid var(--tibber-blue);
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* Tibber lightning bolt SVG logo */
+  .logo-bolt {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--tibber-white);
+    line-height: 1;
+  }
+
+  .logo-text span {
+    color: var(--tibber-blue);
+  }
+
+  .header-sub {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--tibber-dark-grey);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.2rem;
+  }
+
+  .header-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--tibber-medium-grey);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .controls {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .control-group label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--tibber-dark-grey);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .control-group input {
+    background: #1a1e24;
+    border: 1.5px solid #2a2f38;
+    color: var(--tibber-white);
+    font-family: var(--tibber-font);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.45rem 0.75rem;
+    border-radius: 8px;
+    width: 150px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .control-group input:focus {
+    border-color: var(--tibber-blue);
+    box-shadow: 0 0 0 3px rgba(30,208,231,0.12);
+  }
+
+  /* ── KPI BAR ── */
+  .kpi-bar {
+    display: flex;
+    background: var(--tibber-black);
+    border-bottom: 1px solid #1a1e24;
+    flex-wrap: wrap;
+  }
+
+  .kpi {
+    flex: 1;
+    min-width: 150px;
+    padding: 1.1rem 1.5rem;
+    border-right: 1px solid #1a1e24;
+    position: relative;
+  }
+
+  .kpi:last-child { border-right: none; }
+
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--tibber-blue);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .kpi:hover::before { opacity: 1; }
+
+  .kpi-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--tibber-dark-grey);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.35rem;
+  }
+
+  .kpi-value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--tibber-white);
+  }
+
+  .kpi-sub {
+    font-size: 0.62rem;
+    font-weight: 400;
+    color: var(--tibber-dark-grey);
+    margin-top: 0.2rem;
+  }
+
+  /* ── DASHBOARD GRID ── */
+  .dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 1px;
+    background: #1a1e24;
+    padding-bottom: 1px;
+    margin-top: 1px;
+  }
+
+  /* Base panel */
+  .panel {
+    background: #0f1217;
+    padding: 1.5rem 1.75rem;
+    position: relative;
+  }
+
+  /* Hero: Panel 2 — full width, prominent */
+  .panel-hero {
+    grid-column: 1 / -1;
+    background: #0a0e14;
+    padding: 2rem 2.25rem 1.75rem;
+    border-top: 2px solid var(--tibber-blue);
+  }
+
+  .panel-hero .panel-tag { font-size: 0.65rem; }
+
+  .panel-hero .panel-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  /* Focus: Panel 5 — full width, secondary feature */
+  .panel-focus {
+    grid-column: 1 / -1;
+    background: #0d1119;
+    padding: 1.75rem 2.25rem;
+    border-top: 1px solid #1e2740;
+  }
+
+  /* Compact: Panel 6 — full width, slim strip */
+  .panel-compact {
+    grid-column: 1 / -1;
+    background: #0c0f18;
+    padding: 1rem 2.25rem 1.25rem;
+    border-top: 1px solid #1a2035;
+  }
+
+  .panel-compact .panel-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .panel-compact .panel-tag { font-size: 0.55rem; }
+
+  .chart-wrap-compact { height: 100px; }
+
+  /* Minor panels — compact, 1/3 each */
+  .panel-minor {
+    padding: 1.1rem 1.25rem;
+    background: #0b0e13;
+    opacity: 0.92;
+  }
+
+  .panel-minor .panel-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+
+  .panel-minor .panel-tag { font-size: 0.55rem; }
+
+  .panel-tag {
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--tibber-blue);
+    margin-bottom: 0.2rem;
+  }
+
+  .panel-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--tibber-white);
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .chart-wrap {
+    position: relative;
+    height: 260px;
+  }
+
+  .chart-wrap-hero  { height: 340px; }
+  .chart-wrap-focus { height: 280px; }
+  .chart-wrap-minor { height: 160px; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin-top: 0.75rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--tibber-dark-grey);
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── FORECAST BADGE ── */
+  .forecast-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--tibber-blue);
+    background: rgba(30,208,231,0.1);
+    border: 1px solid rgba(30,208,231,0.25);
+    padding: 0.1rem 0.45rem;
+    border-radius: 20px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
+  /* ── PANEL 5 inner ── */
+  .panel-5-inner {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .deviation-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.7rem;
+  }
+
+  .deviation-table th {
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--tibber-dark-grey);
+    border-bottom: 1px solid #1a1e24;
+  }
+
+  .deviation-table td {
+    padding: 0.35rem 0.6rem;
+    border-bottom: 1px solid rgba(26,30,36,0.7);
+    font-weight: 500;
+    color: var(--tibber-white);
+  }
+
+  .over  { color: #ff5a5a; }
+  .under { color: #1ED0E7; }
+
+  /* ── CHIPS ── */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  .chip-blue { background: rgba(30,208,231,0.12); color: var(--tibber-blue); }
+  .chip-red  { background: rgba(255,90,90,0.12);  color: #ff5a5a; }
+  .chip-stable { background: rgba(104,108,115,0.12); color: var(--tibber-dark-grey); }
+
+  /* minor panel section label */
+  .minor-section-label {
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: #2a3040;
+    padding: 0.5rem 1.25rem 0.25rem;
+    background: #080b10;
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 900px) {
+    .dashboard { grid-template-columns: 1fr; }
+    .panel-hero, .panel-focus { grid-column: 1; }
+    .panel-5-inner { grid-template-columns: 1fr; }
+    .kpi-bar { flex-wrap: wrap; }
+  }
+  @media print {
+    @page {
+      size: A4 landscape;
+      margin: 0.8cm;
+    }
+    body {
+      background: #16191D !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+  
+  /* Collapsible panels for Row 1.5 & 2.5 */
+  .collapsible-grid {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #1a1e24;
+    transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .collapsible-grid.collapsed-state {
+    grid-template-columns: 50px 1fr;
+  }
+  .collapsible-panel {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .collapsible-panel.collapsed {
+    padding: 1.5rem 0.5rem !important;
+    cursor: pointer;
+    background: #0b0d11 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .collapsible-panel.collapsed:hover {
+    background: #12161c !important;
+  }
+  .collapsible-panel .collapsed-vertical-title {
+    display: none;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    color: #f59e0b;
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2rem;
+  }
+  .collapsible-panel.collapsed .collapsed-vertical-title {
+    display: block;
+  }
+  .collapsible-panel.collapsed .panel-tag,
+  .collapsible-panel.collapsed .panel-title,
+  .collapsible-panel.collapsed .chart-wrap,
+  .collapsible-panel.collapsed .legend,
+  .collapsible-panel.collapsed .collapse-icon-btn {
+    display: none !important;
+  }
+  .collapse-icon-btn {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--tibber-dark-grey);
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+    z-index: 5;
+  }
+  .collapse-icon-btn:hover {
+    background: rgba(30,208,231,0.15);
+    border-color: var(--tibber-blue);
+    color: var(--tibber-blue);
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-area">
+    <!-- Tibber lightning bolt icon -->
+    <svg class="logo-bolt" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="32" height="32" rx="8" fill="#1ED0E7"/>
+      <path d="M19 4L9 18H16L13 28L23 14H16L19 4Z" fill="#000000"/>
+    </svg>
+    <div>
+      <div class="logo-text">tibber <span>collateral</span></div>
+      <div class="header-sub">Forecast - History - Utilization - As of: 2026-09-04</div>
+    </div>
+  </div>
+  <div class="header-info" id="updateInfo">
+    <div class="info-item" id="elVolumeUpdate">El. volume last updated: -</div>
+    <div class="info-item" id="elPriceUpdate">El. price last updated: -</div>
+  </div>
+</header>
+
+<!-- KPI BAR -->
+<div class="kpi-bar">
+  <div class="kpi">
+    <div class="kpi-label">TODAY DNB GUARANTEE UTILIZED</div>
+    <div class="kpi-value" id="kpi-utilized">208,807</div>
+    <div class="kpi-sub">kNOK (Sep actuals)</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">DNB GUARANTEE LINE</div>
+    <div class="kpi-value" id="kpi2" style="color:var(--tibber-blue)">200,000</div>
+    <div class="kpi-sub">kNOK</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label" style="text-transform: none;">DNB Guarantee BREACH (kNOK)</div>
+    <div class="kpi-value" id="kpiBreach">-</div>
+    <div class="kpi-sub" id="kpiBreachSub">-</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label" style="text-transform: none;">PEAK DNB Guarantee FORECAST (kNOK)</div>
+    <div class="kpi-value" id="kpi3">-</div>
+    <div class="kpi-sub" id="kpi3sub">-</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label" style="text-transform: none;">PEAK ALL guarantee/collaterals TOTAL (kNOK)</div>
+    <div class="kpi-value" id="kpi4" style="color:var(--tibber-medium-purple)">-</div>
+    <div class="kpi-sub" id="kpi4sub">-</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">EUR/NOK Rate</div>
+    <div class="kpi-value" id="kpi5" style="color:var(--tibber-blue)">11.230</div>
+    <div class="kpi-sub">used for conversion</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard">
+
+  <!-- ═══ ROW 1: HERO — Panel 2 ═══ -->
+  <div class="panel panel-hero">
+    <div class="panel-tag">Panel 2 - Primary View <span class="forecast-badge">⟳ Forecast</span></div>
+    <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>DNB + Atradius EUR vs Guarantee Line & Cash after collateral</div>
+    <div class="chart-wrap chart-wrap-hero"><canvas id="chart2"></canvas></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB Guarantee</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-atradius)"></div>Atradius EUR Guarantee (conv.)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-limit); opacity:.7"></div>DNB+Atradius Guarantee Line</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash-after)"></div>Cash after collateral</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Covenant</div>
+    </div>
+  </div>
+
+  <!-- ═══ ROW 1.3: CASH CALCULATION DETAIL TABLE ═══ -->
+  <div class="panel panel-hero">
+    <div class="panel-tag">Panel 2B - Cash Calculation Detail</div>
+    <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>Calculation of Cash After Collateral (kNOK)</div>
+    <div style="overflow-x: auto;">
+      <table class="deviation-table" id="cashCalcTable" style="margin-top: 1rem; white-space: nowrap; width: auto; min-width: 100%;">
+        <tbody id="cashCalcBody">
+          <!-- Dynamically populated rows (transposed) -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ ROW 1.5 & 2.5: SIDE-BY-SIDE 50/50 ═══ -->
+  <div id="collapsible-row-container" class="collapsible-grid collapsed-state">
+    <!-- Panel 6 -->
+    <div id="marex-collapsible-panel" class="panel panel-focus collapsible-panel collapsed" style="grid-column: auto; border-top: 1px solid #1a2035; height: 100%; box-sizing: border-box; display: flex; flex-direction: column;" onclick="expandMarexPanel(event)">
+      <div class="collapsed-vertical-title">▶ Marex DNB EUR Guarantee</div>
+      <div class="collapse-icon-btn" title="Collapse Panel" onclick="collapseMarexPanel(event)">◀</div>
+      <div class="panel-tag"><span class="forecast-badge">⟳ Forecast vs Actual</span></div>
+      <div class="panel-title"><span class="dot" style="background:#f59e0b"></span>Marex DNB EUR Guarantee</div>
+      <div class="chart-wrap chart-wrap-focus" style="flex: 1; min-height: 150px; margin-top: 1rem;"><canvas id="chart6"></canvas></div>
+      <div class="legend" style="margin-top: 1rem;">
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Marex EUR (conv. kNOK)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#1ED0E7; height: 3px; border-radius: 0; width: 14px;"></div>Actual Marex Collateral (conv. kNOK)</div>
+      </div>
+    </div>
+
+    <!-- Expiry Alerts Panel -->
+    <div class="panel panel-focus" style="grid-column: auto; border-top: 1px solid #1a2035; height: 100%; box-sizing: border-box; display: flex; flex-direction: column;">
+      <div class="panel-tag">Alerts & Status</div>
+      <div class="panel-title"><span class="dot" style="background:#EF4444"></span>DNB Guarantees Expiry & Alerts</div>
+      <div style="overflow-x: auto; margin-top: 1rem; flex: 1;">
+        <table class="deviation-table">
+          <thead>
+            <tr>
+              <th>DNB Guarantee</th>
+              <th>Beneficiary</th>
+              <th>Currency</th>
+              <th>Amount (kEUR)</th>
+              <th>Amount (kNOK)</th>
+              <th>Expiry Date</th>
+              <th>Days to Expiry</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="expiryBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ROW 2: FOCUS — Panel 5 ═══ -->
+  <div class="panel panel-focus">
+    <div class="panel-tag"><span class="forecast-badge">⟳ Forecast vs Actual</span></div>
+    <div class="panel-title"><span class="dot" style="background:var(--c-hist)"></span>DNB Guarantee Utilization: Forecast vs Actual - Deviation and Trend</div>
+    <div class="panel-5-inner">
+      <div>
+        <div class="chart-wrap chart-wrap-focus"><canvas id="chart5"></canvas></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--tibber-blue)"></div>Forecast (kNOK)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--c-hist)"></div>Actual (kNOK)</div>
+        </div>
+      </div>
+      <div>
+        <table class="deviation-table" id="devTable">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Forecast (kNOK)</th>
+              <th>Actual (kNOK)</th>
+              <th>Deviation (kNOK)</th>
+              <th>Trend</th>
+            </tr>
+          </thead>
+          <tbody id="devBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ROW 3: MINOR section label ═══ -->
+  <div class="minor-section-label">Supporting Views</div>
+
+  <!-- Panel 1 minor -->
+  <div class="panel panel-minor">
+    <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
+    <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>DNB Guarantee (NOK + EUR)</div>
+    <div class="chart-wrap chart-wrap-minor"><canvas id="chart1"></canvas></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB NOK</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-eur)"></div>DNB EUR (conv.)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-limit); opacity:.7"></div>Guarantee Line</div>
+    </div>
+  </div>
+
+  <!-- Panel 3 minor -->
+  <div class="panel panel-minor">
+    <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
+    <div class="panel-title"><span class="dot" style="background:var(--tibber-light-purple)"></span>Cash Collateral</div>
+    <div class="chart-wrap chart-wrap-minor"><canvas id="chart3"></canvas></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash3)"></div>Skagerak (NOK)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash2)"></div>BNP SEPA EUR (conv.)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash)"></div>PVNED EUR (conv.)</div>
+    </div>
+  </div>
+
+  <!-- Panel 4 minor -->
+  <div class="panel panel-minor">
+    <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
+    <div class="panel-title"><span class="dot" style="background:var(--tibber-medium-purple)"></span>ALL guarantee/collateral: DNB + Atradius + Cash</div>
+    <div class="chart-wrap chart-wrap-minor"><canvas id="chart4"></canvas></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB NOK</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-eur)"></div>DNB EUR (conv.)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-atradius)"></div>Atradius EUR (conv.)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash2)"></div>Cash (conv.)</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// DATA_START
+const BASE_FX = 11.23;
+const FORECAST = {
+  "2026-01": { dnbNok: 126984, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 10939, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1560 },
+  "2026-02": { dnbNok: 123850, dnbEurLocal: 200, marexEurLocal: 0, atraLocal: 8740, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1157 },
+  "2026-03": { dnbNok: 121718, dnbEurLocal: 5963, marexEurLocal: 68, atraLocal: 1749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 790 },
+  "2026-04": { dnbNok: 96132, dnbEurLocal: 5933, marexEurLocal: 133, atraLocal: 1245, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 783 },
+  "2026-05": { dnbNok: 90291, dnbEurLocal: 5608, marexEurLocal: 299, atraLocal: 1245, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 593 },
+  "2026-06": { dnbNok: 88508, dnbEurLocal: 6141, marexEurLocal: 393, atraLocal: 1050, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 496 },
+  "2026-07": { dnbNok: 104988, dnbEurLocal: 6424, marexEurLocal: 481, atraLocal: 1050, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 537 },
+  "2026-08": { dnbNok: 105869, dnbEurLocal: 7668, marexEurLocal: 788, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 657 },
+  "2026-09": { dnbNok: 114075, dnbEurLocal: 9100, marexEurLocal: 1066, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1066 },
+  "2026-10": { dnbNok: 182463, dnbEurLocal: 11347, marexEurLocal: 1978, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1530 },
+  "2026-11": { dnbNok: 191698, dnbEurLocal: 14429, marexEurLocal: 2700, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2220 },
+  "2026-12": { dnbNok: 198315, dnbEurLocal: 17616, marexEurLocal: 3038, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2686 },
+  "2027-01": { dnbNok: 230235, dnbEurLocal: 19321, marexEurLocal: 2495, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2713 },
+  "2027-02": { dnbNok: 222618, dnbEurLocal: 16619, marexEurLocal: 1943, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2515 },
+  "2027-03": { dnbNok: 217092, dnbEurLocal: 13508, marexEurLocal: 1643, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2159 },
+  "2027-04": { dnbNok: 107362, dnbEurLocal: 10346, marexEurLocal: 1433, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1053 },
+  "2027-05": { dnbNok: 104374, dnbEurLocal: 10360, marexEurLocal: 1455, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 795 },
+  "2027-06": { dnbNok: 102532, dnbEurLocal: 10537, marexEurLocal: 1402, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 708 },
+  "2027-07": { dnbNok: 81416, dnbEurLocal: 10961, marexEurLocal: 1331, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 705 },
+  "2027-08": { dnbNok: 82376, dnbEurLocal: 11215, marexEurLocal: 1611, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 865 },
+  "2027-09": { dnbNok: 83263, dnbEurLocal: 12507, marexEurLocal: 1869, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1004 },
+  "2027-10": { dnbNok: 123868, dnbEurLocal: 15597, marexEurLocal: 3123, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1439 },
+  "2027-11": { dnbNok: 128989, dnbEurLocal: 18292, marexEurLocal: 4185, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1969 },
+  "2027-12": { dnbNok: 132255, dnbEurLocal: 2708, marexEurLocal: 4725, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2272 }
+};
+const ACTUALS = {
+  "2024-01": { dnbNok: 129300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 0 },
+  "2024-02": { dnbNok: 114300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 0 },
+  "2024-03": { dnbNok: 114300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 238 },
+  "2024-04": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 220 },
+  "2024-05": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 243 },
+  "2024-06": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 210 },
+  "2024-07": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 217 },
+  "2024-08": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 213 },
+  "2024-09": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 230 },
+  "2024-10": { dnbNok: 86000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 309 },
+  "2024-11": { dnbNok: 86000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 530, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 500 },
+  "2024-12": { dnbNok: 86000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 996, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 960 },
+  "2025-01": { dnbNok: 79000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 996, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 907 },
+  "2025-02": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 1146, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 779 },
+  "2025-03": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 9996, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 603 },
+  "2025-04": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6146, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 467 },
+  "2025-05": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6146, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 452 },
+  "2025-06": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6650, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 421 },
+  "2025-07": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6650, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 436 },
+  "2025-08": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 426 },
+  "2025-09": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 455 },
+  "2025-10": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 482 },
+  "2025-11": { dnbNok: 93000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 11750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 726 },
+  "2025-12": { dnbNok: 93000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 11750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 671 },
+  "2026-01": { dnbNok: 93000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 11749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 884 },
+  "2026-02": { dnbNok: 93000, dnbEurLocal: 200, marexEurLocal: 0, atraLocal: 11749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 902 },
+  "2026-03": { dnbNok: 109000, dnbEurLocal: 6200, marexEurLocal: 0, atraLocal: 1749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 670 },
+  "2026-04": { dnbNok: 109000, dnbEurLocal: 6798, marexEurLocal: 0, atraLocal: 1245, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 629 },
+  "2026-05": { dnbNok: 135000, dnbEurLocal: 5798, marexEurLocal: 0, atraLocal: 1245, cashSkaNok: 2500, cashBnpLocal: 1960, cashPvnedLocal: 629 },
+  "2026-06": { dnbNok: 120000, dnbEurLocal: 6058, marexEurLocal: 0, atraLocal: 1050, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 412 },
+  "2026-07": { dnbNok: 114000, dnbEurLocal: 6058, marexEurLocal: 0, atraLocal: 1050, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 488 },
+  "2026-08": { dnbNok: 114000, dnbEurLocal: 6809, marexEurLocal: 1000, atraLocal: 900, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 3063 }
+};
+const HISTORY_DNB_NOK_ONLY = {
+  "2024-01": 129300,
+  "2024-02": 114300,
+  "2024-03": 114300,
+  "2024-04": 98300,
+  "2024-05": 98300,
+  "2024-06": 98300,
+  "2024-07": 98300,
+  "2024-08": 98300,
+  "2024-09": 98300,
+  "2024-10": 86000,
+  "2024-11": 86000,
+  "2024-12": 86000,
+  "2025-01": 79000,
+  "2025-02": 75000,
+  "2025-03": 75000,
+  "2025-04": 75000,
+  "2025-05": 75000,
+  "2025-06": 75000,
+  "2025-07": 76200,
+  "2025-08": 76200,
+  "2025-09": 76200,
+  "2025-10": 76200,
+  "2025-11": 93000,
+  "2025-12": 93000,
+  "2026-01": 93000
+};
+const HISTORY_DNB_EUR_LOCAL = {
+  "2026-02": 200,
+  "2026-03": 6200,
+  "2026-04": 6798,
+  "2026-05": 5798,
+  "2026-06": 6058,
+  "2026-07": 6058,
+  "2026-08": 7809
+};
+const HISTORY_DNB_NOK_BASE = {
+  "2026-02": 93000,
+  "2026-03": 109000,
+  "2026-04": 109000,
+  "2026-05": 135000,
+  "2026-06": 120000,
+  "2026-07": 114000,
+  "2026-08": 114000
+};
+const HISTORY_MAREX_LOCAL = {
+  "2026-08": 1000
+};
+const MONTHLY_CASH_FORECAST = {
+  "2026-01": 519558,
+  "2026-02": 891184,
+  "2026-03": 939307,
+  "2026-04": 685421,
+  "2026-05": 796228,
+  "2026-06": 548217,
+  "2026-07": 481142,
+  "2026-08": 398181,
+  "2026-09": 328562,
+  "2026-10": 364095,
+  "2026-11": 470049,
+  "2026-12": 445251,
+  "2027-01": 497653,
+  "2027-02": 620992,
+  "2027-03": 575196,
+  "2027-04": 462222,
+  "2027-05": 360489,
+  "2027-06": 313430,
+  "2027-07": 223768,
+  "2027-08": 175305,
+  "2027-09": 161076,
+  "2027-10": 153349,
+  "2027-11": 307392,
+  "2027-12": 454597
+};
+const CASH_COLLATERAL = {
+  "2024-01": 22011,
+  "2024-02": 22011,
+  "2024-03": 24680,
+  "2024-04": 24482,
+  "2024-05": 24735,
+  "2024-06": 24369,
+  "2024-07": 24448,
+  "2024-08": 24403,
+  "2024-09": 24594,
+  "2024-10": 25481,
+  "2024-11": 27626,
+  "2024-12": 32792,
+  "2025-01": 32197,
+  "2025-02": 30759,
+  "2025-03": 28783,
+  "2025-04": 27255,
+  "2025-05": 27087,
+  "2025-06": 26739,
+  "2025-07": 26907,
+  "2025-08": 26795,
+  "2025-09": 27121,
+  "2025-10": 27424,
+  "2025-11": 30164,
+  "2025-12": 29546,
+  "2026-01": 31938,
+  "2026-02": 32140,
+  "2026-03": 29535,
+  "2026-04": 29075,
+  "2026-05": 31575,
+  "2026-06": 41638,
+  "2026-07": 42491,
+  "2026-08": 75900,
+  "2026-09": 33981,
+  "2026-10": 39188,
+  "2026-11": 46943,
+  "2026-12": 52178,
+  "2027-01": 52476,
+  "2027-02": 50250,
+  "2027-03": 46257,
+  "2027-04": 33832,
+  "2027-05": 30943,
+  "2027-06": 29957,
+  "2027-07": 29930,
+  "2027-08": 31723,
+  "2027-09": 33282,
+  "2027-10": 38173,
+  "2027-11": 44123,
+  "2027-12": 47531
+};
+const CASH_AFTER_COLLATERAL = {
+  "2026-01": 471772,
+  "2026-02": 868778,
+  "2026-03": 934665,
+  "2026-04": 690327,
+  "2026-05": 798634,
+  "2026-06": 540560,
+  "2026-07": 472632,
+  "2026-08": 345325,
+  "2026-09": 290215,
+  "2026-10": 216678,
+  "2026-11": 262923,
+  "2026-12": 186687,
+  "2027-01": 203929,
+  "2027-02": 373653,
+  "2027-03": 375682,
+  "2027-04": 422730,
+  "2027-05": 326470,
+  "2027-06": 280847,
+  "2027-07": 208363,
+  "2027-08": 151151,
+  "2027-09": 117069,
+  "2027-10": 15063,
+  "2027-11": 115844,
+  "2027-12": 425319
+};
+const CREDIT_LIMIT = {
+  "2026-01": 200000,
+  "2026-02": 200000,
+  "2026-03": 200000,
+  "2026-04": 200000,
+  "2026-05": 200000,
+  "2026-06": 200000,
+  "2026-07": 200000,
+  "2026-08": 200000,
+  "2026-09": 200000,
+  "2026-10": 200000,
+  "2026-11": 200000,
+  "2026-12": 200000,
+  "2027-01": 200000,
+  "2027-02": 200000,
+  "2027-03": 200000,
+  "2027-04": 200000,
+  "2027-05": 200000,
+  "2027-06": 200000,
+  "2027-07": 200000,
+  "2027-08": 200000,
+  "2027-09": 200000,
+  "2027-10": 200000,
+  "2027-11": 200000,
+  "2027-12": 200000
+};
+const CASH_SOURCES = {
+  "2026-01": "Actual",
+  "2026-02": "Actual",
+  "2026-03": "Actual",
+  "2026-04": "Actual",
+  "2026-05": "Actual",
+  "2026-06": "Actual",
+  "2026-07": "Actual",
+  "2026-08": "Actual",
+  "2026-09": "WCFF",
+  "2026-10": "WCFF",
+  "2026-11": "WCFF",
+  "2026-12": "Budget26",
+  "2027-01": "FC 1.5",
+  "2027-02": "FC 1.5",
+  "2027-03": "FC 1.5",
+  "2027-04": "FC 1.5",
+  "2027-05": "FC 1.5",
+  "2027-06": "FC 1.5",
+  "2027-07": "FC 1.5",
+  "2027-08": "FC 1.5",
+  "2027-09": "FC 1.5",
+  "2027-10": "FC 1.5",
+  "2027-11": "FC 1.5",
+  "2027-12": "FC 1.5"
+};
+const EL_VOLUME_DATE = "2026-07-02";
+const EL_PRICE_DATE = "2026-08-20";
+const TODAY_DNB = [{"gtype": "DNB NOK", "beneficiary": "Mind Energy", "currency": "NOK", "amt_nok": "38,000", "amt_keur": "", "expiry": ""}, {"gtype": "DNB NOK", "beneficiary": "Skagerak", "currency": "NOK", "amt_nok": "79,000", "amt_keur": "", "expiry": ""}, {"gtype": "DNB NOK", "beneficiary": "Nord Pool", "currency": "NOK", "amt_nok": "1,500", "amt_keur": "", "expiry": ""}, {"gtype": "DNB NOK", "beneficiary": "eSett", "currency": "NOK", "amt_nok": "1,500", "amt_keur": "", "expiry": ""}, {"gtype": "DNB EUR", "beneficiary": "Nord Pool DE", "currency": "EUR", "amt_nok": "2,246", "amt_keur": "200", "expiry": "2027-01-14"}, {"gtype": "DNB EUR", "beneficiary": "AXPO", "currency": "EUR", "amt_nok": "56,150", "amt_keur": "5,000", "expiry": "2027-03-26"}, {"gtype": "DNB EUR", "beneficiary": "BayWa", "currency": "EUR", "amt_nok": "8,423", "amt_keur": "750", "expiry": "2027-08-13"}, {"gtype": "DNB EUR", "beneficiary": "Amprion", "currency": "EUR", "amt_nok": "6,716", "amt_keur": "598", "expiry": "2027-04-22"}, {"gtype": "DNB EUR", "beneficiary": "TransnetBW", "currency": "EUR", "amt_nok": "2,920", "amt_keur": "260", "expiry": "2027-04-29"}, {"gtype": "DNB EUR", "beneficiary": "Marex", "currency": "EUR", "amt_nok": "11,230", "amt_keur": "1,000", "expiry": "2027-06-09"}, {"gtype": "DNB EUR", "beneficiary": "Libra Energy", "currency": "EUR", "amt_nok": "1,123", "amt_keur": "100", "expiry": "2027-07-03"}];
+// DATA_END
+
+let charts = {};
+Chart.register(ChartDataLabels);
+function fmt(v) { return Math.round(v).toLocaleString('en-US'); }
+function computeData(fx, dnbLine) {
+  const periods = Object.keys(FORECAST).sort();
+  const dnbNokArr=[], dnbEurArr=[], marexArr=[], atraArr=[], cashSkaArr=[], cashBnpArr=[], cashPvnedArr=[];
+  const dnbTotalArr=[], dnbAtraArr=[], cashTotalArr=[], grandTotalArr=[], dnbLineArr=[], creditLimitArr=[];
+  const dnbTotalForecastArr = [];
+  const marexForecastArr = [];
+
+  for (const p of periods) {
+    const f = FORECAST[p];
+    const act = (typeof ACTUALS !== 'undefined') ? ACTUALS[p] : null;
+    const hasAct = act && (act.dnbNok + act.dnbEurLocal + act.marexEurLocal + act.atraLocal > 0);
+    const d = hasAct ? act : f;
+
+    const dnbNok = d.dnbNok;
+    const dnbEur = d.dnbEurLocal * fx;
+    const marex = d.marexEurLocal * fx;
+    const atra = d.atraLocal * fx;
+    const cashSka = d.cashSkaNok;
+    const cashBnp = d.cashBnpLocal * fx;
+    const cashPvned = d.cashPvnedLocal * fx;
+    const dnbTotal = dnbNok + dnbEur + marex;
+    const cashTotal = cashSka + cashBnp + cashPvned;
+
+    dnbNokArr.push(dnbNok); dnbEurArr.push(dnbEur); marexArr.push(marex); atraArr.push(atra);
+    cashSkaArr.push(cashSka); cashBnpArr.push(cashBnp); cashPvnedArr.push(cashPvned);
+    dnbTotalArr.push(dnbTotal); dnbAtraArr.push(dnbTotal + atra);
+    cashTotalArr.push(cashTotal); grandTotalArr.push(dnbTotal + atra + cashTotal);
+    dnbLineArr.push(dnbLine);
+    const limit = (typeof CREDIT_LIMIT !== 'undefined' && CREDIT_LIMIT[p] !== undefined) ? CREDIT_LIMIT[p] : dnbLine;
+    creditLimitArr.push(limit);
+
+    const fcDnbTotal = f.dnbNok + (f.dnbEurLocal + f.marexEurLocal) * fx;
+    dnbTotalForecastArr.push(fcDnbTotal);
+    marexForecastArr.push(f.marexEurLocal * fx);
+  }
+  return { periods, dnbNokArr, dnbEurArr, marexArr, atraArr, cashSkaArr, cashBnpArr, cashPvnedArr, dnbTotalArr, dnbAtraArr, cashTotalArr, grandTotalArr, dnbLineArr, creditLimitArr, dnbTotalForecastArr, marexForecastArr };
+}
+function computeHistoryDNB(fx) {
+  const result = {};
+  for (const [p, v] of Object.entries(HISTORY_DNB_NOK_ONLY)) result[p] = v;
+  for (const [p, eurLocal] of Object.entries(HISTORY_DNB_EUR_LOCAL)) result[p] = (HISTORY_DNB_NOK_BASE[p] || 0) + eurLocal * fx;
+  return result;
+}
+function makeScales(stacked, currency) {
+  const yTitle = currency === 'NOK' ? 'kNOK' : currency === 'EUR' ? 'kEUR' : 'kNOK (EUR conv.)';
+  return { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', maxRotation: 45 }, stacked: !!stacked }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', callback: v => (v/1000).toFixed(0) + 'k' }, title: { display: true, text: yTitle, color: '#686C73', font: { family: 'Poppins', size: 10, weight: '600' }, padding: { bottom: 4 } }, stacked: !!stacked } };
+}
+function makeOpts(stacked, currency) {
+  return { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { backgroundColor: '#16191D', borderColor: '#1ED0E7', borderWidth: 1, titleFont: { family: 'Poppins', size: 11, weight: '600' }, bodyFont: { family: 'Poppins', size: 11 }, callbacks: { label: ctx => ` ${ctx.dataset.label}: ${Math.round(ctx.raw).toLocaleString()} kNOK` } } }, scales: makeScales(stacked, currency) };
+}
+const BASE_OPTS = makeOpts(false, 'NOK');
+const STACKED_OPTS = makeOpts(true, 'NOK');
+function makeChart(id, config) {
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(document.getElementById(id).getContext('2d'), config);
+}
+function update() {
+  const fx = BASE_FX;
+  const dnbLine = 200000;
+  document.getElementById('kpi5').textContent = fx.toFixed(3);
+  
+  const elVolElem = document.getElementById('elVolumeUpdate');
+  if (elVolElem && typeof EL_VOLUME_DATE !== 'undefined') {
+    elVolElem.textContent = `El. volume last updated: ${EL_VOLUME_DATE}`;
+  }
+  const elPriceElem = document.getElementById('elPriceUpdate');
+  if (elPriceElem && typeof EL_PRICE_DATE !== 'undefined') {
+    elPriceElem.textContent = `El. price last updated: ${EL_PRICE_DATE}`;
+  }
+
+  const d = computeData(fx, dnbLine);
+  const labels = d.periods;
+
+  const todayYM = new Date().toISOString().slice(0, 7);
+  let currentLimit = dnbLine;
+  if (typeof CREDIT_LIMIT !== 'undefined') {
+    if (CREDIT_LIMIT[todayYM] !== undefined) {
+      currentLimit = CREDIT_LIMIT[todayYM];
+    } else if (d.periods.length > 0) {
+      for (const p of d.periods) {
+        if (CREDIT_LIMIT[p] !== undefined) {
+          currentLimit = CREDIT_LIMIT[p];
+          break;
+        }
+      }
+    }
+  }
+  document.getElementById('kpi2').textContent = fmt(dnbLine);
+
+  const asOfYM = document.body.innerHTML.match(/As of:\s*(\d{4}-\d{2}-\d{2})/)?.[1].slice(0, 7) || todayYM;
+  const breachPeriods = d.periods.map((p, i) => ({ p, excess: d.dnbTotalArr[i] - d.creditLimitArr[i] })).filter(x => x.p >= asOfYM && x.excess > 0);
+  const breachEl = document.getElementById('kpiBreach');
+  const breachSubEl = document.getElementById('kpiBreachSub');
+  if (breachPeriods.length > 0) {
+    const first = breachPeriods[0];
+    breachEl.textContent = '+' + fmt(first.excess);
+    breachEl.style.color = '#ff5a5a';
+    breachSubEl.textContent = 'first breach · ' + first.p;
+  } else {
+    breachEl.textContent = 'Within Limit';
+    breachEl.style.color = 'var(--tibber-blue)';
+    breachSubEl.textContent = 'no breach in forecast';
+  }
+  const peakDnbVal = Math.max(...d.dnbTotalArr);
+  const peakDnbIdx = d.dnbTotalArr.indexOf(peakDnbVal);
+  document.getElementById('kpi3').textContent = fmt(peakDnbVal);
+  document.getElementById('kpi3sub').textContent = d.periods[peakDnbIdx];
+  const peakGrandVal = Math.max(...d.grandTotalArr);
+  const peakGrandIdx = d.grandTotalArr.indexOf(peakGrandVal);
+  document.getElementById('kpi4').textContent = fmt(peakGrandVal);
+  document.getElementById('kpi4sub').textContent = d.periods[peakGrandIdx];
+
+  // Populate Cash Calculation Detail Table
+  const cashCalcBody = document.getElementById('cashCalcBody');
+  if (cashCalcBody) {
+    cashCalcBody.innerHTML = '';
+    const todayYM = '2026-06';
+    const cashCollToday = CASH_COLLATERAL[todayYM] || 0;
+    
+    let headerRow = '<tr><td style="font-weight: 700; color: var(--tibber-dark-grey); border-bottom: 2px solid #1a1e24; position: sticky; left: 0; background: #0f1217; z-index: 2;">Metric</td>';
+    let cashPosRow = '<tr><td style="font-weight: 600; color: var(--tibber-dark-grey); position: sticky; left: 0; background: #0f1217; z-index: 2;">Cash Position</td>';
+    let excessRow = '<tr><td style="font-weight: 600; color: var(--tibber-dark-grey); position: sticky; left: 0; background: #0f1217; z-index: 2;">Guarantee Overdraft (Breach)</td>';
+    let collChangeRow = '<tr><td style="font-weight: 600; color: var(--tibber-dark-grey); position: sticky; left: 0; background: #0f1217; z-index: 2;">Cash Collateral Change</td>';
+    let cashAfterRow = '<tr><td style="font-weight: 700; color: var(--c-cash-after); position: sticky; left: 0; background: #0f1217; z-index: 2;">Cash After Collateral</td>';
+    let cashSourceRow = '<tr><td style="font-weight: 600; color: var(--tibber-dark-grey); position: sticky; left: 0; background: #0f1217; z-index: 2;">Cash Position Source</td>';
+    
+    for (const p of d.periods) {
+      headerRow += `<td style="font-weight: 700; border-bottom: 2px solid #1a1e24; text-align: center; padding: 0.4rem 0.75rem;">${p}</td>`;
+      
+      const hasCash = MONTHLY_CASH_FORECAST[p] !== undefined;
+      const cashPos = MONTHLY_CASH_FORECAST[p] || 0;
+      
+      let utilization = 0;
+      if (FORECAST[p]) {
+        const fd = FORECAST[p];
+        const dnbNok = fd.dnbNok || 0;
+        const dnbEur = (fd.dnbEurLocal || 0) * fx;
+        const marex = (fd.marexEurLocal || 0) * fx;
+        const atra = (fd.atraLocal || 0) * fx;
+        utilization = dnbNok + dnbEur + marex + atra;
+      }
+      
+      const limit = CREDIT_LIMIT[p] !== undefined ? CREDIT_LIMIT[p] : dnbLine;
+      const excess = Math.max(0, utilization - limit);
+      
+      const cashColl = CASH_COLLATERAL[p] || 0;
+      const collChange = cashColl - cashCollToday;
+      
+      const cashAfter = CASH_AFTER_COLLATERAL[p] || 0;
+      
+      if (hasCash) {
+        cashPosRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;">${fmt(cashPos)}</td>`;
+        excessRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;" class="${excess > 0 ? 'over' : ''}">${excess > 0 ? '+' : ''}${fmt(excess)}</td>`;
+        collChangeRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;" class="${collChange > 0 ? 'over' : (collChange < 0 ? 'under' : '')}">${collChange > 0 ? '+' : ''}${fmt(collChange)}</td>`;
+        cashAfterRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; font-weight: 700; color: var(--tibber-blue);">${fmt(cashAfter)}</td>`;
+        const sourceVal = (typeof CASH_SOURCES !== 'undefined') ? (CASH_SOURCES[p] || '-') : '-';
+        cashSourceRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; font-style: italic; color: #a1a1aa;">${sourceVal}</td>`;
+      } else {
+        cashPosRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; color: var(--tibber-dark-grey);">-</td>`;
+        excessRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; color: var(--tibber-dark-grey);">-</td>`;
+        collChangeRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; color: var(--tibber-dark-grey);">-</td>`;
+        cashAfterRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; color: var(--tibber-dark-grey);">-</td>`;
+        cashSourceRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; color: var(--tibber-dark-grey);">-</td>`;
+      }
+    }
+    
+    headerRow += '</tr>';
+    cashPosRow += '</tr>';
+    excessRow += '</tr>';
+    collChangeRow += '</tr>';
+    cashAfterRow += '</tr>';
+    cashSourceRow += '</tr>';
+    
+    cashCalcBody.innerHTML = headerRow + cashPosRow + excessRow + collChangeRow + cashAfterRow + cashSourceRow;
+  }
+  makeChart('chart1', { type: 'bar', data: { labels, datasets: [
+    { label: 'DNB NOK', data: d.dnbNokArr, backgroundColor: 'rgba(30,208,231,0.85)', stack: 's' },
+    { label: 'DNB EUR', data: d.dnbEurArr.map((v, i) => v + d.marexArr[i]), backgroundColor: 'rgba(190,251,255,0.75)', stack: 's' },
+    { label: 'Guarantee Line', data: d.dnbLineArr, type: 'line', borderColor: '#FF5A5A', borderDash: [4,3], borderWidth: 1.5, pointRadius: 0, fill: false },
+  ]}, options: makeOpts(true, 'NOK') });
+
+  const chart2Opts = makeOpts(true, 'NOK');
+  chart2Opts.plugins.datalabels = { display: ctx => { if (ctx.datasetIndex !== 1) return false; const dnb = d.dnbTotalArr[ctx.dataIndex]; const atra = d.atraArr[ctx.dataIndex]; return (dnb + atra) > 0; }, formatter: (_, ctx) => { const total = d.dnbTotalArr[ctx.dataIndex] + d.atraArr[ctx.dataIndex]; return (total / 1000).toFixed(2) + 'm'; }, anchor: 'end', align: 'end', offset: 4, color: '#ffffff', font: { family: 'Poppins', size: 10, weight: '700' }, };
+  const cashAfterArr = labels.map(p => CASH_AFTER_COLLATERAL[p] ?? null);
+  const covenantArr = labels.map(() => 125000);
+  const peakStack2 = Math.max(...d.dnbTotalArr.map((v, i) => v + d.atraArr[i]));
+  const peakCash2 = Math.max(...cashAfterArr.filter(x => x !== null));
+
+  chart2Opts.scales = {
+    x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', maxRotation: 45 }, stacked: true, offset: false },
+    y: {
+      type: 'linear', display: true, position: 'left', stacked: true,
+      grid: { color: 'rgba(255,255,255,0.04)' },
+      ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', callback: v => (v/1000).toFixed(0) + 'm' },
+      title: { display: false },
+      suggestedMax: Math.max(peakStack2, peakCash2) * 1.1
+    }
+  };
+
+  makeChart('chart2', { type: 'bar', data: { labels, datasets: [
+    { label: 'DNB Guarantee', data: d.dnbTotalArr, backgroundColor: 'rgba(30,208,231,0.85)', stack: 's', yAxisID: 'y' },
+    { label: 'Atradius EUR Guarantee', data: d.atraArr, backgroundColor: 'rgba(200,109,255,0.75)', stack: 's', yAxisID: 'y' },
+    { label: 'DNB+Atradius Guarantee Line', data: d.creditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit' },
+    { label: 'Cash after collateral', data: cashAfterArr, type: 'line', borderColor: '#10B981', backgroundColor: 'rgba(16,185,129,0.05)', fill: false, tension: 0.3, pointRadius: 4, pointHoverRadius: 6, borderWidth: 4.5, datalabels: { display: false }, yAxisID: 'y', stack: 'cash' },
+    { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
+  ]}, options: chart2Opts });
+
+  const chart6Opts = makeOpts(false, 'NOK');
+  chart6Opts.plugins.datalabels = { display: ctx => ctx.dataset.data[ctx.dataIndex] > 0, formatter: v => (v / 1000).toFixed(2) + 'm', anchor: 'end', align: 'end', offset: 2, color: '#ffffff', font: { family: 'Poppins', size: 9, weight: '600' }, };
+  const marexActualArr = labels.map(p => (typeof HISTORY_MAREX_LOCAL !== 'undefined' && HISTORY_MAREX_LOCAL[p] !== undefined) ? HISTORY_MAREX_LOCAL[p] * fx : null);
+  const peakMarex = Math.max(...d.marexForecastArr, ...marexActualArr.filter(v => v !== null).concat([0]));
+  chart6Opts.scales.y.suggestedMax = peakMarex * 1.25;
+  makeChart('chart6', { type: 'bar', data: { labels, datasets: [
+    { label: 'Marex EUR (conv.)', data: d.marexForecastArr, backgroundColor: 'rgba(245,158,11,0.85)' },
+    {
+      label: 'Actual Marex Collateral',
+      data: marexActualArr,
+      type: 'line',
+      borderColor: '#1ED0E7',
+      borderWidth: 2.5,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+      fill: false,
+      datalabels: { display: false }
+    }
+  ]}, options: chart6Opts });
+  makeChart('chart3', { type: 'bar', data: { labels, datasets: [
+    { label: 'Skagerak (NOK)', data: d.cashSkaArr, backgroundColor: 'rgba(240,218,254,0.85)', stack: 's' },
+    { label: 'BNP SEPA EUR (conv.)', data: d.cashBnpArr, backgroundColor: 'rgba(139,75,190,0.85)', stack: 's' },
+    { label: 'PVNED EUR (conv.)', data: d.cashPvnedArr, backgroundColor: 'rgba(73,15,108,0.85)', stack: 's' },
+  ]}, options: makeOpts(true, 'NOK') });
+  makeChart('chart4', { type: 'bar', data: { labels, datasets: [
+    { label: 'DNB NOK', data: d.dnbNokArr, backgroundColor: 'rgba(30,208,231,0.85)', stack: 's' },
+    { label: 'DNB EUR (conv.)', data: d.dnbEurArr.map((v, i) => v + d.marexArr[i]), backgroundColor: 'rgba(190,251,255,0.7)', stack: 's' },
+    { label: 'Atradius EUR (conv.)', data: d.atraArr, backgroundColor: 'rgba(200,109,255,0.75)', stack: 's' },
+    { label: 'Cash (conv.)', data: d.cashTotalArr, backgroundColor: 'rgba(73,15,108,0.85)', stack: 's' },
+  ]}, options: makeOpts(true, 'NOK') });
+  const histDNB = computeHistoryDNB(fx);
+  const histPeriods = Object.keys(histDNB).sort();
+  const fcPeriods = d.periods;
+  const allPeriods = [...new Set([...histPeriods, ...fcPeriods])].sort();
+  const forecastLine = allPeriods.map(p => { const i = d.periods.indexOf(p); return i >= 0 ? d.dnbTotalForecastArr[i] : null; });
+  const historyLine = allPeriods.map(p => histDNB[p] ?? null);
+  makeChart('chart5', { type: 'line', data: { labels: allPeriods, datasets: [
+    { label: 'Forecast', data: forecastLine, borderColor: '#1ED0E7', backgroundColor: 'rgba(30,208,231,0.06)', fill: true, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2, segment: { borderDash: ctx => allPeriods[ctx.p1DataIndex] > '2026-06' ? [4,3] : [] } },
+    { label: 'Actual', data: historyLine, borderColor: '#686C73', backgroundColor: 'rgba(104,108,115,0.04)', fill: false, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 1.5 },
+  ]}, options: makeOpts(false, 'NOK') });
+  const overlapping = fcPeriods.filter(p => histDNB[p] !== undefined);
+  const tbody = document.getElementById('devBody');
+  tbody.innerHTML = '';
+  for (let i = 0; i < overlapping.length; i++) {
+    const p = overlapping[i];
+    const fcVal = d.dnbTotalForecastArr[d.periods.indexOf(p)];
+    const histVal = histDNB[p];
+    const dev = fcVal - histVal;
+    const devPct = histVal ? dev / histVal * 100 : 0;
+    let trend = '-';
+    if (i > 0) {
+      const prevP = overlapping[i - 1];
+      const prevDev = d.dnbTotalForecastArr[d.periods.indexOf(prevP)] - histDNB[prevP];
+      if (dev > prevDev + 500) trend = 'Rising';
+      else if (dev < prevDev - 500) trend = 'Falling';
+      else trend = 'Stable';
+    }
+    const cls = dev > 0 ? 'over' : (dev < 0 ? 'under' : '');
+    const chipCls = trend === 'Rising' ? 'chip-red' : (trend === 'Falling' ? 'chip-blue' : 'chip-stable');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${p}</td><td>${fmt(fcVal)}</td><td>${fmt(histVal)}</td><td class="${cls}">${dev >= 0 ? '+' : ''}${fmt(dev)} (${devPct >= 0 ? '+' : ''}${devPct.toFixed(1)}%)</td><td>${trend !== '-' ? `<span class="chip ${chipCls}">${trend}</span>` : '-'}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  // Populate Expiry Table
+  const expiryBody = document.getElementById('expiryBody');
+  if (expiryBody && typeof TODAY_DNB !== 'undefined') {
+    expiryBody.innerHTML = '';
+    const asOfDateStr = document.body.innerHTML.match(/As of:\s*(\d{4}-\d{2}-\d{2})/)?.[1] || new Date().toISOString().slice(0, 10);
+    const asOfDate = new Date(asOfDateStr);
+
+    TODAY_DNB.forEach(item => {
+      const tr = document.createElement('tr');
+      
+      let daysText = '-';
+      let daysStyle = '';
+      let statusHtml = '<span class="chip chip-stable">Open-ended</span>';
+      
+      if (item.expiry && item.expiry.trim()) {
+        const expDate = new Date(item.expiry);
+        const diffTime = expDate - asOfDate;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        daysText = diffDays.toString();
+        
+        if (diffDays <= 0) {
+          daysStyle = 'style="color: #ff5a5a; font-weight: 700;"';
+          statusHtml = '<span class="chip chip-red">Expired</span>';
+        } else if (diffDays < 60) {
+          daysStyle = 'style="color: #ff5a5a; font-weight: 700;"';
+          statusHtml = '<span class="chip chip-red">Expiring soon (&lt;60d)</span>';
+        } else if (diffDays < 90) {
+          daysStyle = 'style="color: #f59e0b; font-weight: 700;"';
+          statusHtml = '<span class="chip" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">Expiring soon (&lt;90d)</span>';
+        } else if (diffDays < 120) {
+          daysStyle = 'style="color: #c084fc; font-weight: 700;"';
+          statusHtml = '<span class="chip" style="background: rgba(167, 139, 250, 0.12); color: #c084fc;">Expiring soon (&lt;120d)</span>';
+        } else {
+          daysStyle = '';
+          statusHtml = '<span class="chip chip-blue" style="background: rgba(16, 185, 129, 0.12); color: #10B981;">Active</span>';
+        }
+      }
+      
+      const amtEur = item.amt_keur ? fmt(parseFloat(item.amt_keur.replace(/,/g, ''))) : '-';
+      const amtNok = item.amt_nok ? fmt(parseFloat(item.amt_nok.replace(/,/g, ''))) : '-';
+      
+      tr.innerHTML = `
+        <td>${item.gtype || '-'}</td>
+        <td>${item.beneficiary || '-'}</td>
+        <td>${item.currency || '-'}</td>
+        <td>${amtEur}</td>
+        <td>${amtNok}</td>
+        <td>${item.expiry || '-'}</td>
+        <td ${daysStyle}>${daysText}</td>
+        <td>${statusHtml}</td>
+      `;
+      expiryBody.appendChild(tr);
+    });
+  }
+}
+function expandMarexPanel(e) {
+  const panel = document.getElementById('marex-collapsible-panel');
+  if (panel.classList.contains('collapsed')) {
+    panel.classList.remove('collapsed');
+    document.getElementById('collapsible-row-container').classList.remove('collapsed-state');
+    setTimeout(() => {
+      const chartInstance = Chart.getChart("chart6");
+      if (chartInstance) {
+        chartInstance.resize();
+      }
+    }, 310);
+  }
+}
+
+function collapseMarexPanel(e) {
+  e.stopPropagation();
+  const panel = document.getElementById('marex-collapsible-panel');
+  panel.classList.add('collapsed');
+  document.getElementById('collapsible-row-container').classList.add('collapsed-state');
+}
+
+update();
+</script>
+</body>
+</html>
