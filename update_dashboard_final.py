@@ -1561,7 +1561,7 @@ def main():
                 except Exception as e:
                     print(f"Warning: Failed to copy {target_name} to Shared Drive Data folder: {e}")
 
-        # 4. Push to GitHub if Git repository is configured
+        # 4. Push to GitHub if Git repository is configured in Shared Drive or local directory
         for repo_dir in [shared_data_dir, script_dir]:
             if os.path.exists(os.path.join(repo_dir, ".git")):
                 import subprocess
@@ -1580,6 +1580,64 @@ def main():
                     print(f"Warning: Git push failed in {repo_dir}: {e}")
     else:
         print(f"Warning: Shared Drive path not found: {shared_dir}")
+
+    # 5. Copy files to local GitHub repository folder (fervent-carson)
+    local_repo_dir = r"C:\Users\NancyChangEriksson\Documents\antigravity\fervent-carson"
+    print(f"\nChecking local GitHub repository directory: {local_repo_dir}...")
+    if os.path.exists(local_repo_dir):
+        os.makedirs(os.path.join(local_repo_dir, "Data"), exist_ok=True)
+        
+        # Files to copy directly to fervent-carson
+        sync_bat_src = os.path.join(script_dir, "sync_and_push.bat")
+        if not os.path.exists(sync_bat_src):
+            sync_bat_src = os.path.join(local_repo_dir, "sync_and_push.bat")
+
+        repo_copies = [
+            (collateral_path, "Collateral calculator 2 - Summary.csv"),
+            (treasury_path, "CFF Treasury.csv"),
+            (fpa_path, "CFF FP&A.csv"),
+            (local_index_path if os.path.exists(local_index_path) else html_path, "index.html"),
+            (sync_bat_src, "sync_and_push.bat"),
+            (os.path.join(script_dir, "update_dashboard_final.py"), "update_dashboard_final.py")
+        ]
+
+        for src, target_name in repo_copies:
+            if src and os.path.exists(src):
+                # Copy to root of fervent-carson
+                dst_root = os.path.join(local_repo_dir, target_name)
+                try:
+                    shutil.copy2(src, dst_root)
+                    print(f"[OK] Copied {target_name} -> {local_repo_dir}")
+                except Exception as e:
+                    print(f"Warning: Failed to copy {target_name} to {local_repo_dir}: {e}")
+
+                # Also copy data CSVs to Data/ subfolder in fervent-carson
+                if target_name.endswith('.csv'):
+                    dst_data = os.path.join(local_repo_dir, "Data", target_name)
+                    try:
+                        shutil.copy2(src, dst_data)
+                        print(f"[OK] Copied {target_name} -> {local_repo_dir}\\Data")
+                    except Exception as e:
+                        print(f"Warning: Failed to copy {target_name} to {local_repo_dir}\\Data: {e}")
+
+        # Git commit & push from fervent-carson if .git exists
+        if os.path.exists(os.path.join(local_repo_dir, ".git")):
+            import subprocess
+            try:
+                print(f"\nGit repository detected in {local_repo_dir}. Staging, committing, and pushing to GitHub...")
+                subprocess.run(["git", "add", "."], cwd=local_repo_dir, check=True)
+                status = subprocess.run(["git", "status", "--porcelain"], cwd=local_repo_dir, capture_output=True, text=True)
+                if status.stdout.strip():
+                    commit_msg = f"Auto-sync dashboard and data: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+                    subprocess.run(["git", "commit", "-m", commit_msg], cwd=local_repo_dir, check=True)
+                    subprocess.run(["git", "push"], cwd=local_repo_dir, check=True)
+                    print(f"[OK] Successfully pushed updates to GitHub from {local_repo_dir}")
+                else:
+                    print(f"[OK] No new changes to commit in {local_repo_dir}")
+            except Exception as e:
+                print(f"Warning: Git push failed in {local_repo_dir}: {e}")
+    else:
+        print(f"Warning: Local GitHub repository path not found: {local_repo_dir}")
 
     print(f"\n{'='*60}")
     print(f"DASHBOARD UPDATE SUCCESSFUL")
