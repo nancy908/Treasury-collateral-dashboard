@@ -490,7 +490,7 @@ def parse_js_obj(js_str):
     json_str = re.sub(r',\s*\]', r']', json_str)
     return json.loads(json_str)
 
-def update_html(html_content, collateral_data, monthly_cash, cash_collateral, cash_sources):
+def update_html(html_content, collateral_data, monthly_cash, cash_collateral, cash_sources, covenant_data=None):
     """Update HTML preserving guarantee data and adding cash flow data"""
 
     # Extract existing guarantee data
@@ -530,6 +530,7 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
     # Build complete data block
     today_dnb_json = json.dumps(collateral_data['today_dnb'])
     actuals_obj = format_forecast_block(collateral_data['actuals'])
+    covenant_json = json.dumps(covenant_data if covenant_data else {})
     data_block = f"""// DATA_START
 const BASE_FX = {collateral_data['fx_rate']};
 const FORECAST = {forecast_obj};
@@ -546,6 +547,7 @@ const CASH_SOURCES = {format_sources_js(cash_sources)};
 const EL_VOLUME_DATE = "{collateral_data.get('el_volume_date', '')}";
 const EL_PRICE_DATE = "{collateral_data.get('el_price_date', '')}";
 const TODAY_DNB = {today_dnb_json};
+const COVENANT_DATA = {covenant_json};
 // DATA_END"""
 
     # Replace the entire DATA block
@@ -1343,9 +1345,68 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
 
 
 
+def parse_covenant_csv(csv_path):
+    """
+    Parse Covenant forecast CSV.
+    Columns:
+      Date (col 0): e.g. '2024-09-30'
+      Covenant ratio (col 9): e.g. '94.83%'
+      Group Liquidity (col 10): e.g. '459,324,392' (NOK, converted to kNOK)
+      Covenant ratio threshold (col 11): e.g. '80%'
+      Group cash requirement (col 12): e.g. '125,000,000' (NOK, converted to kNOK)
+    Returns:
+      dict mapping period 'YYYY-MM' -> {
+          'ratio': float,
+          'liquidity': float (kNOK),
+          'threshold': float,
+          'requirement': float (kNOK),
+          'date': str
+      }
+    """
+    print(f"  Reading: Covenant forecast...")
+    data = {}
+    if not csv_path or not os.path.exists(csv_path):
+        return data
+
+    with open(csv_path, newline='', encoding='utf-8-sig', errors='ignore') as f:
+        reader = csv.reader(f)
+        for i, row in enumerate(reader):
+            if i == 0 or not row or not row[0].strip():
+                continue
+            date_str = row[0].strip()
+            if not re.match(r'^\d{4}-\d{2}', date_str):
+                continue
+            period = date_str[:7]
+
+            def parse_pct(val_str, default=None):
+                if not val_str: return default
+                cleaned = val_str.replace('%', '').replace(',', '').strip()
+                try: return float(cleaned)
+                except ValueError: return default
+
+            def parse_amt_knok(val_str, default=0.0):
+                if not val_str: return default
+                cleaned = val_str.replace(',', '').replace(' ', '').strip()
+                try: return float(cleaned) / 1000.0
+                except ValueError: return default
+
+            ratio = parse_pct(row[9] if len(row) > 9 else "")
+            liquidity = parse_amt_knok(row[10] if len(row) > 10 else "")
+            threshold = parse_pct(row[11] if len(row) > 11 else "", 80.0)
+            requirement = parse_amt_knok(row[12] if len(row) > 12 else "", 125000.0)
+
+            data[period] = {
+                'ratio': ratio,
+                'liquidity': round(liquidity, 1) if liquidity is not None else None,
+                'threshold': threshold if threshold is not None else 80.0,
+                'requirement': round(requirement, 1) if requirement is not None else 125000.0,
+                'date': date_str
+            }
+    return data
+
 def find_input_csvs(script_dir, target_date=None):
     """
-    Search for collateral, treasury, and FP&A CSV files across multiple candidate directories
+    Search for collateral, treasury, FP&A, and covenant CSV files across multiple candidate directories
     with case-insensitive matching for full cross-platform / GitHub Actions compatibility.
     """
     candidate_dirs = [
@@ -1372,6 +1433,7 @@ def find_input_csvs(script_dir, target_date=None):
     collateral_candidates = []
     treasury_candidates = []
     fpa_candidates = []
+    covenant_candidates = []
 
     for fpath in all_csvs:
         fname_lower = os.path.basename(fpath).lower()
@@ -1386,6 +1448,8 @@ def find_input_csvs(script_dir, target_date=None):
             treasury_candidates.append(fpath)
         elif 'fp&a' in fname_lower or 'fpa' in fname_lower or 'cff fp&a' in fname_lower:
             fpa_candidates.append(fpath)
+        elif 'covenant' in fname_lower:
+            covenant_candidates.append(fpath)
 
     def pick_best(candidates, preferred_name):
         if not candidates:
@@ -1403,8 +1467,9 @@ def find_input_csvs(script_dir, target_date=None):
     collateral_path = pick_best(collateral_candidates, "Collateral calculator 2 - Summary.csv")
     treasury_path = pick_best(treasury_candidates, "CFF Treasury.csv")
     fpa_path = pick_best(fpa_candidates, "CFF FP&A.csv")
+    covenant_path = pick_best(covenant_candidates, "Covenant forecast.csv")
 
-    return collateral_path, treasury_path, fpa_path
+    return collateral_path, treasury_path, fpa_path, covenant_path
 
 def main():
     import sys
@@ -1423,7 +1488,7 @@ def main():
     if target_date:
         print(f"Target date specified: {target_date}")
 
-    collateral_path, treasury_path, fpa_path = find_input_csvs(script_dir, target_date)
+    collateral_path, treasury_path, fpa_path, covenant_path = find_input_csvs(script_dir, target_date)
 
     if not collateral_path:
         print(f"\n[NOTICE] No Collateral calculator CSV file found in candidate directories.")
@@ -1448,10 +1513,13 @@ def main():
 
     treasury_data = {}
     fpa_data = {}
+    covenant_data = {}
     if treasury_path:
         treasury_data = parse_treasury_csv(treasury_path)
     if fpa_path:
         fpa_data = parse_fpa_csv(fpa_path)
+    if covenant_path:
+        covenant_data = parse_covenant_csv(covenant_path)
 
     # Bootstrap cash flow
     current_month = collateral_data['as_of_date'][:7] if collateral_data.get('as_of_date') else None
@@ -1463,6 +1531,7 @@ def main():
     print(f"  - Utilized Today: {collateral_data['utilized_today']:,.0f} kNOK")
     print(f"  - Cash forecasts: {len(monthly_cash)} months")
     print(f"  - Cash collateral periods: {len(collateral_data['cash_collateral'])}")
+    print(f"  - Covenant forecast periods: {len(covenant_data)}")
 
     print(f"\nReading HTML...")
     with open(html_path, 'r', encoding='utf-8') as f:
@@ -1470,7 +1539,7 @@ def main():
     print(f"[OK] HTML read ({len(html_content):,} bytes)")
 
     print(f"\nUpdating HTML...")
-    updated_html = update_html(html_content, collateral_data, monthly_cash, collateral_data['cash_collateral'], cash_sources)
+    updated_html = update_html(html_content, collateral_data, monthly_cash, collateral_data['cash_collateral'], cash_sources, covenant_data)
     print(f"[OK] HTML updated")
 
     print(f"\nWriting updated HTML...")
@@ -1491,7 +1560,8 @@ def main():
     local_data_copies = [
         (collateral_path, "Collateral calculator 2 - Summary.csv"),
         (treasury_path, "CFF Treasury.csv"),
-        (fpa_path, "CFF FP&A.csv")
+        (fpa_path, "CFF FP&A.csv"),
+        (covenant_path, "Covenant forecast.csv")
     ]
     for src_path, target_name in local_data_copies:
         if src_path and os.path.exists(src_path):
@@ -1550,7 +1620,8 @@ def main():
         data_copies = [
             (collateral_path, "Collateral calculator 2 - Summary.csv"),
             (treasury_path, "CFF Treasury.csv"),
-            (fpa_path, "CFF FP&A.csv")
+            (fpa_path, "CFF FP&A.csv"),
+            (covenant_path, "Covenant forecast.csv")
         ]
         for src_path, target_name in data_copies:
             if src_path and os.path.exists(src_path):
@@ -1596,6 +1667,7 @@ def main():
             (collateral_path, "Collateral calculator 2 - Summary.csv"),
             (treasury_path, "CFF Treasury.csv"),
             (fpa_path, "CFF FP&A.csv"),
+            (covenant_path, "Covenant forecast.csv"),
             (local_index_path if os.path.exists(local_index_path) else html_path, "index.html"),
             (sync_bat_src, "sync_and_push.bat"),
             (os.path.join(script_dir, "update_dashboard_final.py"), "update_dashboard_final.py")
