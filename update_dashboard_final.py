@@ -1377,6 +1377,8 @@ def parse_covenant_csv(csv_path):
             if not re.match(r'^\d{4}-\d{2}', date_str):
                 continue
             period = date_str[:7]
+            if period > '2027-12':
+                continue
 
             def parse_pct(val_str, default=None):
                 if not val_str: return default
