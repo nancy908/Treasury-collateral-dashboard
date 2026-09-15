@@ -333,8 +333,29 @@ def parse_fpa_csv(csv_path):
 
     fpa_data = {}
 
-    # Skip header rows, start from row 5
-    for row in rows[5:]:
+    # Detect header row dynamically
+    header_idx = -1
+    col_map = {}
+    for idx, row in enumerate(rows[:10]):
+        row_lower = [c.lower().strip() for c in row]
+        if 'period' in row_lower:
+            header_idx = idx
+            for c_idx, cell in enumerate(row_lower):
+                clean = cell.replace(' ', '').replace('.', '')
+                col_map[clean] = c_idx
+            break
+
+    start_row = header_idx + 1 if header_idx >= 0 else 5
+
+    def get_col_val(row, name_keys, default=0.0):
+        for k in name_keys:
+            if k in col_map:
+                c_i = col_map[k]
+                if c_i < len(row) and row[c_i].strip():
+                    return parse_num(row[c_i])
+        return default
+
+    for row in rows[start_row:]:
         if len(row) >= 2 and row[0].strip():
             try:
                 date_str = row[0].strip()
@@ -347,10 +368,11 @@ def parse_fpa_csv(csv_path):
 
                 if re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
                     fpa_data[date_str] = {
-                        'BU26': parse_num(row[5]) if len(row) >= 6 else parse_num(row[1]),
-                        'FC1.5': parse_num(row[6]) if len(row) >= 7 else 0.0,
-                        'Actual': parse_num(row[7]) if len(row) >= 8 else 0.0,
-                        'WCFF': parse_num(row[8]) if len(row) >= 9 else 0.0
+                        'BU26': get_col_val(row, ['bu26', 'budget26']),
+                        'FC1.5': get_col_val(row, ['fc15', 'fc1.5']),
+                        'FC1.7': get_col_val(row, ['fc17', 'fc1.7']),
+                        'Actual': get_col_val(row, ['actual', 'actuals']),
+                        'WCFF': get_col_val(row, ['wcff'])
                     }
             except:
                 pass
@@ -405,12 +427,17 @@ def bootstrap_cash_flow(treasury, fpa, current_month=None):
                 monthly_cash[month_str] = val
                 cash_sources[month_str] = "Budget26"
                 
-        # Rule (4): Future months in 2027 and later -> use FC 1.5 from CFF FP&A
+        # Rule (4): Future months in 2027 and later -> use FC 1.7 from CFF FP&A (fallback to FC 1.5)
         elif month_str >= '2027-01':
-            val = values.get('FC1.5', 0.0)
+            val = values.get('FC1.7', 0.0)
             if val > 0:
                 monthly_cash[month_str] = val
-                cash_sources[month_str] = "FC 1.5"
+                cash_sources[month_str] = "FC 1.7"
+            else:
+                val = values.get('FC1.5', 0.0)
+                if val > 0:
+                    monthly_cash[month_str] = val
+                    cash_sources[month_str] = "FC 1.5"
 
     return monthly_cash, cash_sources
 
