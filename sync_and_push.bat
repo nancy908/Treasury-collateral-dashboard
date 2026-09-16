@@ -21,6 +21,11 @@ for %%f in ("G:\Shared drives\Tibber – House of Business\Treasury\Dashboards\D
     copy /Y "%%f" "%~dp0Data\Covenant forecast.csv"
 )
 
+REM 尋找 G 槽帶有日期的 Cash position history 檔案，並覆寫為本機固定檔名
+for %%f in ("G:\Shared drives\Tibber – House of Business\Treasury\Dashboards\Data\Cash position history *.csv") do (
+    copy /Y "%%f" "%~dp0Data\Cash position history.csv"
+)
+
 REM 複製當天的 index.html
 copy /Y "G:\Shared drives\Tibber – House of Business\Treasury\Dashboards\Data\index.html" "%~dp0"
 

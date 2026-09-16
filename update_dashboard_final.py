@@ -517,7 +517,7 @@ def parse_js_obj(js_str):
     json_str = re.sub(r',\s*\]', r']', json_str)
     return json.loads(json_str)
 
-def update_html(html_content, collateral_data, monthly_cash, cash_collateral, cash_sources, covenant_data=None):
+def update_html(html_content, collateral_data, monthly_cash, cash_collateral, cash_sources, covenant_data=None, cash_history_data=None):
     """Update HTML preserving guarantee data and adding cash flow data"""
 
     # Extract existing guarantee data
@@ -558,6 +558,7 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
     today_dnb_json = json.dumps(collateral_data['today_dnb'])
     actuals_obj = format_forecast_block(collateral_data['actuals'])
     covenant_json = json.dumps(covenant_data if covenant_data else {})
+    cash_history_json = json.dumps(cash_history_data if cash_history_data else {})
     data_block = f"""// DATA_START
 const BASE_FX = {collateral_data['fx_rate']};
 const FORECAST = {forecast_obj};
@@ -575,6 +576,7 @@ const EL_VOLUME_DATE = "{collateral_data.get('el_volume_date', '')}";
 const EL_PRICE_DATE = "{collateral_data.get('el_price_date', '')}";
 const TODAY_DNB = {today_dnb_json};
 const COVENANT_DATA = {covenant_json};
+const CASH_HISTORY_DATA = {cash_history_json};
 // DATA_END"""
 
     # Replace the entire DATA block
@@ -1433,10 +1435,122 @@ def parse_covenant_csv(csv_path):
             }
     return data
 
+def parse_cash_position_history_csv(csv_path):
+    """
+    Parse Cash position history CSV.
+    Section 1: "Bank balance history" (Cols A-H)
+      Date (col 0), Week (col 1), Year (col 2), Legal Entity (col 3),
+      Currency (col 4), Cash Flow Amount (col 6), Cash Flow Amount (NOK) (col 7)
+    Section 2: Columns K-O
+      Date (col 10), Week (col 11), Actual Cash Position (NOK) (col 12),
+      Forecast Cash Position (NOK) (col 13), Deviation (NMOK) (col 14)
+    Returns:
+      dict with 'bank_balance' and 'forecast_vs_actual'
+    """
+    print(f"  Reading: Cash position history...")
+    data = {
+        'bank_balance': {
+            'dates': [],
+            'entities': [],
+            'by_entity': {},
+            'group_total': []
+        },
+        'forecast_vs_actual': {
+            'dates': [],
+            'weeks': [],
+            'actual': [],
+            'forecast': [],
+            'deviation': []
+        }
+    }
+    if not csv_path or not os.path.exists(csv_path):
+        return data
+
+    def parse_amt(val_str):
+        if not val_str or not val_str.strip():
+            return None
+        cleaned = val_str.replace(',', '').replace(' ', '').replace('"', '').strip()
+        try:
+            return float(cleaned)
+        except ValueError:
+            return None
+
+    with open(csv_path, newline='', encoding='utf-8-sig', errors='ignore') as f:
+        rows = list(csv.reader(f))
+
+    # --- 1. Parse Section 1: Bank Balance History (Cols A-H) ---
+    from collections import defaultdict
+    entity_sums = defaultdict(lambda: defaultdict(float))
+    all_dates_set = set()
+    all_entities_set = set()
+
+    for r in rows[1:]:
+        if not r or len(r) < 8:
+            continue
+        date_str = r[0].strip()
+        if not re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
+            continue
+        entity = r[3].strip()
+        amt_nok = parse_amt(r[7])
+        if amt_nok is not None and entity:
+            all_dates_set.add(date_str)
+            all_entities_set.add(entity)
+            entity_sums[date_str][entity] += amt_nok
+
+    sorted_dates = sorted(all_dates_set)
+    sorted_entities = sorted(all_entities_set)
+
+    by_entity = {ent: [] for ent in sorted_entities}
+    group_total = []
+
+    for d in sorted_dates:
+        tot = 0.0
+        for ent in sorted_entities:
+            val = round(entity_sums[d].get(ent, 0.0), 2)
+            by_entity[ent].append(val)
+            tot += val
+        group_total.append(round(tot, 2))
+
+    data['bank_balance']['dates'] = sorted_dates
+    data['bank_balance']['entities'] = sorted_entities
+    data['bank_balance']['by_entity'] = by_entity
+    data['bank_balance']['group_total'] = group_total
+
+    # --- 2. Parse Section 2: Forecast vs Actual & Deviation (Cols K-O) ---
+    f_dates = []
+    f_weeks = []
+    f_actuals = []
+    f_forecasts = []
+    f_deviations = []
+
+    for r in rows[3:]:
+        if len(r) > 10 and r[10].strip():
+            d_str = r[10].strip()
+            if not re.match(r'^\d{4}-\d{2}-\d{2}$', d_str):
+                continue
+            wk = r[11].strip() if len(r) > 11 else ""
+            act = parse_amt(r[12]) if len(r) > 12 else None
+            fc = parse_amt(r[13]) if len(r) > 13 else None
+            dev = (act - fc) if (act is not None and fc is not None) else None
+
+            f_dates.append(d_str)
+            f_weeks.append(wk)
+            f_actuals.append(round(act, 2) if act is not None else None)
+            f_forecasts.append(round(fc, 2) if fc is not None else None)
+            f_deviations.append(round(dev, 2) if dev is not None else None)
+
+    data['forecast_vs_actual']['dates'] = f_dates
+    data['forecast_vs_actual']['weeks'] = f_weeks
+    data['forecast_vs_actual']['actual'] = f_actuals
+    data['forecast_vs_actual']['forecast'] = f_forecasts
+    data['forecast_vs_actual']['deviation'] = f_deviations
+
+    return data
+
 def find_input_csvs(script_dir, target_date=None):
     """
-    Search for collateral, treasury, FP&A, and covenant CSV files across multiple candidate directories
-    with case-insensitive matching for full cross-platform / GitHub Actions compatibility.
+    Search for collateral, treasury, FP&A, covenant, and cash position history CSV files across
+    multiple candidate directories with case-insensitive matching for full cross-platform compatibility.
     """
     candidate_dirs = [
         os.path.join(script_dir, "Data"),
@@ -1463,6 +1577,7 @@ def find_input_csvs(script_dir, target_date=None):
     treasury_candidates = []
     fpa_candidates = []
     covenant_candidates = []
+    cash_history_candidates = []
 
     for fpath in all_csvs:
         fname_lower = os.path.basename(fpath).lower()
@@ -1479,6 +1594,8 @@ def find_input_csvs(script_dir, target_date=None):
             fpa_candidates.append(fpath)
         elif 'covenant' in fname_lower:
             covenant_candidates.append(fpath)
+        elif 'cash' in fname_lower and 'position' in fname_lower and 'history' in fname_lower:
+            cash_history_candidates.append(fpath)
 
     def pick_best(candidates, preferred_name):
         if not candidates:
@@ -1497,8 +1614,9 @@ def find_input_csvs(script_dir, target_date=None):
     treasury_path = pick_best(treasury_candidates, "CFF Treasury.csv")
     fpa_path = pick_best(fpa_candidates, "CFF FP&A.csv")
     covenant_path = pick_best(covenant_candidates, "Covenant forecast.csv")
+    cash_history_path = pick_best(cash_history_candidates, "Cash position history.csv")
 
-    return collateral_path, treasury_path, fpa_path, covenant_path
+    return collateral_path, treasury_path, fpa_path, covenant_path, cash_history_path
 
 def main():
     import sys
@@ -1517,7 +1635,7 @@ def main():
     if target_date:
         print(f"Target date specified: {target_date}")
 
-    collateral_path, treasury_path, fpa_path, covenant_path = find_input_csvs(script_dir, target_date)
+    collateral_path, treasury_path, fpa_path, covenant_path, cash_history_path = find_input_csvs(script_dir, target_date)
 
     if not collateral_path:
         print(f"\n[NOTICE] No Collateral calculator CSV file found in candidate directories.")
@@ -1543,12 +1661,15 @@ def main():
     treasury_data = {}
     fpa_data = {}
     covenant_data = {}
+    cash_history_data = {}
     if treasury_path:
         treasury_data = parse_treasury_csv(treasury_path)
     if fpa_path:
         fpa_data = parse_fpa_csv(fpa_path)
     if covenant_path:
         covenant_data = parse_covenant_csv(covenant_path)
+    if cash_history_path:
+        cash_history_data = parse_cash_position_history_csv(cash_history_path)
 
     # Bootstrap cash flow
     current_month = collateral_data['as_of_date'][:7] if collateral_data.get('as_of_date') else None
@@ -1561,6 +1682,7 @@ def main():
     print(f"  - Cash forecasts: {len(monthly_cash)} months")
     print(f"  - Cash collateral periods: {len(collateral_data['cash_collateral'])}")
     print(f"  - Covenant forecast periods: {len(covenant_data)}")
+    print(f"  - Cash position history dates: {len(cash_history_data.get('bank_balance', {}).get('dates', []))}")
 
     print(f"\nReading HTML...")
     with open(html_path, 'r', encoding='utf-8') as f:
@@ -1568,7 +1690,7 @@ def main():
     print(f"[OK] HTML read ({len(html_content):,} bytes)")
 
     print(f"\nUpdating HTML...")
-    updated_html = update_html(html_content, collateral_data, monthly_cash, collateral_data['cash_collateral'], cash_sources, covenant_data)
+    updated_html = update_html(html_content, collateral_data, monthly_cash, collateral_data['cash_collateral'], cash_sources, covenant_data, cash_history_data)
     print(f"[OK] HTML updated")
 
     print(f"\nWriting updated HTML...")
@@ -1590,7 +1712,8 @@ def main():
         (collateral_path, "Collateral calculator 2 - Summary.csv"),
         (treasury_path, "CFF Treasury.csv"),
         (fpa_path, "CFF FP&A.csv"),
-        (covenant_path, "Covenant forecast.csv")
+        (covenant_path, "Covenant forecast.csv"),
+        (cash_history_path, "Cash position history.csv")
     ]
     for src_path, target_name in local_data_copies:
         if src_path and os.path.exists(src_path):
@@ -1650,7 +1773,8 @@ def main():
             (collateral_path, "Collateral calculator 2 - Summary.csv"),
             (treasury_path, "CFF Treasury.csv"),
             (fpa_path, "CFF FP&A.csv"),
-            (covenant_path, "Covenant forecast.csv")
+            (covenant_path, "Covenant forecast.csv"),
+            (cash_history_path, "Cash position history.csv")
         ]
         for src_path, target_name in data_copies:
             if src_path and os.path.exists(src_path):
@@ -1697,6 +1821,7 @@ def main():
             (treasury_path, "CFF Treasury.csv"),
             (fpa_path, "CFF FP&A.csv"),
             (covenant_path, "Covenant forecast.csv"),
+            (cash_history_path, "Cash position history.csv"),
             (local_index_path if os.path.exists(local_index_path) else html_path, "index.html"),
             (sync_bat_src, "sync_and_push.bat"),
             (os.path.join(script_dir, "update_dashboard_final.py"), "update_dashboard_final.py")
