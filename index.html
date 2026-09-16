@@ -613,6 +613,7 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-atradius)"></div>Atradius EUR Guarantee (conv.)</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-limit); opacity:.7"></div>DNB+Atradius Guarantee Line</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash-after)"></div>Cash after collateral</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#EF4444; width: 8px; height: 8px; border-radius: 50%;"></div>Below Covenant (&lt; 125m)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Covenant</div>
     </div>
   </div>
@@ -1265,7 +1266,8 @@ function update() {
         cashPosRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;">${fmt(cashPos)}</td>`;
         excessRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;" class="${excess > 0 ? 'over' : ''}">${excess > 0 ? '+' : ''}${fmt(excess)}</td>`;
         collChangeRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;" class="${collChange > 0 ? 'over' : (collChange < 0 ? 'under' : '')}">${collChange > 0 ? '+' : ''}${fmt(collChange)}</td>`;
-        cashAfterRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; font-weight: 700; color: var(--tibber-blue);">${fmt(cashAfter)}</td>`;
+        const isCashBreach = cashAfter < 125000;
+        cashAfterRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; font-weight: 700; color: ${isCashBreach ? '#EF4444' : 'var(--tibber-blue)'};">${fmt(cashAfter)}</td>`;
         const sourceVal = (typeof CASH_SOURCES !== 'undefined') ? (CASH_SOURCES[p] || '-') : '-';
         cashSourceRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; font-style: italic; color: #a1a1aa;">${sourceVal}</td>`;
       } else {
@@ -1299,6 +1301,32 @@ function update() {
   const peakStack2 = Math.max(...d.dnbTotalArr.map((v, i) => v + d.atraArr[i]));
   const peakCash2 = Math.max(...cashAfterArr.filter(x => x !== null));
 
+  // Highlight points below covenant (< 125,000 kNOK) with Red dots
+  const cashPointColors = cashAfterArr.map(v => (v !== null && v < 125000) ? '#EF4444' : '#10B981');
+  const cashPointBorderColors = cashAfterArr.map(v => (v !== null && v < 125000) ? '#FFFFFF' : '#10B981');
+  const cashPointRadii = cashAfterArr.map(v => (v !== null && v < 125000) ? 6 : 4);
+  const cashPointHoverRadii = cashAfterArr.map(v => (v !== null && v < 125000) ? 8 : 6);
+  const cashPointBorderWidths = cashAfterArr.map(v => (v !== null && v < 125000) ? 2 : 1);
+
+  chart2Opts.plugins.tooltip = {
+    backgroundColor: '#16191D',
+    borderColor: '#1ED0E7',
+    borderWidth: 1,
+    titleFont: { family: 'Poppins', size: 11, weight: '600' },
+    bodyFont: { family: 'Poppins', size: 11 },
+    callbacks: {
+      label: ctx => {
+        const val = ctx.raw;
+        if (val === null || val === undefined) return ` ${ctx.dataset.label}: -`;
+        const formatted = `${Math.round(val).toLocaleString()} kNOK (${(val / 1000).toFixed(1)}m)`;
+        if (ctx.dataset.label === 'Cash after collateral' && val < 125000) {
+          return ` ${ctx.dataset.label}: ${formatted}  ⚠️ Below Covenant (< 125m)`;
+        }
+        return ` ${ctx.dataset.label}: ${formatted}`;
+      }
+    }
+  };
+
   chart2Opts.scales = {
     x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', maxRotation: 45 }, stacked: true, offset: false },
     y: {
@@ -1314,7 +1342,24 @@ function update() {
     { label: 'DNB Guarantee', data: d.dnbTotalArr, backgroundColor: 'rgba(30,208,231,0.85)', stack: 's', yAxisID: 'y' },
     { label: 'Atradius EUR Guarantee', data: d.atraArr, backgroundColor: 'rgba(200,109,255,0.75)', stack: 's', yAxisID: 'y' },
     { label: 'DNB+Atradius Guarantee Line', data: d.creditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit' },
-    { label: 'Cash after collateral', data: cashAfterArr, type: 'line', borderColor: '#10B981', backgroundColor: 'rgba(16,185,129,0.05)', fill: false, tension: 0.3, pointRadius: 4, pointHoverRadius: 6, borderWidth: 4.5, datalabels: { display: false }, yAxisID: 'y', stack: 'cash' },
+    {
+      label: 'Cash after collateral',
+      data: cashAfterArr,
+      type: 'line',
+      borderColor: '#10B981',
+      backgroundColor: 'rgba(16,185,129,0.05)',
+      fill: false,
+      tension: 0.3,
+      pointRadius: cashPointRadii,
+      pointHoverRadius: cashPointHoverRadii,
+      pointBackgroundColor: cashPointColors,
+      pointBorderColor: cashPointBorderColors,
+      pointBorderWidth: cashPointBorderWidths,
+      borderWidth: 4.5,
+      datalabels: { display: false },
+      yAxisID: 'y',
+      stack: 'cash'
+    },
     { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
   ]}, options: chart2Opts });
 
