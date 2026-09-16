@@ -468,6 +468,86 @@
     font-weight: 600;
   }
 
+  /* Supporting Views Collapsible Bar & Container */
+  .supporting-views-bar {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 1.25rem;
+    background: #080b10;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+  }
+  .supporting-views-bar:hover {
+    background: #11151c;
+  }
+  .supporting-views-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+  .supporting-views-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--tibber-blue);
+    flex-shrink: 0;
+  }
+  .supporting-views-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--tibber-white);
+  }
+  .supporting-views-subtitle {
+    font-size: 0.6rem;
+    color: #8A909A;
+    letter-spacing: 0.04em;
+  }
+  .supporting-views-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--tibber-blue);
+    background: rgba(30, 208, 231, 0.1);
+    border: 1px solid rgba(30, 208, 231, 0.25);
+    padding: 0.2rem 0.65rem;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .supporting-views-bar:hover .supporting-views-badge {
+    background: rgba(30, 208, 231, 0.2);
+    border-color: rgba(30, 208, 231, 0.4);
+  }
+  .supporting-views-grid {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: #1a1e24;
+    transition: all 0.3s ease;
+  }
+  .supporting-views-grid.collapsed {
+    display: none;
+  }
+  @media (max-width: 900px) {
+    .supporting-views-grid {
+      grid-template-columns: 1fr;
+    }
+    .supporting-views-subtitle {
+      display: none;
+    }
+  }
+
   /* Collapsible panels for Row 1.5 & 2.5 */
   .collapsible-grid {
     grid-column: 1 / -1;
@@ -699,43 +779,57 @@
     </div>
   </div>
 
-  <!-- ═══ ROW 3: MINOR section label ═══ -->
-  <div class="minor-section-label">Supporting Views</div>
-
-  <!-- Panel 1 minor -->
-  <div class="panel panel-minor">
-    <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
-    <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>DNB Guarantee (NOK + EUR)</div>
-    <div class="chart-wrap chart-wrap-minor"><canvas id="chart1"></canvas></div>
-    <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB NOK</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-eur)"></div>DNB EUR (conv.)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c-limit); opacity:.7"></div>Guarantee Line</div>
+  <!-- ═══ ROW 3: SUPPORTING VIEWS (COLLAPSIBLE) ═══ -->
+  <div class="supporting-views-bar" onclick="toggleSupportingViews()">
+    <div class="supporting-views-bar-left">
+      <span class="supporting-views-dot"></span>
+      <span class="supporting-views-title">Supporting Views</span>
+      <span class="supporting-views-subtitle">DNB Guarantee (NOK + EUR) · Cash Collateral · ALL Guarantee/Collateral</span>
+    </div>
+    <div class="supporting-views-bar-right">
+      <span id="supporting-views-badge" class="supporting-views-badge">
+        <span id="supporting-views-icon">＋</span>
+        <span id="supporting-views-text">Expand (3 charts)</span>
+      </span>
     </div>
   </div>
 
-  <!-- Panel 3 minor -->
-  <div class="panel panel-minor">
-    <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
-    <div class="panel-title"><span class="dot" style="background:var(--tibber-light-purple)"></span>Cash Collateral</div>
-    <div class="chart-wrap chart-wrap-minor"><canvas id="chart3"></canvas></div>
-    <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash3)"></div>Skagerak (NOK)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash2)"></div>BNP SEPA EUR (conv.)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash)"></div>PVNED EUR (conv.)</div>
+  <div id="supporting-views-container" class="supporting-views-grid collapsed">
+    <!-- Panel 1 minor -->
+    <div class="panel panel-minor">
+      <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
+      <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>DNB Guarantee (NOK + EUR)</div>
+      <div class="chart-wrap chart-wrap-minor"><canvas id="chart1"></canvas></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB NOK</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-eur)"></div>DNB EUR (conv.)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-limit); opacity:.7"></div>Guarantee Line</div>
+      </div>
     </div>
-  </div>
 
-  <!-- Panel 4 minor -->
-  <div class="panel panel-minor">
-    <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
-    <div class="panel-title"><span class="dot" style="background:var(--tibber-medium-purple)"></span>ALL guarantee/collateral: DNB + Atradius + Cash</div>
-    <div class="chart-wrap chart-wrap-minor"><canvas id="chart4"></canvas></div>
-    <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB NOK</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-eur)"></div>DNB EUR (conv.)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c-atradius)"></div>Atradius EUR (conv.)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash2)"></div>Cash (conv.)</div>
+    <!-- Panel 3 minor -->
+    <div class="panel panel-minor">
+      <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
+      <div class="panel-title"><span class="dot" style="background:var(--tibber-light-purple)"></span>Cash Collateral</div>
+      <div class="chart-wrap chart-wrap-minor"><canvas id="chart3"></canvas></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash3)"></div>Skagerak (NOK)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash2)"></div>BNP SEPA EUR (conv.)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash)"></div>PVNED EUR (conv.)</div>
+      </div>
+    </div>
+
+    <!-- Panel 4 minor -->
+    <div class="panel panel-minor">
+      <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
+      <div class="panel-title"><span class="dot" style="background:var(--tibber-medium-purple)"></span>ALL guarantee/collateral: DNB + Atradius + Cash</div>
+      <div class="chart-wrap chart-wrap-minor"><canvas id="chart4"></canvas></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB NOK</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-eur)"></div>DNB EUR (conv.)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-atradius)"></div>Atradius EUR (conv.)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash2)"></div>Cash (conv.)</div>
+      </div>
     </div>
   </div>
 
@@ -1955,6 +2049,31 @@ function toggleDevDataset(idx) {
   chart.setDatasetVisibility(idx, !isVisible);
   chart.update();
 }
+
+function toggleSupportingViews() {
+  const container = document.getElementById('supporting-views-container');
+  const icon = document.getElementById('supporting-views-icon');
+  const text = document.getElementById('supporting-views-text');
+  if (!container) return;
+
+  const isCollapsed = container.classList.contains('collapsed');
+  if (isCollapsed) {
+    container.classList.remove('collapsed');
+    if (icon) icon.textContent = '−';
+    if (text) text.textContent = 'Fold / Collapse';
+    setTimeout(() => {
+      ['chart1', 'chart3', 'chart4'].forEach(id => {
+        const c = Chart.getChart(id) || charts[id];
+        if (c) c.resize();
+      });
+    }, 60);
+  } else {
+    container.classList.add('collapsed');
+    if (icon) icon.textContent = '＋';
+    if (text) text.textContent = 'Expand (3 charts)';
+  }
+}
+
 function expandMarexPanel(e) {
   const panel = document.getElementById('marex-collapsible-panel');
   if (panel.classList.contains('collapsed')) {
