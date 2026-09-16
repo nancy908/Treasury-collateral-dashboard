@@ -836,13 +836,13 @@
   <!-- ═══ ROW 4: DNB COVENANT FORECAST ═══ -->
   <div class="panel panel-hero" style="grid-column: 1 / -1; margin-top: 1.5rem;">
     <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
-    <div class="panel-title"><span class="dot" style="background:#A855F7"></span>DNB covenant forecast</div>
+    <div class="panel-title"><span class="dot" style="background:#FACC15"></span>DNB covenant forecast</div>
     <div class="chart-wrap" style="height: 380px; position: relative;"><canvas id="chartCovenant"></canvas></div>
     <div class="legend" style="margin-top: 0.75rem; flex-wrap: wrap;">
       <div class="legend-item"><div class="legend-dot" style="background:rgba(30, 208, 231, 0.85)"></div>Group Liquidity (mNOK)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#EF4444"></div>Group Liquidity &lt; Cash Req. (Breach)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#10B981; height: 3px; border-radius: 0; width: 14px; border-top: 2px dashed #10B981;"></div>Group Cash Requirement (125m NOK)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#C084FC; height: 3px; border-radius: 0; width: 14px;"></div>Covenant Ratio (%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FACC15; height: 3.5px; border-radius: 0; width: 14px;"></div>Covenant Ratio (%)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#FF5A5A; height: 3px; border-radius: 0; width: 14px; border-top: 2px dashed #FF5A5A;"></div>Covenant Ratio Threshold (80%)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#EF4444; width: 8px; height: 8px; border-radius: 50%;"></div>Ratio Breach (&gt;80%)</div>
     </div>
@@ -863,14 +863,15 @@
       </div>
       <div class="chart-wrap" style="height: 380px; position: relative;"><canvas id="chartBankBalanceHist"></canvas></div>
       <div class="legend" id="legend-bank-balance" style="margin-top: 0.75rem; flex-wrap: wrap;">
-        <div class="legend-item" onclick="toggleCashDataset(0)" style="cursor: pointer;"><div class="legend-dot" style="background:#FFFFFF; border: 1.5px solid #1ED0E7;"></div>Group Total</div>
-        <div class="legend-item" onclick="toggleCashDataset(1)" style="cursor: pointer;"><div class="legend-dot" style="background:#1ED0E7"></div>TAB</div>
-        <div class="legend-item" onclick="toggleCashDataset(2)" style="cursor: pointer;"><div class="legend-dot" style="background:#BEFBFF"></div>TAS</div>
-        <div class="legend-item" onclick="toggleCashDataset(3)" style="cursor: pointer;"><div class="legend-dot" style="background:#10B981"></div>TN</div>
-        <div class="legend-item" onclick="toggleCashDataset(4)" style="cursor: pointer;"><div class="legend-dot" style="background:#C86DFF"></div>TDE</div>
-        <div class="legend-item" onclick="toggleCashDataset(5)" style="cursor: pointer;"><div class="legend-dot" style="background:#F0DAFE"></div>TFI</div>
-        <div class="legend-item" onclick="toggleCashDataset(6)" style="cursor: pointer;"><div class="legend-dot" style="background:#F59E0B"></div>TDK</div>
-        <div class="legend-item" onclick="toggleCashDataset(7)" style="cursor: pointer;"><div class="legend-dot" style="background:#8B4BBE"></div>TNL</div>
+        <div class="legend-item" onclick="toggleCashDataset(0)" style="cursor: pointer;"><div class="legend-dot" style="background:#94A3B8; border: 1.5px solid #475569;"></div>Group Total</div>
+        <div class="legend-item" onclick="toggleCashDataset(1)" style="cursor: pointer;"><div class="legend-dot" style="background:#F59E0B; height: 3px; border-radius: 0; width: 14px; border-top: 2px dashed #F59E0B;"></div>Covenant = 125000000 NOK</div>
+        <div class="legend-item" onclick="toggleCashDataset(2)" style="cursor: pointer;"><div class="legend-dot" style="background:#0284C7"></div>TAB</div>
+        <div class="legend-item" onclick="toggleCashDataset(3)" style="cursor: pointer;"><div class="legend-dot" style="background:#06B6D4"></div>TAS</div>
+        <div class="legend-item" onclick="toggleCashDataset(4)" style="cursor: pointer;"><div class="legend-dot" style="background:#047857"></div>TN</div>
+        <div class="legend-item" onclick="toggleCashDataset(5)" style="cursor: pointer;"><div class="legend-dot" style="background:#7E22CE"></div>TDE</div>
+        <div class="legend-item" onclick="toggleCashDataset(6)" style="cursor: pointer;"><div class="legend-dot" style="background:#4338CA"></div>TFI</div>
+        <div class="legend-item" onclick="toggleCashDataset(7)" style="cursor: pointer;"><div class="legend-dot" style="background:#B45309"></div>TDK</div>
+        <div class="legend-item" onclick="toggleCashDataset(8)" style="cursor: pointer;"><div class="legend-dot" style="background:#4C1D95"></div>TNL</div>
       </div>
     </div>
 
@@ -883,8 +884,8 @@
       <div class="legend" style="margin-top: 0.75rem; flex-wrap: wrap;">
         <div class="legend-item" onclick="toggleDevDataset(0)" style="cursor: pointer;"><div class="legend-dot" style="background:#1ED0E7; height: 3px; border-radius: 0; width: 14px;"></div>Actual Cash Position (NOK)</div>
         <div class="legend-item" onclick="toggleDevDataset(1)" style="cursor: pointer;"><div class="legend-dot" style="background:#C86DFF; height: 3px; border-radius: 0; width: 14px; border-top: 2px dashed #C86DFF;"></div>Forecast Cash Position (NOK)</div>
-        <div class="legend-item" onclick="toggleDevDataset(2)" style="cursor: pointer;"><div class="legend-dot" style="background:#10B981"></div>Positive Dev</div>
-        <div class="legend-item" onclick="toggleDevDataset(2)" style="cursor: pointer;"><div class="legend-dot" style="background:#EF4444"></div>Negative Dev</div>
+        <div class="legend-item" onclick="toggleDevDataset(2)" style="cursor: pointer;"><div class="legend-dot" style="background:rgba(16, 185, 129, 0.35); border: 1px solid #10B981;"></div>Positive Dev</div>
+        <div class="legend-item" onclick="toggleDevDataset(2)" style="cursor: pointer;"><div class="legend-dot" style="background:rgba(239, 68, 68, 0.35); border: 1px solid #EF4444;"></div>Negative Dev</div>
       </div>
     </div>
   </div>
@@ -1602,9 +1603,9 @@ function update() {
 
     const ratioPointColors = covPeriods.map(p => {
       const item = COVENANT_DATA[p];
-      if (!item || item.ratio === null || item.ratio === undefined) return '#C084FC';
+      if (!item || item.ratio === null || item.ratio === undefined) return '#FACC15';
       const th = item.threshold ?? 80;
-      return item.ratio > th ? '#EF4444' : '#C084FC';
+      return item.ratio > th ? '#EF4444' : '#FACC15';
     });
 
     const ratioPointRadii = covPeriods.map(p => {
@@ -1616,9 +1617,9 @@ function update() {
 
     const ratioPointBorderColors = covPeriods.map(p => {
       const item = COVENANT_DATA[p];
-      if (!item || item.ratio === null || item.ratio === undefined) return '#C084FC';
+      if (!item || item.ratio === null || item.ratio === undefined) return '#FACC15';
       const th = item.threshold ?? 80;
-      return item.ratio > th ? '#FFFFFF' : '#C084FC';
+      return item.ratio > th ? '#FFFFFF' : '#FACC15';
     });
 
     const validRatios = ratioData.filter(v => v !== null);
@@ -1655,8 +1656,8 @@ function update() {
             label: 'Covenant Ratio',
             data: ratioData,
             type: 'line',
-            borderColor: '#C084FC',
-            borderWidth: 2.5,
+            borderColor: '#FACC15',
+            borderWidth: 3.5,
             tension: 0.2,
             fill: false,
             pointRadius: ratioPointRadii,
@@ -1749,14 +1750,14 @@ function update() {
             position: 'right',
             grid: { drawOnChartArea: false },
             ticks: {
-              font: { family: 'Poppins', size: 10 },
-              color: '#C084FC',
+              font: { family: 'Poppins', size: 10, weight: '500' },
+              color: '#FACC15',
               callback: v => v.toFixed(0) + '%'
             },
             title: {
               display: true,
               text: 'Covenant Ratio (%)',
-              color: '#C084FC',
+              color: '#FACC15',
               font: { family: 'Poppins', size: 10, weight: '600' }
             },
             suggestedMin: 0,
@@ -1773,13 +1774,13 @@ function update() {
     const devData = CASH_HISTORY_DATA.forecast_vs_actual || CASH_HISTORY_DATA.forecast_dev;
 
     const entityColors = {
-      'TAB': '#1ED0E7',
-      'TAS': '#BEFBFF',
-      'TN':  '#10B981',
-      'TDE': '#C86DFF',
-      'TFI': '#F0DAFE',
-      'TDK': '#F59E0B',
-      'TNL': '#8B4BBE'
+      'TAB': '#0284C7',
+      'TAS': '#06B6D4',
+      'TN':  '#047857',
+      'TDE': '#7E22CE',
+      'TFI': '#4338CA',
+      'TDK': '#B45309',
+      'TNL': '#4C1D95'
     };
 
     const bankDatasets = [];
@@ -1789,20 +1790,36 @@ function update() {
       label: 'Group Total',
       data: bankData.group_total || [],
       type: 'line',
-      borderColor: '#FFFFFF',
-      backgroundColor: '#1ED0E7',
+      borderColor: '#94A3B8',
+      backgroundColor: '#64748B',
       borderWidth: 2.5,
       pointRadius: 2.5,
       pointHoverRadius: 5,
-      pointBackgroundColor: '#1ED0E7',
-      pointBorderColor: '#FFFFFF',
+      pointBackgroundColor: '#475569',
+      pointBorderColor: '#94A3B8',
       pointBorderWidth: 1.5,
       fill: false,
       order: 1,
       stack: 'group_total'
     });
 
-    // Datasets 1..7: Entities Stacked Bars
+    // Dataset 1: Covenant Line (125,000,000 NOK)
+    const covenantLineData = (bankData.dates || []).map(() => 125000000);
+    bankDatasets.push({
+      label: 'Covenant = 125000000 NOK',
+      data: covenantLineData,
+      type: 'line',
+      borderColor: '#F59E0B',
+      borderDash: [5, 5],
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      fill: false,
+      order: 0,
+      stack: 'covenant'
+    });
+
+    // Datasets 2..8: Entities Stacked Bars
     const entities = bankData.entities || ['TAB', 'TAS', 'TN', 'TDE', 'TFI', 'TDK', 'TNL'];
     entities.forEach(ent => {
       bankDatasets.push({
@@ -1839,6 +1856,9 @@ function update() {
               label: ctx => {
                 const v = ctx.raw;
                 if (v === null || v === undefined) return ` ${ctx.dataset.label}: -`;
+                if (ctx.dataset.label && ctx.dataset.label.startsWith('Covenant')) {
+                  return ` ${ctx.dataset.label}: 125m NOK (125,000,000 NOK)`;
+                }
                 const mStr = (v / 1e6).toFixed(2) + 'm NOK';
                 const fullStr = Math.round(v).toLocaleString('en-US') + ' NOK';
                 return ` ${ctx.dataset.label}: ${mStr} (${fullStr})`;
@@ -1876,11 +1896,11 @@ function update() {
     if (devData && devData.dates) {
       const devBgColors = (devData.deviation || []).map(v => {
         if (v === null || v === undefined) return 'transparent';
-        return v >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.7)';
+        return v >= 0 ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)';
       });
       const devBorderColors = (devData.deviation || []).map(v => {
         if (v === null || v === undefined) return 'transparent';
-        return v >= 0 ? '#10B981' : '#EF4444';
+        return v >= 0 ? 'rgba(16, 185, 129, 0.45)' : 'rgba(239, 68, 68, 0.45)';
       });
 
       makeChart('chartCashDevHist', {
@@ -2017,17 +2037,20 @@ function setCashHistView(mode) {
 
   if (mode === 'all') {
     chart.setDatasetVisibility(0, true);
-    for (let i = 1; i < chart.data.datasets.length; i++) {
+    chart.setDatasetVisibility(1, true);
+    for (let i = 2; i < chart.data.datasets.length; i++) {
       chart.setDatasetVisibility(i, true);
     }
   } else if (mode === 'group') {
     chart.setDatasetVisibility(0, true);
-    for (let i = 1; i < chart.data.datasets.length; i++) {
+    chart.setDatasetVisibility(1, true);
+    for (let i = 2; i < chart.data.datasets.length; i++) {
       chart.setDatasetVisibility(i, false);
     }
   } else if (mode === 'entities') {
     chart.setDatasetVisibility(0, false);
-    for (let i = 1; i < chart.data.datasets.length; i++) {
+    chart.setDatasetVisibility(1, false);
+    for (let i = 2; i < chart.data.datasets.length; i++) {
       chart.setDatasetVisibility(i, true);
     }
   }
