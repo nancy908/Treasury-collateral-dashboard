@@ -1630,7 +1630,7 @@ function update() {
   // Cash Position History Charts
   if (typeof CASH_HISTORY_DATA !== 'undefined' && CASH_HISTORY_DATA.bank_balance && CASH_HISTORY_DATA.bank_balance.dates) {
     const bankData = CASH_HISTORY_DATA.bank_balance;
-    const devData = CASH_HISTORY_DATA.forecast_dev;
+    const devData = CASH_HISTORY_DATA.forecast_vs_actual || CASH_HISTORY_DATA.forecast_dev;
 
     const entityColors = {
       'TAB': '#1ED0E7',
