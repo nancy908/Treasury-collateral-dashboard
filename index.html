@@ -1263,7 +1263,8 @@ function update() {
       const cashAfter = CASH_AFTER_COLLATERAL[p] || 0;
       
       if (hasCash) {
-        cashPosRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;">${fmt(cashPos)}</td>`;
+        const isPosBreach = cashPos < 125000;
+        cashPosRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; font-weight: ${isPosBreach ? '700' : 'normal'}; color: ${isPosBreach ? '#EF4444' : 'inherit'};">${fmt(cashPos)}</td>`;
         excessRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;" class="${excess > 0 ? 'over' : ''}">${excess > 0 ? '+' : ''}${fmt(excess)}</td>`;
         collChangeRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;" class="${collChange > 0 ? 'over' : (collChange < 0 ? 'under' : '')}">${collChange > 0 ? '+' : ''}${fmt(collChange)}</td>`;
         const isCashBreach = cashAfter < 125000;

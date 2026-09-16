@@ -1045,6 +1045,9 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
                 
                 if r_idx == 0:
                     val_str = f"{cash_pos:,.0f}"
+                    if cash_pos < 125000:
+                        cell_color = RGBColor(255, 90, 90)
+                        is_bold = True
                 elif r_idx == 1:
                     val_str = f"+{excess:,.0f}" if excess > 0 else "-"
                     if excess > 0:
@@ -1058,7 +1061,10 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
                         cell_color = RGBColor(16, 185, 129)
                 elif r_idx == 3:
                     val_str = f"{cash_after:,.0f}"
-                    cell_color = RGBColor(16, 185, 129)
+                    if cash_after < 125000:
+                        cell_color = RGBColor(255, 90, 90)
+                    else:
+                        cell_color = RGBColor(16, 185, 129)
                     is_bold = True
                     
                 cell.text = val_str
