@@ -427,6 +427,68 @@
     }
   }
   
+  /* Cash Position History Collapsible Bar */
+  .cash-history-bar {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 1.25rem;
+    background: #080b10;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+    margin-top: 1.5rem;
+  }
+  .cash-history-bar:hover {
+    background: #11151c;
+  }
+  .cash-history-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+  .cash-history-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #1ED0E7;
+    flex-shrink: 0;
+  }
+  .cash-history-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--tibber-white);
+  }
+  .cash-history-subtitle {
+    font-size: 0.6rem;
+    color: #8A909A;
+    letter-spacing: 0.04em;
+  }
+  .cash-history-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #1ED0E7;
+    background: rgba(30, 208, 231, 0.1);
+    border: 1px solid rgba(30, 208, 231, 0.25);
+    padding: 0.2rem 0.65rem;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .cash-history-bar:hover .cash-history-badge {
+    background: rgba(30, 208, 231, 0.2);
+    border-color: rgba(30, 208, 231, 0.4);
+  }
+
   /* Cash Position History Grid & Toggles */
   .cash-history-grid {
     grid-column: 1 / -1;
@@ -434,9 +496,14 @@
     grid-template-columns: 1fr 1fr;
     gap: 1.25rem;
     margin-top: 0.5rem;
+    transition: all 0.3s ease;
+  }
+  .cash-history-grid.collapsed {
+    display: none;
   }
   @media (max-width: 1100px) {
     .cash-history-grid { grid-template-columns: 1fr; }
+    .cash-history-subtitle { display: none; }
   }
   .toggle-btn-group {
     display: inline-flex;
@@ -848,9 +915,22 @@
     </div>
   </div>
 
-  <!-- ═══ ROW 5: CASH POSITION HISTORY ═══ -->
-  <div class="minor-section-label" style="margin-top: 1.5rem;">Cash Position History</div>
-  <div class="cash-history-grid">
+  <!-- ═══ ROW 5: CASH POSITION HISTORY (COLLAPSIBLE) ═══ -->
+  <div class="cash-history-bar" onclick="toggleCashHistory()">
+    <div class="cash-history-bar-left">
+      <span class="cash-history-dot"></span>
+      <span class="cash-history-title">Cash Position History</span>
+      <span class="cash-history-subtitle">Bank balance history · Actual vs Forecast &amp; Deviation</span>
+    </div>
+    <div class="cash-history-bar-right">
+      <span id="cash-history-badge" class="cash-history-badge">
+        <span id="cash-history-icon">＋</span>
+        <span id="cash-history-text">Expand (2 charts)</span>
+      </span>
+    </div>
+  </div>
+
+  <div id="cash-history-container" class="cash-history-grid collapsed">
     <!-- Panel 1: Bank Balance History (Group & Entities) -->
     <div class="panel panel-hero" style="margin-top: 0;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px;">
@@ -2094,6 +2174,30 @@ function toggleSupportingViews() {
     container.classList.add('collapsed');
     if (icon) icon.textContent = '＋';
     if (text) text.textContent = 'Expand (3 charts)';
+  }
+}
+
+function toggleCashHistory() {
+  const container = document.getElementById('cash-history-container');
+  const icon = document.getElementById('cash-history-icon');
+  const text = document.getElementById('cash-history-text');
+  if (!container) return;
+
+  const isCollapsed = container.classList.contains('collapsed');
+  if (isCollapsed) {
+    container.classList.remove('collapsed');
+    if (icon) icon.textContent = '−';
+    if (text) text.textContent = 'Fold / Collapse';
+    setTimeout(() => {
+      ['chartBankBalanceHist', 'chartCashDevHist'].forEach(id => {
+        const c = Chart.getChart(id) || charts[id];
+        if (c) c.resize();
+      });
+    }, 60);
+  } else {
+    container.classList.add('collapsed');
+    if (icon) icon.textContent = '＋';
+    if (text) text.textContent = 'Expand (2 charts)';
   }
 }
 
