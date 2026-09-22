@@ -289,6 +289,99 @@ def parse_collateral_csv(csv_path):
         if act['marexEurLocal'] > 0:
             history_marex_local[period] = act['marexEurLocal']
 
+    # Extract country breakdown data
+    # Norway: kNOK
+    # Germany: kEUR
+    # Netherlands: kEUR
+    norway_fc = defaultdict(lambda: {'mindEnergy': 0.0, 'skagerak': 0.0, 'skagerakCash': 0.0, 'nordPool': 0.0, 'eSett': 0.0})
+    germany_fc = defaultdict(lambda: {'axpo': 0.0, 'axpoCash': 0.0, 'bayWa': 0.0, 'marex': 0.0, 'amprion': 0.0, 'transnetBw': 0.0, 'tenneT': 0.0, 'fiftyHertz': 0.0, 'nordPoolDe': 0.0, 'bnpSepaCash': 0.0})
+    netherlands_fc = defaultdict(lambda: {'pvned': 0.0, 'libraEnergy': 0.0})
+
+    norway_act = defaultdict(lambda: {'mindEnergy': 0.0, 'skagerak': 0.0, 'skagerakCash': 0.0, 'nordPool': 0.0, 'eSett': 0.0})
+    germany_act = defaultdict(lambda: {'axpo': 0.0, 'axpoCash': 0.0, 'bayWa': 0.0, 'marex': 0.0, 'amprion': 0.0, 'transnetBw': 0.0, 'tenneT': 0.0, 'fiftyHertz': 0.0, 'nordPoolDe': 0.0, 'bnpSepaCash': 0.0})
+    netherlands_act = defaultdict(lambda: {'pvned': 0.0, 'libraEnergy': 0.0})
+
+    for row in rows[3:]:
+        # Forecast (cols 0-5)
+        if len(row) > 5 and row[0].strip():
+            period = to_ym(row[0])
+            gtype_l = row[1].strip().lower()
+            ben_l = row[2].strip().lower()
+            amt_k = parse_num(row[4])
+            amt_nok = parse_num(row[5])
+            if period:
+                # Norway (kNOK)
+                if gtype_l == 'dnb nok':
+                    if 'mind energy' in ben_l: norway_fc[period]['mindEnergy'] += amt_nok
+                    elif 'skagerak' in ben_l: norway_fc[period]['skagerak'] += amt_nok
+                    elif 'nord pool' in ben_l and 'de' not in ben_l: norway_fc[period]['nordPool'] += amt_nok
+                    elif 'esett' in ben_l: norway_fc[period]['eSett'] += amt_nok
+                elif gtype_l == 'cash collateral' and 'skagerak' in ben_l:
+                    norway_fc[period]['skagerakCash'] += amt_nok
+
+                # Germany (kEUR)
+                if gtype_l == 'dnb eur':
+                    if 'axpo' in ben_l: germany_fc[period]['axpo'] += amt_k
+                    elif 'baywa' in ben_l: germany_fc[period]['bayWa'] += amt_k
+                    elif 'marex' in ben_l: germany_fc[period]['marex'] += amt_k
+                    elif 'amprion' in ben_l: germany_fc[period]['amprion'] += amt_k
+                    elif 'transnetbw' in ben_l: germany_fc[period]['transnetBw'] += amt_k
+                    elif 'tennet' in ben_l: germany_fc[period]['tenneT'] += amt_k
+                    elif '50hertz' in ben_l: germany_fc[period]['fiftyHertz'] += amt_k
+                    elif 'nord pool' in ben_l: germany_fc[period]['nordPoolDe'] += amt_k
+                elif gtype_l == 'cash collateral':
+                    if 'axpo' in ben_l: germany_fc[period]['axpoCash'] += amt_k
+                    elif 'bnp sepa' in ben_l: germany_fc[period]['bnpSepaCash'] += amt_k
+
+                # Netherlands (kEUR)
+                if gtype_l == 'cash collateral' and 'pvned' in ben_l:
+                    netherlands_fc[period]['pvned'] += amt_k
+                elif gtype_l == 'dnb eur' and 'libra' in ben_l:
+                    netherlands_fc[period]['libraEnergy'] += amt_k
+
+        # Actuals (cols 13-18)
+        if len(row) > 18 and row[13].strip():
+            period = to_ym(row[13])
+            gtype_l = row[14].strip().lower()
+            ben_l = row[15].strip().lower()
+            amt_k = parse_num(row[17])
+            amt_nok = parse_num(row[18])
+            if period:
+                # Norway (kNOK)
+                if gtype_l == 'dnb nok':
+                    if 'mind energy' in ben_l: norway_act[period]['mindEnergy'] += amt_nok
+                    elif 'skagerak' in ben_l: norway_act[period]['skagerak'] += amt_nok
+                    elif 'nord pool' in ben_l and 'de' not in ben_l: norway_act[period]['nordPool'] += amt_nok
+                    elif 'esett' in ben_l: norway_act[period]['eSett'] += amt_nok
+                elif gtype_l == 'cash collateral' and 'skagerak' in ben_l:
+                    norway_act[period]['skagerakCash'] += amt_nok
+
+                # Germany (kEUR)
+                if gtype_l == 'dnb eur':
+                    if 'axpo' in ben_l: germany_act[period]['axpo'] += amt_k
+                    elif 'baywa' in ben_l: germany_act[period]['bayWa'] += amt_k
+                    elif 'marex' in ben_l: germany_act[period]['marex'] += amt_k
+                    elif 'amprion' in ben_l: germany_act[period]['amprion'] += amt_k
+                    elif 'transnetbw' in ben_l: germany_act[period]['transnetBw'] += amt_k
+                    elif 'tennet' in ben_l: germany_act[period]['tenneT'] += amt_k
+                    elif '50hertz' in ben_l: germany_act[period]['fiftyHertz'] += amt_k
+                    elif 'nord pool' in ben_l: germany_act[period]['nordPoolDe'] += amt_k
+                elif gtype_l == 'cash collateral':
+                    if 'axpo' in ben_l: germany_act[period]['axpoCash'] += amt_k
+                    elif 'bnp sepa' in ben_l: germany_act[period]['bnpSepaCash'] += amt_k
+
+                # Netherlands (kEUR)
+                if gtype_l == 'cash collateral' and 'pvned' in ben_l:
+                    netherlands_act[period]['pvned'] += amt_k
+                elif gtype_l == 'dnb eur' and 'libra' in ben_l:
+                    netherlands_act[period]['libraEnergy'] += amt_k
+
+    country_data = {
+        'norway': {'forecast': dict(norway_fc), 'actual': dict(norway_act)},
+        'germany': {'forecast': dict(germany_fc), 'actual': dict(germany_act)},
+        'netherlands': {'forecast': dict(netherlands_fc), 'actual': dict(netherlands_act)}
+    }
+
     return {
         'fx_rate': fx_rate,
         'utilized_today': utilized_today,
@@ -303,6 +396,7 @@ def parse_collateral_csv(csv_path):
         'history_dnb_nok_base': history_dnb_nok_base,
         'history_marex_local': history_marex_local,
         'actuals': actuals,
+        'country_data': country_data,
         'el_volume_date': el_volume_date,
         'el_price_date': el_price_date
     }
@@ -565,6 +659,7 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
     actuals_obj = format_forecast_block(collateral_data['actuals'])
     covenant_json = json.dumps(covenant_data if covenant_data else {})
     cash_history_json = json.dumps(cash_history_data if cash_history_data else {})
+    country_data_json = json.dumps(collateral_data.get('country_data', {}))
     data_block = f"""// DATA_START
 const BASE_FX = {collateral_data['fx_rate']};
 const FORECAST = {forecast_obj};
@@ -583,6 +678,7 @@ const EL_PRICE_DATE = "{collateral_data.get('el_price_date', '')}";
 const TODAY_DNB = {today_dnb_json};
 const COVENANT_DATA = {covenant_json};
 const CASH_HISTORY_DATA = {cash_history_json};
+const COUNTRY_DATA = {country_data_json};
 // DATA_END"""
 
     # Replace the entire DATA block
