@@ -1,7 +1,7 @@
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,Utilized amount,Credit line,,,,,,,,,,,,EUR/NOK,11.230,,,El. volume – last updated:,2026-07-02
-,,,,Forecast,,,,,,Limit,,,,,,,Actual,,,,,,,,,,,,,,,,,,,,,,,,Utilized today (kNOK),"208,807",,,El. price – last updated:,2026-09-03
+,,,,Forecast,,,,,,Limit,,,,,,,Actual,,,,,,,,,,,,,,,,,,,,,,,,Utilized today (kNOK),"187,807",,,El. price – last updated:,2026-09-03
 Period,Guarantee type,Beneficiary,Currency,Utilized amount (k),Utilized amount (kNOK),,Period,Guarantee type,Currency,Guarantee line (k),Guarantee line (kNOK),,Period,Guarantee type,Beneficiary,Currency,Utilized amount (k),Utilized amount (kNOK),,,,,,,,Update date,KPI,Level,Benchmark,Currency,Utilization rate,Headroom,,Period,Beneficiary,Currency,Invoice amount (k),,DNB guarantee,Beneficiary,Currency,Amount (kNOK),Amount (kEUR),Expiry date,,
-2026-01-01,DNB NOK,Mind Energy,NOK,"29,471","29,471",,2026-01-01,DNB NOK,NOK,"200,000","200,000",,2024-01-01,DNB NOK,Mind Energy,NOK,"16,300","16,300",,,,,,,,2026-05-01,DNB NOK,#N/A,"134,888",NOK,#N/A,#N/A,,2026-01-01,Mind Energy,NOK,"250,535",,DNB NOK,Mind Energy,NOK,"38,000",,,,
+2026-01-01,DNB NOK,Mind Energy,NOK,"29,471","29,471",,2026-01-01,DNB NOK,NOK,"200,000","200,000",,2024-01-01,DNB NOK,Mind Energy,NOK,"16,300","16,300",,,,,,,,2026-05-01,DNB NOK,#N/A,"134,888",NOK,#N/A,#N/A,,2026-01-01,Mind Energy,NOK,"250,535",,DNB NOK,Mind Energy,NOK,"17,000",,,,
 2026-02-01,DNB NOK,Mind Energy,NOK,"26,337","26,337",,2026-02-01,DNB NOK,NOK,"197,754","197,754",,2024-02-01,DNB NOK,Mind Energy,NOK,"16,300","16,300",,,,,,,,2026-05-01,DNB EUR,#N/A,#REF!,NOK,#N/A,#REF!,,2026-02-01,Mind Energy,NOK,"559,984",,DNB NOK,Skagerak,NOK,"79,000",,,,
 2026-03-01,DNB NOK,Mind Energy,NOK,"24,205","24,205",,2026-03-01,DNB NOK,NOK,"130,374","130,374",,2024-03-01,DNB NOK,Mind Energy,NOK,"16,300","16,300",,,,,,,,2026-05-01,Atradius EUR,#N/A,"1,750",EUR,#N/A,#N/A,,2026-03-01,Mind Energy,NOK,"493,990",,DNB NOK,Nord Pool,NOK,"1,500",,,,
 2026-04-01,DNB NOK,Mind Energy,NOK,"16,573","16,573",,2026-04-01,DNB NOK,NOK,"123,658","123,658",,2024-04-01,DNB NOK,Mind Energy,NOK,"16,300","16,300",,,,,,,,2026-05-01,Cash collateral,#N/A,0,EUR,,,,2026-04-01,Mind Energy,NOK,"307,698",,DNB NOK,eSett,NOK,"1,500",,,,
@@ -33,7 +33,7 @@ Period,Guarantee type,Beneficiary,Currency,Utilized amount (k),Utilized amount (
 2026-06-01,DNB NOK,Skagerak,NOK,"76,559","76,559",,2026-06-01,DNB EUR,EUR,"6,058","68,031",,2026-06-01,DNB NOK,Mind Energy,NOK,"38,000","38,000",,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2026-07-01,DNB NOK,Skagerak,NOK,"94,781","94,781",,2026-07-01,DNB EUR,EUR,"6,158","69,154",,2026-07-01,DNB NOK,Mind Energy,NOK,"38,000","38,000",,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2026-08-01,DNB NOK,Skagerak,NOK,"94,781","94,781",,2026-08-01,DNB EUR,EUR,"7,908","88,807",,2026-08-01,DNB NOK,Mind Energy,NOK,"38,000","38,000",,,,,,,,,,,,,,,,,,,,,,,,,,,,
-2026-09-01,DNB NOK,Skagerak,NOK,"94,781","94,781",,2026-09-01,DNB EUR,EUR,"10,387","116,649",,2026-09-01,DNB NOK,Mind Energy,NOK,"38,000","38,000",,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2026-09-01,DNB NOK,Skagerak,NOK,"94,781","94,781",,2026-09-01,DNB EUR,EUR,"10,387","116,649",,2026-09-01,DNB NOK,Mind Energy,NOK,"17,000","17,000",,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2026-10-01,DNB NOK,Skagerak,NOK,"181,187","181,187",,2026-10-01,DNB EUR,EUR,"14,177","159,208",,2024-01-01,DNB NOK,Skagerak,NOK,"73,000","73,000",,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2026-11-01,DNB NOK,Skagerak,NOK,"181,187","181,187",,2026-11-01,DNB EUR,EUR,"18,588","208,745",,2024-02-01,DNB NOK,Skagerak,NOK,"73,000","73,000",,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2026-12-01,DNB NOK,Skagerak,NOK,"181,187","181,187",,2026-12-01,DNB EUR,EUR,"22,307","250,508",,2024-03-01,DNB NOK,Skagerak,NOK,"73,000","73,000",,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -474,4 +474,4 @@ Period,Guarantee type,Beneficiary,Currency,Utilized amount (k),Utilized amount (
 ,,,,,,,,,,,,,2026-08-01,Cash collateral,Skagerak,NOK,"15,000","15,000",,,,,,,,,,,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,2026-09-01,Cash collateral,Skagerak,NOK,"15,000","15,000",,,,,,,,,,,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,2026-08-01,Cash collateral,AXPO,EUR,400,"4,492",,,,,,,,,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,2026-09-01,Cash collateral,AXPO,EUR,400,"4,492",,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,2026-09-01,Cash collateral,AXPO,EUR,"1,000","11,230",,,,,,,,,,,,,,,,,,,,,,,,,,,,
