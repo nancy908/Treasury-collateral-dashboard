@@ -762,7 +762,7 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash-after)"></div>Cash after collateral</div>
       <div class="legend-item"><div class="legend-dot" style="background:#EF4444; width: 8px; height: 8px; border-radius: 50%;"></div>Below Covenant (&lt; 125m)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Covenant</div>
-      <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#1ED0E7;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid: Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(56,189,248,0.4);border:1px solid #38BDF8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter: Forecast</div>
+      <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#1ED0E7;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid (Bar/Line): Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(56,189,248,0.4);border:1px dashed #38BDF8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter / Dashed: Forecast</div>
     </div>
   </div>
 
@@ -1522,9 +1522,15 @@ function update() {
   const peakStack2 = Math.max(...d.dnbTotalArr.map((v, i) => v + d.atraArr[i]));
   const peakCash2 = Math.max(...cashAfterArr.filter(x => x !== null));
 
-  // Highlight points below covenant (< 125,000 kNOK) with Red dots
-  const cashPointColors = cashAfterArr.map(v => (v !== null && v < 125000) ? '#EF4444' : '#10B981');
-  const cashPointBorderColors = cashAfterArr.map(v => (v !== null && v < 125000) ? '#FFFFFF' : '#10B981');
+  // Highlight points below covenant (< 125,000 kNOK) with Red dots, distinguish actual vs forecast
+  const cashPointColors = cashAfterArr.map((v, i) => {
+    if (v !== null && v < 125000) return '#EF4444';
+    return labels[i] > asOfYM ? '#34D399' : '#10B981';
+  });
+  const cashPointBorderColors = cashAfterArr.map((v, i) => {
+    if (v !== null && v < 125000) return '#FFFFFF';
+    return labels[i] > asOfYM ? '#34D399' : '#10B981';
+  });
   const cashPointRadii = cashAfterArr.map(v => (v !== null && v < 125000) ? 6 : 4);
   const cashPointHoverRadii = cashAfterArr.map(v => (v !== null && v < 125000) ? 8 : 6);
   const cashPointBorderWidths = cashAfterArr.map(v => (v !== null && v < 125000) ? 2 : 1);
@@ -1545,8 +1551,11 @@ function update() {
         const val = ctx.raw;
         if (val === null || val === undefined) return ` ${ctx.dataset.label}: -`;
         const formatted = `${Math.round(val).toLocaleString()} kNOK (${(val / 1000).toFixed(1)}m)`;
-        if (ctx.dataset.label === 'Cash after collateral' && val < 125000) {
-          return ` ${ctx.dataset.label}: ${formatted}  ⚠️ Below Covenant (< 125m)`;
+        const p = ctx.label;
+        const type = p <= asOfYM ? 'Actual' : 'Forecast';
+        if (ctx.dataset.label === 'Cash after collateral') {
+          const breachNote = val < 125000 ? '  ⚠️ Below Covenant (< 125m)' : '';
+          return ` ${ctx.dataset.label} (${type}): ${formatted}${breachNote}`;
         }
         return ` ${ctx.dataset.label}: ${formatted}`;
       }
@@ -1600,7 +1609,11 @@ function update() {
       borderWidth: 4.5,
       datalabels: { display: false },
       yAxisID: 'y',
-      stack: 'cash'
+      stack: 'cash',
+      segment: {
+        borderColor: ctx => labels[ctx.p1DataIndex] > asOfYM ? '#34D399' : '#10B981',
+        borderDash: ctx => labels[ctx.p1DataIndex] > asOfYM ? [8, 4] : undefined,
+      }
     },
     { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
   ]}, options: chart2Opts });
@@ -1691,7 +1704,7 @@ function update() {
   const forecastLine = allPeriods.map(p => { const i = d.periods.indexOf(p); return i >= 0 ? d.dnbTotalForecastArr[i] : null; });
   const historyLine = allPeriods.map(p => histDNB[p] ?? null);
   makeChart('chart5', { type: 'line', data: { labels: allPeriods, datasets: [
-    { label: 'Forecast', data: forecastLine, borderColor: '#1ED0E7', backgroundColor: 'rgba(30,208,231,0.06)', fill: true, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2, segment: { borderDash: ctx => allPeriods[ctx.p1DataIndex] > '2026-06' ? [4,3] : [] } },
+    { label: 'Forecast', data: forecastLine, borderColor: '#1ED0E7', backgroundColor: 'rgba(30,208,231,0.06)', fill: true, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2, segment: { borderDash: ctx => allPeriods[ctx.p1DataIndex] > asOfYM ? [4,3] : [] } },
     { label: 'Actual', data: historyLine, borderColor: '#686C73', backgroundColor: 'rgba(104,108,115,0.04)', fill: false, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 1.5 },
   ]}, options: makeOpts(false, 'NOK') });
   const overlapping = fcPeriods.filter(p => histDNB[p] !== undefined);
