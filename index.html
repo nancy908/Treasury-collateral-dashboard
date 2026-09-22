@@ -29,6 +29,7 @@
     --c-cash:      #490F6C;
     --c-cash2:     #8B4BBE;
     --c-cash3:     #F0DAFE;
+    --c-cash-axpo: #FB923C;
     --c-limit:     #FF5A5A;
     --c-hist:      #686C73;
     --c-cash-fc:   #10B981;
@@ -885,6 +886,7 @@
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash3)"></div>Skagerak (NOK)</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash2)"></div>BNP SEPA EUR (conv.)</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash)"></div>PVNED EUR (conv.)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash-axpo)"></div>AXPO EUR (conv.)</div>
         <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#c084fc;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid: Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(192,132,252,0.4);border:1px solid #c084fc;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter: Forecast</div>
       </div>
     </div>
@@ -980,65 +982,65 @@
 // DATA_START
 const BASE_FX = 11.23;
 const FORECAST = {
-  "2026-01": { dnbNok: 126984, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 10939, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1560 },
-  "2026-02": { dnbNok: 123850, dnbEurLocal: 200, marexEurLocal: 0, atraLocal: 8740, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1157 },
-  "2026-03": { dnbNok: 121718, dnbEurLocal: 5963, marexEurLocal: 68, atraLocal: 1749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 790 },
-  "2026-04": { dnbNok: 96132, dnbEurLocal: 5933, marexEurLocal: 133, atraLocal: 1245, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 783 },
-  "2026-05": { dnbNok: 90291, dnbEurLocal: 5608, marexEurLocal: 299, atraLocal: 1245, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 593 },
-  "2026-06": { dnbNok: 88508, dnbEurLocal: 6141, marexEurLocal: 393, atraLocal: 1050, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 496 },
-  "2026-07": { dnbNok: 104988, dnbEurLocal: 6424, marexEurLocal: 481, atraLocal: 1050, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 537 },
-  "2026-08": { dnbNok: 105869, dnbEurLocal: 7668, marexEurLocal: 788, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 657 },
-  "2026-09": { dnbNok: 114075, dnbEurLocal: 9221, marexEurLocal: 1066, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1066 },
-  "2026-10": { dnbNok: 212267, dnbEurLocal: 12099, marexEurLocal: 1978, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1615 },
-  "2026-11": { dnbNok: 222030, dnbEurLocal: 15788, marexEurLocal: 2700, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2596 },
-  "2026-12": { dnbNok: 228774, dnbEurLocal: 19169, marexEurLocal: 3038, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 3046 },
-  "2027-01": { dnbNok: 254082, dnbEurLocal: 20994, marexEurLocal: 2495, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 3054 },
-  "2027-02": { dnbNok: 246258, dnbEurLocal: 17993, marexEurLocal: 1943, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2831 },
-  "2027-03": { dnbNok: 237421, dnbEurLocal: 14536, marexEurLocal: 1643, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2431 },
-  "2027-04": { dnbNok: 121434, dnbEurLocal: 11069, marexEurLocal: 1433, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1199 },
-  "2027-05": { dnbNok: 109500, dnbEurLocal: 11085, marexEurLocal: 1455, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 906 },
-  "2027-06": { dnbNok: 105996, dnbEurLocal: 11266, marexEurLocal: 1402, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 806 },
-  "2027-07": { dnbNok: 89171, dnbEurLocal: 11720, marexEurLocal: 1331, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 794 },
-  "2027-08": { dnbNok: 91187, dnbEurLocal: 12003, marexEurLocal: 1611, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 974 },
-  "2027-09": { dnbNok: 93941, dnbEurLocal: 13358, marexEurLocal: 1869, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1130 },
-  "2027-10": { dnbNok: 132844, dnbEurLocal: 16664, marexEurLocal: 3123, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1567 },
-  "2027-11": { dnbNok: 142328, dnbEurLocal: 19612, marexEurLocal: 4185, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2144 },
-  "2027-12": { dnbNok: 147687, dnbEurLocal: 2708, marexEurLocal: 4725, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2475 }
+  "2026-01": { dnbNok: 126984, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 10939, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1560, cashAxpoLocal: 0 },
+  "2026-02": { dnbNok: 123850, dnbEurLocal: 200, marexEurLocal: 0, atraLocal: 8740, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1157, cashAxpoLocal: 0 },
+  "2026-03": { dnbNok: 121718, dnbEurLocal: 5963, marexEurLocal: 68, atraLocal: 1749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 790, cashAxpoLocal: 0 },
+  "2026-04": { dnbNok: 96132, dnbEurLocal: 5933, marexEurLocal: 133, atraLocal: 1245, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 783, cashAxpoLocal: 0 },
+  "2026-05": { dnbNok: 90291, dnbEurLocal: 5608, marexEurLocal: 299, atraLocal: 1245, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 593, cashAxpoLocal: 0 },
+  "2026-06": { dnbNok: 88508, dnbEurLocal: 6141, marexEurLocal: 393, atraLocal: 1050, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 496, cashAxpoLocal: 0 },
+  "2026-07": { dnbNok: 104988, dnbEurLocal: 6424, marexEurLocal: 481, atraLocal: 1050, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 537, cashAxpoLocal: 0 },
+  "2026-08": { dnbNok: 105869, dnbEurLocal: 7668, marexEurLocal: 788, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 657, cashAxpoLocal: 0 },
+  "2026-09": { dnbNok: 114075, dnbEurLocal: 9221, marexEurLocal: 1066, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1066, cashAxpoLocal: 0 },
+  "2026-10": { dnbNok: 212267, dnbEurLocal: 12099, marexEurLocal: 1978, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1615, cashAxpoLocal: 0 },
+  "2026-11": { dnbNok: 222030, dnbEurLocal: 15788, marexEurLocal: 2700, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2596, cashAxpoLocal: 0 },
+  "2026-12": { dnbNok: 228774, dnbEurLocal: 19169, marexEurLocal: 3038, atraLocal: 900, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 3046, cashAxpoLocal: 0 },
+  "2027-01": { dnbNok: 254082, dnbEurLocal: 20994, marexEurLocal: 2495, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 3054, cashAxpoLocal: 0 },
+  "2027-02": { dnbNok: 246258, dnbEurLocal: 17993, marexEurLocal: 1943, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2831, cashAxpoLocal: 0 },
+  "2027-03": { dnbNok: 237421, dnbEurLocal: 14536, marexEurLocal: 1643, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2431, cashAxpoLocal: 0 },
+  "2027-04": { dnbNok: 121434, dnbEurLocal: 11069, marexEurLocal: 1433, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1199, cashAxpoLocal: 0 },
+  "2027-05": { dnbNok: 109500, dnbEurLocal: 11085, marexEurLocal: 1455, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 906, cashAxpoLocal: 0 },
+  "2027-06": { dnbNok: 105996, dnbEurLocal: 11266, marexEurLocal: 1402, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 806, cashAxpoLocal: 0 },
+  "2027-07": { dnbNok: 89171, dnbEurLocal: 11720, marexEurLocal: 1331, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 794, cashAxpoLocal: 0 },
+  "2027-08": { dnbNok: 91187, dnbEurLocal: 12003, marexEurLocal: 1611, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 974, cashAxpoLocal: 0 },
+  "2027-09": { dnbNok: 93941, dnbEurLocal: 13358, marexEurLocal: 1869, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1130, cashAxpoLocal: 0 },
+  "2027-10": { dnbNok: 132844, dnbEurLocal: 16664, marexEurLocal: 3123, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 1567, cashAxpoLocal: 0 },
+  "2027-11": { dnbNok: 142328, dnbEurLocal: 19612, marexEurLocal: 4185, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2144, cashAxpoLocal: 0 },
+  "2027-12": { dnbNok: 147687, dnbEurLocal: 2708, marexEurLocal: 4725, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 2475, cashAxpoLocal: 0 }
 };
 const ACTUALS = {
-  "2024-01": { dnbNok: 129300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 0 },
-  "2024-02": { dnbNok: 114300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 0 },
-  "2024-03": { dnbNok: 114300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 238 },
-  "2024-04": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 220 },
-  "2024-05": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 243 },
-  "2024-06": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 210 },
-  "2024-07": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 217 },
-  "2024-08": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 213 },
-  "2024-09": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 230 },
-  "2024-10": { dnbNok: 86000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 309 },
-  "2024-11": { dnbNok: 86000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 530, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 500 },
-  "2024-12": { dnbNok: 86000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 996, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 960 },
-  "2025-01": { dnbNok: 79000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 996, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 907 },
-  "2025-02": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 1146, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 779 },
-  "2025-03": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 9996, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 603 },
-  "2025-04": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6146, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 467 },
-  "2025-05": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6146, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 452 },
-  "2025-06": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6650, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 421 },
-  "2025-07": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6650, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 436 },
-  "2025-08": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 426 },
-  "2025-09": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 455 },
-  "2025-10": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 482 },
-  "2025-11": { dnbNok: 93000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 11750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 726 },
-  "2025-12": { dnbNok: 93000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 11750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 671 },
-  "2026-01": { dnbNok: 93000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 11749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 884 },
-  "2026-02": { dnbNok: 93000, dnbEurLocal: 200, marexEurLocal: 0, atraLocal: 11749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 902 },
-  "2026-03": { dnbNok: 109000, dnbEurLocal: 6200, marexEurLocal: 0, atraLocal: 1749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 670 },
-  "2026-04": { dnbNok: 109000, dnbEurLocal: 6798, marexEurLocal: 0, atraLocal: 1245, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 629 },
-  "2026-05": { dnbNok: 135000, dnbEurLocal: 5798, marexEurLocal: 0, atraLocal: 1245, cashSkaNok: 2500, cashBnpLocal: 1960, cashPvnedLocal: 629 },
-  "2026-06": { dnbNok: 120000, dnbEurLocal: 6058, marexEurLocal: 0, atraLocal: 1050, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 412 },
-  "2026-07": { dnbNok: 114000, dnbEurLocal: 6058, marexEurLocal: 0, atraLocal: 1050, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 488 },
-  "2026-08": { dnbNok: 114000, dnbEurLocal: 6808, marexEurLocal: 1000, atraLocal: 900, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 3063 },
-  "2026-09": { dnbNok: 93000, dnbEurLocal: 6808, marexEurLocal: 1000, atraLocal: 900, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 4215 }
+  "2024-01": { dnbNok: 129300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 0, cashAxpoLocal: 0 },
+  "2024-02": { dnbNok: 114300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 0, cashAxpoLocal: 0 },
+  "2024-03": { dnbNok: 114300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 238, cashAxpoLocal: 0 },
+  "2024-04": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 220, cashAxpoLocal: 0 },
+  "2024-05": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 243, cashAxpoLocal: 0 },
+  "2024-06": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 210, cashAxpoLocal: 0 },
+  "2024-07": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 217, cashAxpoLocal: 0 },
+  "2024-08": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 213, cashAxpoLocal: 0 },
+  "2024-09": { dnbNok: 98300, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 230, cashAxpoLocal: 0 },
+  "2024-10": { dnbNok: 86000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 0, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 309, cashAxpoLocal: 0 },
+  "2024-11": { dnbNok: 86000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 530, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 500, cashAxpoLocal: 0 },
+  "2024-12": { dnbNok: 86000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 996, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 960, cashAxpoLocal: 0 },
+  "2025-01": { dnbNok: 79000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 996, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 907, cashAxpoLocal: 0 },
+  "2025-02": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 1146, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 779, cashAxpoLocal: 0 },
+  "2025-03": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 9996, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 603, cashAxpoLocal: 0 },
+  "2025-04": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6146, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 467, cashAxpoLocal: 0 },
+  "2025-05": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6146, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 452, cashAxpoLocal: 0 },
+  "2025-06": { dnbNok: 75000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6650, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 421, cashAxpoLocal: 0 },
+  "2025-07": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6650, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 436, cashAxpoLocal: 0 },
+  "2025-08": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 426, cashAxpoLocal: 0 },
+  "2025-09": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 455, cashAxpoLocal: 0 },
+  "2025-10": { dnbNok: 76200, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 6750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 482, cashAxpoLocal: 0 },
+  "2025-11": { dnbNok: 93000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 11750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 726, cashAxpoLocal: 0 },
+  "2025-12": { dnbNok: 93000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 11750, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 671, cashAxpoLocal: 0 },
+  "2026-01": { dnbNok: 93000, dnbEurLocal: 0, marexEurLocal: 0, atraLocal: 11749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 884, cashAxpoLocal: 0 },
+  "2026-02": { dnbNok: 93000, dnbEurLocal: 200, marexEurLocal: 0, atraLocal: 11749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 902, cashAxpoLocal: 0 },
+  "2026-03": { dnbNok: 109000, dnbEurLocal: 6200, marexEurLocal: 0, atraLocal: 1749, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 670, cashAxpoLocal: 0 },
+  "2026-04": { dnbNok: 109000, dnbEurLocal: 6798, marexEurLocal: 0, atraLocal: 1245, cashSkaNok: 0, cashBnpLocal: 1960, cashPvnedLocal: 629, cashAxpoLocal: 0 },
+  "2026-05": { dnbNok: 135000, dnbEurLocal: 5798, marexEurLocal: 0, atraLocal: 1245, cashSkaNok: 2500, cashBnpLocal: 1960, cashPvnedLocal: 629, cashAxpoLocal: 0 },
+  "2026-06": { dnbNok: 120000, dnbEurLocal: 6058, marexEurLocal: 0, atraLocal: 1050, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 412, cashAxpoLocal: 0 },
+  "2026-07": { dnbNok: 114000, dnbEurLocal: 6058, marexEurLocal: 0, atraLocal: 1050, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 488, cashAxpoLocal: 0 },
+  "2026-08": { dnbNok: 114000, dnbEurLocal: 6808, marexEurLocal: 1000, atraLocal: 900, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 3063, cashAxpoLocal: 400 },
+  "2026-09": { dnbNok: 93000, dnbEurLocal: 6808, marexEurLocal: 1000, atraLocal: 900, cashSkaNok: 15000, cashBnpLocal: 1960, cashPvnedLocal: 4215, cashAxpoLocal: 1000 }
 };
 const HISTORY_DNB_NOK_ONLY = {
   "2024-01": 129300,
@@ -1293,7 +1295,7 @@ Chart.register(ChartDataLabels);
 function fmt(v) { return Math.round(v).toLocaleString('en-US'); }
 function computeData(fx, dnbLine) {
   const periods = Object.keys(FORECAST).sort();
-  const dnbNokArr=[], dnbEurArr=[], marexArr=[], atraArr=[], cashSkaArr=[], cashBnpArr=[], cashPvnedArr=[];
+  const dnbNokArr=[], dnbEurArr=[], marexArr=[], atraArr=[], cashSkaArr=[], cashBnpArr=[], cashPvnedArr=[], cashAxpoArr=[];
   const dnbTotalArr=[], dnbAtraArr=[], cashTotalArr=[], grandTotalArr=[], dnbLineArr=[], creditLimitArr=[];
   const dnbTotalForecastArr = [];
   const marexForecastArr = [];
@@ -1301,21 +1303,22 @@ function computeData(fx, dnbLine) {
   for (const p of periods) {
     const f = FORECAST[p];
     const act = (typeof ACTUALS !== 'undefined') ? ACTUALS[p] : null;
-    const hasAct = act && (act.dnbNok + act.dnbEurLocal + act.marexEurLocal + act.atraLocal > 0);
+    const hasAct = act && (act.dnbNok + act.dnbEurLocal + act.marexEurLocal + act.atraLocal + (act.cashSkaNok || 0) + (act.cashBnpLocal || 0) + (act.cashPvnedLocal || 0) + (act.cashAxpoLocal || 0) > 0);
     const d = hasAct ? act : f;
 
     const dnbNok = d.dnbNok;
     const dnbEur = d.dnbEurLocal * fx;
     const marex = d.marexEurLocal * fx;
     const atra = d.atraLocal * fx;
-    const cashSka = d.cashSkaNok;
-    const cashBnp = d.cashBnpLocal * fx;
-    const cashPvned = d.cashPvnedLocal * fx;
+    const cashSka = d.cashSkaNok || 0;
+    const cashBnp = (d.cashBnpLocal || 0) * fx;
+    const cashPvned = (d.cashPvnedLocal || 0) * fx;
+    const cashAxpo = (d.cashAxpoLocal || 0) * fx;
     const dnbTotal = dnbNok + dnbEur + marex;
-    const cashTotal = cashSka + cashBnp + cashPvned;
+    const cashTotal = cashSka + cashBnp + cashPvned + cashAxpo;
 
     dnbNokArr.push(dnbNok); dnbEurArr.push(dnbEur); marexArr.push(marex); atraArr.push(atra);
-    cashSkaArr.push(cashSka); cashBnpArr.push(cashBnp); cashPvnedArr.push(cashPvned);
+    cashSkaArr.push(cashSka); cashBnpArr.push(cashBnp); cashPvnedArr.push(cashPvned); cashAxpoArr.push(cashAxpo);
     dnbTotalArr.push(dnbTotal); dnbAtraArr.push(dnbTotal + atra);
     cashTotalArr.push(cashTotal); grandTotalArr.push(dnbTotal + atra + cashTotal);
     dnbLineArr.push(dnbLine);
@@ -1326,7 +1329,7 @@ function computeData(fx, dnbLine) {
     dnbTotalForecastArr.push(fcDnbTotal);
     marexForecastArr.push(f.marexEurLocal * fx);
   }
-  return { periods, dnbNokArr, dnbEurArr, marexArr, atraArr, cashSkaArr, cashBnpArr, cashPvnedArr, dnbTotalArr, dnbAtraArr, cashTotalArr, grandTotalArr, dnbLineArr, creditLimitArr, dnbTotalForecastArr, marexForecastArr };
+  return { periods, dnbNokArr, dnbEurArr, marexArr, atraArr, cashSkaArr, cashBnpArr, cashPvnedArr, cashAxpoArr, dnbTotalArr, dnbAtraArr, cashTotalArr, grandTotalArr, dnbLineArr, creditLimitArr, dnbTotalForecastArr, marexForecastArr };
 }
 function computeHistoryDNB(fx) {
   const result = {};
@@ -1659,6 +1662,14 @@ function update() {
       data: d.cashPvnedArr,
       backgroundColor: actBg('rgba(73,15,108,0.85)', 'rgba(109,40,217,0.40)'),
       borderColor: actBorder('rgba(73,15,108,0.95)', 'rgba(109,40,217,0.85)'),
+      borderWidth: 1,
+      stack: 's'
+    },
+    {
+      label: 'AXPO EUR (conv.)',
+      data: d.cashAxpoArr,
+      backgroundColor: actBg('rgba(251,146,60,0.85)', 'rgba(251,146,60,0.40)'),
+      borderColor: actBorder('rgba(251,146,60,0.95)', 'rgba(251,146,60,0.85)'),
       borderWidth: 1,
       stack: 's'
     },

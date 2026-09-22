@@ -151,7 +151,8 @@ def parse_collateral_csv(csv_path):
                     'atraLocal': 0.0,
                     'cashSkaNok': 0.0,
                     'cashBnpLocal': 0.0,
-                    'cashPvnedLocal': 0.0
+                    'cashPvnedLocal': 0.0,
+                    'cashAxpoLocal': 0.0
                 }
                 
             gtype_lower = gtype.lower()
@@ -175,6 +176,8 @@ def parse_collateral_csv(csv_path):
                     forecast[period]['cashPvnedLocal'] += amt_k
                 elif ben_lower == 'skagerak':
                     forecast[period]['cashSkaNok'] += amt_nok
+                elif ben_lower == 'axpo':
+                    forecast[period]['cashAxpoLocal'] += amt_k
 
     # Parse Actuals and merge/overwrite forecast values where actuals exist
     actuals = {}
@@ -200,7 +203,8 @@ def parse_collateral_csv(csv_path):
                     'atraLocal': 0.0,
                     'cashSkaNok': 0.0,
                     'cashBnpLocal': 0.0,
-                    'cashPvnedLocal': 0.0
+                    'cashPvnedLocal': 0.0,
+                    'cashAxpoLocal': 0.0
                 }
                 
             gtype_lower = gtype.lower()
@@ -224,6 +228,8 @@ def parse_collateral_csv(csv_path):
                     actuals[period]['cashPvnedLocal'] += amt_k
                 elif ben_lower == 'skagerak':
                     actuals[period]['cashSkaNok'] += amt_nok
+                elif ben_lower == 'axpo':
+                    actuals[period]['cashAxpoLocal'] += amt_k
 
 
 
@@ -471,7 +477,7 @@ def format_forecast_block(forecast_dict):
     for key in sorted(forecast_dict.keys()):
         val = forecast_dict[key]
         parts = []
-        for k in ['dnbNok', 'dnbEurLocal', 'marexEurLocal', 'atraLocal', 'cashSkaNok', 'cashBnpLocal', 'cashPvnedLocal']:
+        for k in ['dnbNok', 'dnbEurLocal', 'marexEurLocal', 'atraLocal', 'cashSkaNok', 'cashBnpLocal', 'cashPvnedLocal', 'cashAxpoLocal']:
             v = val.get(k, 0.0)
             parts.append(f'{k}: {int(round(v))}')
         line = f'  "{key}": {{ ' + ', '.join(parts) + ' },'
