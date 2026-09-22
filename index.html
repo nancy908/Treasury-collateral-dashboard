@@ -752,8 +752,8 @@
 
   <!-- ═══ ROW 1: HERO — Panel 2 ═══ -->
   <div class="panel panel-hero">
-    <div class="panel-tag">Panel 2 - Primary View <span class="forecast-badge">⟳ Forecast</span></div>
-    <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>DNB + Atradius EUR vs Guarantee Line & Cash after collateral</div>
+    <div class="panel-tag">Panel 2 - Primary View <span class="forecast-badge" style="background:rgba(30,208,231,0.12); color:#BEFBFF; border-color:rgba(30,208,231,0.3);">● Actual &amp; ⟳ Forecast</span></div>
+    <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>DNB + Atradius EUR vs Guarantee Line & Cash after collateral · Actual & Forecast</div>
     <div class="chart-wrap chart-wrap-hero"><canvas id="chart2"></canvas></div>
     <div class="legend">
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB Guarantee</div>
@@ -762,6 +762,7 @@
       <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash-after)"></div>Cash after collateral</div>
       <div class="legend-item"><div class="legend-dot" style="background:#EF4444; width: 8px; height: 8px; border-radius: 50%;"></div>Below Covenant (&lt; 125m)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Covenant</div>
+      <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#1ED0E7;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid: Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(56,189,248,0.4);border:1px solid #38BDF8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter: Forecast</div>
     </div>
   </div>
 
@@ -851,7 +852,7 @@
     <div class="supporting-views-bar-left">
       <span class="supporting-views-dot"></span>
       <span class="supporting-views-title">Supporting Views</span>
-      <span class="supporting-views-subtitle">DNB Guarantee (NOK + EUR) · Cash Collateral · ALL Guarantee/Collateral</span>
+      <span class="supporting-views-subtitle">DNB Guarantee (NOK + EUR) · Cash Collateral · ALL Guarantee/Collateral · Actual &amp; Forecast</span>
     </div>
     <div class="supporting-views-bar-right">
       <span id="supporting-views-badge" class="supporting-views-badge">
@@ -864,38 +865,41 @@
   <div id="supporting-views-container" class="supporting-views-grid collapsed">
     <!-- Panel 1 minor -->
     <div class="panel panel-minor">
-      <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
-      <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>DNB Guarantee (NOK + EUR)</div>
+      <div class="panel-tag"><span class="forecast-badge" style="background:rgba(30,208,231,0.12); color:#BEFBFF; border-color:rgba(30,208,231,0.3);">● Actual &amp; ⟳ Forecast</span></div>
+      <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>DNB Guarantee (NOK + EUR) · Actual &amp; Forecast</div>
       <div class="chart-wrap chart-wrap-minor"><canvas id="chart1"></canvas></div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB NOK</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-eur)"></div>DNB EUR (conv.)</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-limit); opacity:.7"></div>Guarantee Line</div>
+        <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#1ED0E7;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid: Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(56,189,248,0.4);border:1px solid #38BDF8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter: Forecast</div>
       </div>
     </div>
 
     <!-- Panel 3 minor -->
     <div class="panel panel-minor">
-      <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
-      <div class="panel-title"><span class="dot" style="background:var(--tibber-light-purple)"></span>Cash Collateral</div>
+      <div class="panel-tag"><span class="forecast-badge" style="background:rgba(30,208,231,0.12); color:#BEFBFF; border-color:rgba(30,208,231,0.3);">● Actual &amp; ⟳ Forecast</span></div>
+      <div class="panel-title"><span class="dot" style="background:var(--tibber-light-purple)"></span>Cash Collateral · Actual &amp; Forecast</div>
       <div class="chart-wrap chart-wrap-minor"><canvas id="chart3"></canvas></div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash3)"></div>Skagerak (NOK)</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash2)"></div>BNP SEPA EUR (conv.)</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash)"></div>PVNED EUR (conv.)</div>
+        <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#c084fc;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid: Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(192,132,252,0.4);border:1px solid #c084fc;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter: Forecast</div>
       </div>
     </div>
 
     <!-- Panel 4 minor -->
     <div class="panel panel-minor">
-      <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
-      <div class="panel-title"><span class="dot" style="background:var(--tibber-medium-purple)"></span>ALL guarantee/collateral: DNB + Atradius + Cash</div>
+      <div class="panel-tag"><span class="forecast-badge" style="background:rgba(30,208,231,0.12); color:#BEFBFF; border-color:rgba(30,208,231,0.3);">● Actual &amp; ⟳ Forecast</span></div>
+      <div class="panel-title"><span class="dot" style="background:var(--tibber-medium-purple)"></span>ALL guarantee/collateral: DNB + Atradius + Cash · Actual &amp; Forecast</div>
       <div class="chart-wrap chart-wrap-minor"><canvas id="chart4"></canvas></div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB NOK</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-eur)"></div>DNB EUR (conv.)</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-atradius)"></div>Atradius EUR (conv.)</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash2)"></div>Cash (conv.)</div>
+        <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#1ED0E7;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid: Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(56,189,248,0.4);border:1px solid #38BDF8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter: Forecast</div>
       </div>
     </div>
   </div>
@@ -1335,7 +1339,32 @@ function makeScales(stacked, currency) {
   return { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', maxRotation: 45 }, stacked: !!stacked }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', callback: v => (v/1000).toFixed(0) + 'k' }, title: { display: true, text: yTitle, color: '#686C73', font: { family: 'Poppins', size: 10, weight: '600' }, padding: { bottom: 4 } }, stacked: !!stacked } };
 }
 function makeOpts(stacked, currency) {
-  return { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { backgroundColor: '#16191D', borderColor: '#1ED0E7', borderWidth: 1, titleFont: { family: 'Poppins', size: 11, weight: '600' }, bodyFont: { family: 'Poppins', size: 11 }, callbacks: { label: ctx => ` ${ctx.dataset.label}: ${Math.round(ctx.raw).toLocaleString()} kNOK` } } }, scales: makeScales(stacked, currency) };
+  const asOfYM = document.body.innerHTML.match(/As of:\s*(\d{4}-\d{2}-\d{2})/)?.[1].slice(0, 7) || new Date().toISOString().slice(0, 7);
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      datalabels: { display: false },
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#16191D',
+        borderColor: '#1ED0E7',
+        borderWidth: 1,
+        titleFont: { family: 'Poppins', size: 11, weight: '600' },
+        bodyFont: { family: 'Poppins', size: 11 },
+        callbacks: {
+          title: ctx => {
+            const p = ctx[0].label;
+            const type = p <= asOfYM ? 'Actual' : 'Forecast';
+            return `${p} (${type})`;
+          },
+          label: ctx => ` ${ctx.dataset.label}: ${Math.round(ctx.raw).toLocaleString()} kNOK`
+        }
+      }
+    },
+    scales: makeScales(stacked, currency)
+  };
 }
 const BASE_OPTS = makeOpts(false, 'NOK');
 const STACKED_OPTS = makeOpts(true, 'NOK');
@@ -1377,6 +1406,8 @@ function update() {
   document.getElementById('kpi2').textContent = fmt(dnbLine);
 
   const asOfYM = document.body.innerHTML.match(/As of:\s*(\d{4}-\d{2}-\d{2})/)?.[1].slice(0, 7) || todayYM;
+  const actBg = (actCol, fcCol) => labels.map(p => p <= asOfYM ? actCol : fcCol);
+  const actBorder = (actBorderCol, fcBorderCol) => labels.map(p => p <= asOfYM ? actBorderCol : fcBorderCol);
   const breachPeriods = d.periods.map((p, i) => ({ p, excess: d.dnbTotalArr[i] - d.creditLimitArr[i] })).filter(x => x.p >= asOfYM && x.excess > 0);
   const breachEl = document.getElementById('kpiBreach');
   const breachSubEl = document.getElementById('kpiBreachSub');
@@ -1465,8 +1496,22 @@ function update() {
     cashCalcBody.innerHTML = headerRow + cashPosRow + excessRow + collChangeRow + cashAfterRow + cashSourceRow;
   }
   makeChart('chart1', { type: 'bar', data: { labels, datasets: [
-    { label: 'DNB NOK', data: d.dnbNokArr, backgroundColor: 'rgba(30,208,231,0.85)', stack: 's' },
-    { label: 'DNB EUR', data: d.dnbEurArr.map((v, i) => v + d.marexArr[i]), backgroundColor: 'rgba(190,251,255,0.75)', stack: 's' },
+    {
+      label: 'DNB NOK',
+      data: d.dnbNokArr,
+      backgroundColor: actBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
+      borderColor: actBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
+      borderWidth: 1,
+      stack: 's'
+    },
+    {
+      label: 'DNB EUR',
+      data: d.dnbEurArr.map((v, i) => v + d.marexArr[i]),
+      backgroundColor: actBg('rgba(190,251,255,0.75)', 'rgba(147,197,253,0.40)'),
+      borderColor: actBorder('rgba(190,251,255,0.90)', 'rgba(147,197,253,0.85)'),
+      borderWidth: 1,
+      stack: 's'
+    },
     { label: 'Guarantee Line', data: d.dnbLineArr, type: 'line', borderColor: '#FF5A5A', borderDash: [4,3], borderWidth: 1.5, pointRadius: 0, fill: false },
   ]}, options: makeOpts(true, 'NOK') });
 
@@ -1491,6 +1536,11 @@ function update() {
     titleFont: { family: 'Poppins', size: 11, weight: '600' },
     bodyFont: { family: 'Poppins', size: 11 },
     callbacks: {
+      title: ctx => {
+        const p = ctx[0].label;
+        const type = p <= asOfYM ? 'Actual' : 'Forecast';
+        return `${p} (${type})`;
+      },
       label: ctx => {
         const val = ctx.raw;
         if (val === null || val === undefined) return ` ${ctx.dataset.label}: -`;
@@ -1515,8 +1565,24 @@ function update() {
   };
 
   makeChart('chart2', { type: 'bar', data: { labels, datasets: [
-    { label: 'DNB Guarantee', data: d.dnbTotalArr, backgroundColor: 'rgba(30,208,231,0.85)', stack: 's', yAxisID: 'y' },
-    { label: 'Atradius EUR Guarantee', data: d.atraArr, backgroundColor: 'rgba(200,109,255,0.75)', stack: 's', yAxisID: 'y' },
+    {
+      label: 'DNB Guarantee',
+      data: d.dnbTotalArr,
+      backgroundColor: actBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
+      borderColor: actBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
+      borderWidth: 1,
+      stack: 's',
+      yAxisID: 'y'
+    },
+    {
+      label: 'Atradius EUR Guarantee',
+      data: d.atraArr,
+      backgroundColor: actBg('rgba(200,109,255,0.75)', 'rgba(217,70,239,0.40)'),
+      borderColor: actBorder('rgba(200,109,255,0.90)', 'rgba(217,70,239,0.85)'),
+      borderWidth: 1,
+      stack: 's',
+      yAxisID: 'y'
+    },
     { label: 'DNB+Atradius Guarantee Line', data: d.creditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit' },
     {
       label: 'Cash after collateral',
@@ -1559,15 +1625,64 @@ function update() {
     }
   ]}, options: chart6Opts });
   makeChart('chart3', { type: 'bar', data: { labels, datasets: [
-    { label: 'Skagerak (NOK)', data: d.cashSkaArr, backgroundColor: 'rgba(240,218,254,0.85)', stack: 's' },
-    { label: 'BNP SEPA EUR (conv.)', data: d.cashBnpArr, backgroundColor: 'rgba(139,75,190,0.85)', stack: 's' },
-    { label: 'PVNED EUR (conv.)', data: d.cashPvnedArr, backgroundColor: 'rgba(73,15,108,0.85)', stack: 's' },
+    {
+      label: 'Skagerak (NOK)',
+      data: d.cashSkaArr,
+      backgroundColor: actBg('rgba(240,218,254,0.85)', 'rgba(244,114,182,0.40)'),
+      borderColor: actBorder('rgba(240,218,254,0.95)', 'rgba(244,114,182,0.85)'),
+      borderWidth: 1,
+      stack: 's'
+    },
+    {
+      label: 'BNP SEPA EUR (conv.)',
+      data: d.cashBnpArr,
+      backgroundColor: actBg('rgba(139,75,190,0.85)', 'rgba(168,85,247,0.40)'),
+      borderColor: actBorder('rgba(139,75,190,0.95)', 'rgba(168,85,247,0.85)'),
+      borderWidth: 1,
+      stack: 's'
+    },
+    {
+      label: 'PVNED EUR (conv.)',
+      data: d.cashPvnedArr,
+      backgroundColor: actBg('rgba(73,15,108,0.85)', 'rgba(109,40,217,0.40)'),
+      borderColor: actBorder('rgba(73,15,108,0.95)', 'rgba(109,40,217,0.85)'),
+      borderWidth: 1,
+      stack: 's'
+    },
   ]}, options: makeOpts(true, 'NOK') });
   makeChart('chart4', { type: 'bar', data: { labels, datasets: [
-    { label: 'DNB NOK', data: d.dnbNokArr, backgroundColor: 'rgba(30,208,231,0.85)', stack: 's' },
-    { label: 'DNB EUR (conv.)', data: d.dnbEurArr.map((v, i) => v + d.marexArr[i]), backgroundColor: 'rgba(190,251,255,0.7)', stack: 's' },
-    { label: 'Atradius EUR (conv.)', data: d.atraArr, backgroundColor: 'rgba(200,109,255,0.75)', stack: 's' },
-    { label: 'Cash (conv.)', data: d.cashTotalArr, backgroundColor: 'rgba(73,15,108,0.85)', stack: 's' },
+    {
+      label: 'DNB NOK',
+      data: d.dnbNokArr,
+      backgroundColor: actBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
+      borderColor: actBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
+      borderWidth: 1,
+      stack: 's'
+    },
+    {
+      label: 'DNB EUR (conv.)',
+      data: d.dnbEurArr.map((v, i) => v + d.marexArr[i]),
+      backgroundColor: actBg('rgba(190,251,255,0.70)', 'rgba(147,197,253,0.40)'),
+      borderColor: actBorder('rgba(190,251,255,0.90)', 'rgba(147,197,253,0.85)'),
+      borderWidth: 1,
+      stack: 's'
+    },
+    {
+      label: 'Atradius EUR (conv.)',
+      data: d.atraArr,
+      backgroundColor: actBg('rgba(200,109,255,0.75)', 'rgba(217,70,239,0.40)'),
+      borderColor: actBorder('rgba(200,109,255,0.90)', 'rgba(217,70,239,0.85)'),
+      borderWidth: 1,
+      stack: 's'
+    },
+    {
+      label: 'Cash (conv.)',
+      data: d.cashTotalArr,
+      backgroundColor: actBg('rgba(73,15,108,0.85)', 'rgba(109,40,217,0.40)'),
+      borderColor: actBorder('rgba(73,15,108,0.95)', 'rgba(109,40,217,0.85)'),
+      borderWidth: 1,
+      stack: 's'
+    },
   ]}, options: makeOpts(true, 'NOK') });
   const histDNB = computeHistoryDNB(fx);
   const histPeriods = Object.keys(histDNB).sort();
