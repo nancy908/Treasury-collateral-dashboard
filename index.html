@@ -1128,16 +1128,17 @@
 
   <!-- ═══ ROW 4: DNB COVENANT FORECAST ═══ -->
   <div class="panel panel-hero" style="grid-column: 1 / -1; margin-top: 1.5rem;">
-    <div class="panel-tag"><span class="forecast-badge">⟳ Forecast</span></div>
-    <div class="panel-title"><span class="dot" style="background:#FACC15"></span>DNB covenant forecast</div>
+    <div class="panel-tag"><span class="forecast-badge" style="background:rgba(30,208,231,0.12); color:#BEFBFF; border-color:rgba(30,208,231,0.3);">● Actual &amp; ⟳ Forecast</span></div>
+    <div class="panel-title"><span class="dot" style="background:#FACC15"></span>DNB covenant forecast · Actual &amp; Forecast</div>
     <div class="chart-wrap" style="height: 380px; position: relative;"><canvas id="chartCovenant"></canvas></div>
     <div class="legend" style="margin-top: 0.75rem; flex-wrap: wrap;">
       <div class="legend-item"><div class="legend-dot" style="background:rgba(30, 208, 231, 0.85)"></div>Group Liquidity (mNOK)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#EF4444"></div>Group Liquidity &lt; Cash Req. (Breach)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#10B981; height: 3px; border-radius: 0; width: 14px; border-top: 2px dashed #10B981;"></div>Group Cash Requirement (125m NOK)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#FACC15; height: 3.5px; border-radius: 0; width: 14px;"></div>Covenant Ratio (%)</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#FF5A5A; height: 3px; border-radius: 0; width: 14px; border-top: 2px dashed #FF5A5A;"></div>Covenant Ratio Threshold (80%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FACC15; height: 3.5px; border-radius: 0; width: 14px;"></div>Borrowing base (%)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FF5A5A; height: 3px; border-radius: 0; width: 14px; border-top: 2px dashed #FF5A5A;"></div>Borrowing base threshold (80%)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#EF4444; width: 8px; height: 8px; border-radius: 50%;"></div>Ratio Breach (&gt;80%)</div>
+      <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#1ED0E7;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid (Bar/Line): Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(56,189,248,0.4);border:1px dashed #38BDF8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter / Dashed: Forecast</div>
     </div>
   </div>
 
@@ -2369,35 +2370,47 @@ function update() {
       const item = COVENANT_DATA[p];
       if (!item || item.liquidity === null || item.liquidity === undefined) return 'rgba(30, 208, 231, 0.75)';
       const req = item.requirement ?? 125000;
-      return item.liquidity < req ? 'rgba(239, 68, 68, 0.85)' : 'rgba(30, 208, 231, 0.75)';
+      const isBreach = item.liquidity < req;
+      const isActual = p <= asOfYM;
+      if (isBreach) {
+        return isActual ? 'rgba(239, 68, 68, 0.85)' : 'rgba(239, 68, 68, 0.45)';
+      }
+      return isActual ? 'rgba(30, 208, 231, 0.85)' : 'rgba(56, 189, 248, 0.40)';
     });
 
     const barBorderColors = covPeriods.map(p => {
       const item = COVENANT_DATA[p];
       if (!item || item.liquidity === null || item.liquidity === undefined) return 'rgba(30, 208, 231, 1)';
       const req = item.requirement ?? 125000;
-      return item.liquidity < req ? '#EF4444' : 'rgba(30, 208, 231, 1)';
+      const isBreach = item.liquidity < req;
+      const isActual = p <= asOfYM;
+      if (isBreach) {
+        return isActual ? '#EF4444' : 'rgba(239, 68, 68, 0.85)';
+      }
+      return isActual ? 'rgba(30, 208, 231, 0.95)' : 'rgba(56, 189, 248, 0.85)';
     });
 
     const ratioPointColors = covPeriods.map(p => {
       const item = COVENANT_DATA[p];
       if (!item || item.ratio === null || item.ratio === undefined) return '#FACC15';
       const th = item.threshold ?? 80;
-      return item.ratio > th ? '#EF4444' : '#FACC15';
+      if (item.ratio > th) return '#EF4444';
+      return p <= asOfYM ? '#EAB308' : '#FDE047';
     });
 
     const ratioPointRadii = covPeriods.map(p => {
       const item = COVENANT_DATA[p];
       if (!item || item.ratio === null || item.ratio === undefined) return 0;
       const th = item.threshold ?? 80;
-      return item.ratio > th ? 6 : 2.5;
+      return item.ratio > th ? 6 : 3;
     });
 
     const ratioPointBorderColors = covPeriods.map(p => {
       const item = COVENANT_DATA[p];
       if (!item || item.ratio === null || item.ratio === undefined) return '#FACC15';
       const th = item.threshold ?? 80;
-      return item.ratio > th ? '#FFFFFF' : '#FACC15';
+      if (item.ratio > th) return '#FFFFFF';
+      return p <= asOfYM ? '#EAB308' : '#FDE047';
     });
 
     const validRatios = ratioData.filter(v => v !== null);
@@ -2431,10 +2444,10 @@ function update() {
             order: 1
           },
           {
-            label: 'Covenant Ratio',
+            label: 'Borrowing base (%)',
             data: ratioData,
             type: 'line',
-            borderColor: '#FACC15',
+            borderColor: '#EAB308',
             borderWidth: 3.5,
             tension: 0.2,
             fill: false,
@@ -2444,10 +2457,14 @@ function update() {
             pointBorderColor: ratioPointBorderColors,
             pointBorderWidth: 1.5,
             yAxisID: 'yRatio',
-            order: 0
+            order: 0,
+            segment: {
+              borderColor: ctx => covPeriods[ctx.p1DataIndex] > asOfYM ? '#FDE047' : '#EAB308',
+              borderDash: ctx => covPeriods[ctx.p1DataIndex] > asOfYM ? [6, 4] : undefined,
+            }
           },
           {
-            label: 'Covenant Ratio Threshold',
+            label: 'Borrowing base threshold',
             data: thresholdData,
             type: 'line',
             borderColor: '#FF5A5A',
@@ -2475,23 +2492,29 @@ function update() {
             titleFont: { family: 'Poppins', size: 11, weight: '600' },
             bodyFont: { family: 'Poppins', size: 11 },
             callbacks: {
+              title: ctx => {
+                const p = covPeriods[ctx[0].dataIndex];
+                const type = p <= asOfYM ? 'Actual' : 'Forecast';
+                return `${p} (${type})`;
+              },
               label: ctx => {
                 const p = covPeriods[ctx.dataIndex];
                 const item = COVENANT_DATA[p];
+                const type = p <= asOfYM ? 'Actual' : 'Forecast';
                 if (ctx.dataset.label === 'Group Liquidity') {
                   const val = ctx.raw !== null ? (ctx.raw / 1000).toFixed(1) + 'm NOK (' + Math.round(ctx.raw).toLocaleString() + ' kNOK)' : '-';
                   const breach = (item && item.liquidity < item.requirement) ? '  ⚠️ BREACH (< 125m Req)' : '';
-                  return ` ${ctx.dataset.label}: ${val}${breach}`;
+                  return ` ${ctx.dataset.label} (${type}): ${val}${breach}`;
                 }
                 if (ctx.dataset.label === 'Group Cash Requirement') {
                   return ` ${ctx.dataset.label}: ${(ctx.raw / 1000).toFixed(0)}m NOK`;
                 }
-                if (ctx.dataset.label === 'Covenant Ratio') {
+                if (ctx.dataset.label.includes('Borrowing base') && !ctx.dataset.label.toLowerCase().includes('threshold')) {
                   const val = ctx.raw !== null ? ctx.raw.toFixed(2) + '%' : '-';
                   const breach = (item && item.ratio > item.threshold) ? `  ⚠️ BREACH (> ${item.threshold}%)` : '';
-                  return ` ${ctx.dataset.label}: ${val}${breach}`;
+                  return ` ${ctx.dataset.label} (${type}): ${val}${breach}`;
                 }
-                if (ctx.dataset.label === 'Covenant Ratio Threshold') {
+                if (ctx.dataset.label.toLowerCase().includes('threshold')) {
                   return ` ${ctx.dataset.label}: ${ctx.raw}%`;
                 }
                 return ` ${ctx.dataset.label}: ${ctx.raw}`;
@@ -2534,7 +2557,7 @@ function update() {
             },
             title: {
               display: true,
-              text: 'Covenant Ratio (%)',
+              text: 'Borrowing base (%)',
               color: '#FACC15',
               font: { family: 'Poppins', size: 10, weight: '600' }
             },
