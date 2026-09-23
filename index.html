@@ -1202,7 +1202,7 @@
     <div class="simulation-views-bar-left">
       <span class="simulation-views-dot"></span>
       <span class="simulation-views-title">Simulation cash position</span>
-      <span class="simulation-views-subtitle">Assume +100,000,000 NOK more funding · Lifted Cash After Collateral &amp; Guarantee Line</span>
+      <span class="simulation-views-subtitle">Assume +100,000,000 NOK more funding · Lifted Cash After Collateral</span>
     </div>
     <div class="simulation-views-bar-right">
       <span id="simulation-views-badge" class="simulation-views-badge">
@@ -1220,7 +1220,7 @@
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB Guarantee</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-atradius)"></div>Atradius EUR Guarantee (conv.)</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--c-limit); opacity:.7"></div>DNB+Atradius Guarantee Line (+100m)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-limit); opacity:.7"></div>DNB+Atradius Guarantee Line</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash-after)"></div>Cash after collateral (+100m)</div>
         <div class="legend-item"><div class="legend-dot" style="background:#EF4444; width: 8px; height: 8px; border-radius: 50%;"></div>Below Covenant (&lt; 125m)</div>
         <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Covenant</div>
@@ -1878,7 +1878,7 @@ function update() {
 
   // --- Simulation Chart: Simulation cash position (+100,000,000 NOK funding) ---
   const simCashAfterArr = cashAfterArr.map(v => v !== null ? v + 100000 : null);
-  const simCreditLimitArr = d.creditLimitArr.map(v => v + 100000);
+  const simCreditLimitArr = d.creditLimitArr;
   const peakSimCash = Math.max(...simCashAfterArr.filter(x => x !== null));
   const peakSimLimit = Math.max(...simCreditLimitArr);
 
@@ -1970,7 +1970,7 @@ function update() {
       stack: 's',
       yAxisID: 'y'
     },
-    { label: 'DNB+Atradius Guarantee Line (+100m)', data: simCreditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit' },
+    { label: 'DNB+Atradius Guarantee Line', data: simCreditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit' },
     {
       label: 'Cash after collateral (+100m)',
       data: simCashAfterArr,
