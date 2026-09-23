@@ -536,6 +536,82 @@
     font-weight: 600;
   }
 
+  /* Simulation Cash Position Collapsible Bar & Container */
+  .simulation-views-bar {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 1.25rem;
+    background: #080b10;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+    margin-top: 1.5rem;
+  }
+  .simulation-views-bar:hover {
+    background: #11151c;
+  }
+  .simulation-views-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+  .simulation-views-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10B981;
+    flex-shrink: 0;
+  }
+  .simulation-views-title {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--tibber-white);
+  }
+  .simulation-views-subtitle {
+    font-size: 0.6rem;
+    color: #8A909A;
+    letter-spacing: 0.04em;
+  }
+  .simulation-views-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #10B981;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 0.2rem 0.65rem;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .simulation-views-bar:hover .simulation-views-badge {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+  .simulation-views-grid {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+    transition: all 0.3s ease;
+  }
+  .simulation-views-grid.collapsed {
+    display: none;
+  }
+  @media (max-width: 1100px) {
+    .simulation-views-subtitle { display: none; }
+  }
+
   /* Supporting Views Collapsible Bar & Container */
   .supporting-views-bar {
     grid-column: 1 / -1;
@@ -785,7 +861,7 @@
     </svg>
     <div>
       <div class="logo-text">tibber <span>collateral</span></div>
-      <div class="header-sub">Forecast - History - Utilization - As of: 2026-09-22</div>
+      <div class="header-sub">Forecast - History - Utilization - As of: 2026-09-23</div>
     </div>
   </div>
   <div class="header-info" id="updateInfo">
@@ -1116,6 +1192,38 @@
         <div class="legend-item" onclick="toggleDevDataset(1)" style="cursor: pointer;"><div class="legend-dot" style="background:#C86DFF; height: 3px; border-radius: 0; width: 14px; border-top: 2px dashed #C86DFF;"></div>Forecast Cash Position (NOK)</div>
         <div class="legend-item" onclick="toggleDevDataset(2)" style="cursor: pointer;"><div class="legend-dot" style="background:rgba(16, 185, 129, 0.35); border: 1px solid #10B981;"></div>Positive Dev</div>
         <div class="legend-item" onclick="toggleDevDataset(2)" style="cursor: pointer;"><div class="legend-dot" style="background:rgba(239, 68, 68, 0.35); border: 1px solid #EF4444;"></div>Negative Dev</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ROW 6: SIMULATION CASH POSITION (COLLAPSIBLE) ═══ -->
+  <div class="simulation-views-bar" onclick="toggleSimulationViews()">
+    <div class="simulation-views-bar-left">
+      <span class="simulation-views-dot"></span>
+      <span class="simulation-views-title">Simulation cash position</span>
+      <span class="simulation-views-subtitle">Assume +100,000,000 NOK more funding · Lifted Cash After Collateral &amp; Guarantee Line</span>
+    </div>
+    <div class="simulation-views-bar-right">
+      <span id="simulation-views-badge" class="simulation-views-badge">
+        <span id="simulation-views-icon">＋</span>
+        <span id="simulation-views-text">Expand (1 chart)</span>
+      </span>
+    </div>
+  </div>
+
+  <div id="simulation-views-container" class="simulation-views-grid collapsed">
+    <div class="panel panel-hero" style="margin-top: 0; grid-column: 1 / -1;">
+      <div class="panel-tag">Simulation <span class="forecast-badge" style="background:rgba(30,208,231,0.12); color:#BEFBFF; border-color:rgba(30,208,231,0.3);">● Actual &amp; ⟳ Forecast</span></div>
+      <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>Simulation: DNB + Atradius EUR vs Guarantee Line &amp; Cash after collateral (+100m NOK funding) · Actual &amp; Forecast</div>
+      <div class="chart-wrap chart-wrap-hero"><canvas id="chartSimulation"></canvas></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB Guarantee</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-atradius)"></div>Atradius EUR Guarantee (conv.)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-limit); opacity:.7"></div>DNB+Atradius Guarantee Line (+100m)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash-after)"></div>Cash after collateral (+100m)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#EF4444; width: 8px; height: 8px; border-radius: 50%;"></div>Below Covenant (&lt; 125m)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Covenant</div>
+        <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#1ED0E7;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid (Bar/Line): Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(56,189,248,0.4);border:1px dashed #38BDF8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter / Dashed: Forecast</div>
       </div>
     </div>
   </div>
@@ -1766,6 +1874,126 @@ function update() {
     },
     { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
   ]}, options: chart2Opts });
+
+  // --- Simulation Chart: Simulation cash position (+100,000,000 NOK funding) ---
+  const simCashAfterArr = cashAfterArr.map(v => v !== null ? v + 100000 : null);
+  const simCreditLimitArr = d.creditLimitArr.map(v => v + 100000);
+  const peakSimCash = Math.max(...simCashAfterArr.filter(x => x !== null));
+  const peakSimLimit = Math.max(...simCreditLimitArr);
+
+  const simCashPointColors = simCashAfterArr.map((v, i) => {
+    if (v !== null && v < 125000) return '#EF4444';
+    return labels[i] > asOfYM ? '#34D399' : '#10B981';
+  });
+  const simCashPointBorderColors = simCashAfterArr.map((v, i) => {
+    if (v !== null && v < 125000) return '#FFFFFF';
+    return labels[i] > asOfYM ? '#34D399' : '#10B981';
+  });
+  const simCashPointRadii = simCashAfterArr.map(v => (v !== null && v < 125000) ? 6 : 4);
+  const simCashPointHoverRadii = simCashAfterArr.map(v => (v !== null && v < 125000) ? 8 : 6);
+  const simCashPointBorderWidths = simCashAfterArr.map(v => (v !== null && v < 125000) ? 2 : 1);
+
+  const simChartOpts = makeOpts(true, 'NOK');
+  simChartOpts.plugins.datalabels = {
+    display: ctx => {
+      if (ctx.datasetIndex !== 1) return false;
+      const dnb = d.dnbTotalArr[ctx.dataIndex];
+      const atra = d.atraArr[ctx.dataIndex];
+      return (dnb + atra) > 0;
+    },
+    formatter: (_, ctx) => {
+      const total = d.dnbTotalArr[ctx.dataIndex] + d.atraArr[ctx.dataIndex];
+      return (total / 1000).toFixed(2) + 'm';
+    },
+    anchor: 'end',
+    align: 'end',
+    offset: 4,
+    color: '#ffffff',
+    font: { family: 'Poppins', size: 10, weight: '700' },
+  };
+
+  simChartOpts.plugins.tooltip = {
+    backgroundColor: '#16191D',
+    borderColor: '#1ED0E7',
+    borderWidth: 1,
+    titleFont: { family: 'Poppins', size: 11, weight: '600' },
+    bodyFont: { family: 'Poppins', size: 11 },
+    callbacks: {
+      title: ctx => {
+        const p = ctx[0].label;
+        const type = p <= asOfYM ? 'Actual' : 'Forecast';
+        return `${p} (${type}) · Simulation (+100m NOK)`;
+      },
+      label: ctx => {
+        const val = ctx.raw;
+        if (val === null || val === undefined) return ` ${ctx.dataset.label}: -`;
+        const formatted = `${Math.round(val).toLocaleString()} kNOK (${(val / 1000).toFixed(1)}m)`;
+        const p = ctx.label;
+        const type = p <= asOfYM ? 'Actual' : 'Forecast';
+        if (ctx.dataset.label.includes('Cash after collateral')) {
+          const breachNote = val < 125000 ? '  ⚠️ Below Covenant (< 125m)' : '  ✅ Above Covenant';
+          return ` ${ctx.dataset.label} (${type}): ${formatted}${breachNote}`;
+        }
+        return ` ${ctx.dataset.label}: ${formatted}`;
+      }
+    }
+  };
+
+  simChartOpts.scales = {
+    x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', maxRotation: 45 }, stacked: true, offset: false },
+    y: {
+      type: 'linear', display: true, position: 'left', stacked: true,
+      grid: { color: 'rgba(255,255,255,0.04)' },
+      ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', callback: v => (v/1000).toFixed(0) + 'm' },
+      title: { display: false },
+      suggestedMax: Math.max(peakStack2, peakSimCash, peakSimLimit) * 1.1
+    }
+  };
+
+  makeChart('chartSimulation', { type: 'bar', data: { labels, datasets: [
+    {
+      label: 'DNB Guarantee',
+      data: d.dnbTotalArr,
+      backgroundColor: actBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
+      borderColor: actBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
+      borderWidth: 1,
+      stack: 's',
+      yAxisID: 'y'
+    },
+    {
+      label: 'Atradius EUR Guarantee',
+      data: d.atraArr,
+      backgroundColor: actBg('rgba(200,109,255,0.75)', 'rgba(217,70,239,0.40)'),
+      borderColor: actBorder('rgba(200,109,255,0.90)', 'rgba(217,70,239,0.85)'),
+      borderWidth: 1,
+      stack: 's',
+      yAxisID: 'y'
+    },
+    { label: 'DNB+Atradius Guarantee Line (+100m)', data: simCreditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit' },
+    {
+      label: 'Cash after collateral (+100m)',
+      data: simCashAfterArr,
+      type: 'line',
+      borderColor: '#10B981',
+      backgroundColor: 'rgba(16,185,129,0.05)',
+      fill: false,
+      tension: 0.3,
+      pointRadius: simCashPointRadii,
+      pointHoverRadius: simCashPointHoverRadii,
+      pointBackgroundColor: simCashPointColors,
+      pointBorderColor: simCashPointBorderColors,
+      pointBorderWidth: simCashPointBorderWidths,
+      borderWidth: 4.5,
+      datalabels: { display: false },
+      yAxisID: 'y',
+      stack: 'cash',
+      segment: {
+        borderColor: ctx => labels[ctx.p1DataIndex] > asOfYM ? '#34D399' : '#10B981',
+        borderDash: ctx => labels[ctx.p1DataIndex] > asOfYM ? [8, 4] : undefined,
+      }
+    },
+    { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
+  ]}, options: simChartOpts });
 
   const chart6Opts = makeOpts(false, 'NOK');
   chart6Opts.plugins.datalabels = { display: ctx => ctx.dataset.data[ctx.dataIndex] > 0, formatter: v => (v / 1000).toFixed(2) + 'm', anchor: 'end', align: 'end', offset: 2, color: '#ffffff', font: { family: 'Poppins', size: 9, weight: '600' }, };
@@ -2692,6 +2920,28 @@ function toggleCashHistory() {
     container.classList.add('collapsed');
     if (icon) icon.textContent = '＋';
     if (text) text.textContent = 'Expand (2 charts)';
+  }
+}
+
+function toggleSimulationViews() {
+  const container = document.getElementById('simulation-views-container');
+  const icon = document.getElementById('simulation-views-icon');
+  const text = document.getElementById('simulation-views-text');
+  if (!container) return;
+
+  const isCollapsed = container.classList.contains('collapsed');
+  if (isCollapsed) {
+    container.classList.remove('collapsed');
+    if (icon) icon.textContent = '−';
+    if (text) text.textContent = 'Fold / Collapse';
+    setTimeout(() => {
+      const c = Chart.getChart('chartSimulation') || charts['chartSimulation'];
+      if (c) c.resize();
+    }, 60);
+  } else {
+    container.classList.add('collapsed');
+    if (icon) icon.textContent = '＋';
+    if (text) text.textContent = 'Expand (1 chart)';
   }
 }
 
