@@ -2429,69 +2429,73 @@ function update() {
     const weAreHerePlugin = {
       id: 'weAreHerePlugin',
       afterDatasetsDraw(chart) {
-        const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+        const { ctx, scales: { x, yLiquidity } } = chart;
         const targetIdx = covPeriods.indexOf(latestActualPeriod);
         if (targetIdx === -1) return;
 
         const xPos = x.getPixelForTick(targetIdx);
         if (xPos === undefined || xPos === null) return;
 
+        const item = COVENANT_DATA[latestActualPeriod];
+        const barVal = (item && item.liquidity !== null && item.liquidity !== undefined) ? item.liquidity : 402506.7;
+        const yBarTop = yLiquidity.getPixelForValue(barVal);
+        if (yBarTop === undefined || yBarTop === null) return;
+
         ctx.save();
 
-        // 1. Badge metrics & positioning
-        const text = '📍 We are here';
-        ctx.font = '600 11px Poppins, sans-serif';
+        // 1. Text & pill dimensions
+        const text = 'We are here';
+        ctx.font = "600 11px 'Poppins', sans-serif";
         const textMetrics = ctx.measureText(text);
-        const badgePadX = 10;
-        const badgeHeight = 22;
-        const badgeWidth = textMetrics.width + badgePadX * 2;
-        const badgeX = xPos - badgeWidth / 2;
-        const badgeY = top + 6;
-        const radius = 6;
-        const arrowHeight = 5;
+        const pillPadX = 8;
+        const pillHeight = 20;
+        const pillWidth = textMetrics.width + pillPadX * 2;
 
-        // 2. Subtle vertical demarcation guide line down to x-axis
-        ctx.beginPath();
-        ctx.setLineDash([4, 3]);
-        ctx.lineWidth = 1.5;
-        ctx.strokeStyle = 'rgba(30, 208, 231, 0.45)';
-        ctx.moveTo(xPos, badgeY + badgeHeight + arrowHeight);
-        ctx.lineTo(xPos, bottom);
-        ctx.stroke();
+        // Arrow dimensions
+        const arrowHeight = 14;
+        const arrowHeadHeight = 6;
+        const arrowHeadWidth = 9;
+        const arrowStemWidth = 2.5;
 
-        // 3. Badge background with subtle cyan glow
-        ctx.setLineDash([]);
-        ctx.shadowColor = 'rgba(30, 208, 231, 0.35)';
-        ctx.shadowBlur = 8;
-        ctx.fillStyle = '#0b0f17';
+        // Position pill right above arrow
+        const arrowBottom = yBarTop - 5; // arrow points directly at the top of the bar
+        const arrowTop = arrowBottom - arrowHeight;
+        const pillY = arrowTop - pillHeight - 2;
+        const pillX = xPos - pillWidth / 2;
+        const radius = 5;
+
+        // 2. Pill background
+        ctx.fillStyle = 'rgba(11, 15, 23, 0.90)';
         ctx.beginPath();
         if (ctx.roundRect) {
-          ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, radius);
+          ctx.roundRect(pillX, pillY, pillWidth, pillHeight, radius);
         } else {
-          ctx.rect(badgeX, badgeY, badgeWidth, badgeHeight);
+          ctx.rect(pillX, pillY, pillWidth, pillHeight);
         }
         ctx.fill();
 
-        // 4. Badge border
-        ctx.shadowBlur = 0;
+        // 3. Pill border
         ctx.lineWidth = 1.5;
         ctx.strokeStyle = '#1ED0E7';
         ctx.stroke();
 
-        // 5. Downward pointer arrow
-        ctx.beginPath();
-        ctx.fillStyle = '#1ED0E7';
-        ctx.moveTo(xPos - 5, badgeY + badgeHeight);
-        ctx.lineTo(xPos + 5, badgeY + badgeHeight);
-        ctx.lineTo(xPos, badgeY + badgeHeight + arrowHeight);
-        ctx.closePath();
-        ctx.fill();
-
-        // 6. Badge text
+        // 4. Pill text
         ctx.fillStyle = '#BEFBFF';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(text, xPos, badgeY + badgeHeight / 2 + 1);
+        ctx.fillText(text, xPos, pillY + pillHeight / 2 + 0.5);
+
+        // 5. Downward arrow (stem + head)
+        ctx.fillStyle = '#1ED0E7';
+        // Stem
+        ctx.fillRect(xPos - arrowStemWidth / 2, arrowTop, arrowStemWidth, arrowHeight - arrowHeadHeight);
+        // Head
+        ctx.beginPath();
+        ctx.moveTo(xPos - arrowHeadWidth / 2, arrowBottom - arrowHeadHeight);
+        ctx.lineTo(xPos + arrowHeadWidth / 2, arrowBottom - arrowHeadHeight);
+        ctx.lineTo(xPos, arrowBottom);
+        ctx.closePath();
+        ctx.fill();
 
         ctx.restore();
       }
