@@ -1138,6 +1138,7 @@
       <div class="legend-item"><div class="legend-dot" style="background:#FACC15; height: 3.5px; border-radius: 0; width: 14px;"></div>Borrowing base (%)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#FF5A5A; height: 3px; border-radius: 0; width: 14px; border-top: 2px dashed #FF5A5A;"></div>Borrowing base threshold (80%)</div>
       <div class="legend-item"><div class="legend-dot" style="background:#EF4444; width: 8px; height: 8px; border-radius: 50%;"></div>Ratio Breach (&gt;80%)</div>
+      <div class="legend-item" style="color: #BEFBFF; font-weight: 600;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#1ED0E7;margin-right:4px;"></span>📍 We are here (2026-08)</div>
       <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#1ED0E7;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid (Bar/Line): Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(56,189,248,0.4);border:1px dashed #38BDF8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter / Dashed: Forecast</div>
     </div>
   </div>
@@ -2422,6 +2423,80 @@ function update() {
     const validRatios = ratioData.filter(v => v !== null);
     const maxRatio = validRatios.length > 0 ? Math.max(...validRatios) : 100;
 
+    const actualPeriods = covPeriods.filter(p => isCovActual(p));
+    const latestActualPeriod = actualPeriods.length > 0 ? actualPeriods[actualPeriods.length - 1] : '2026-08';
+
+    const weAreHerePlugin = {
+      id: 'weAreHerePlugin',
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+        const targetIdx = covPeriods.indexOf(latestActualPeriod);
+        if (targetIdx === -1) return;
+
+        const xPos = x.getPixelForTick(targetIdx);
+        if (xPos === undefined || xPos === null) return;
+
+        ctx.save();
+
+        // 1. Badge metrics & positioning
+        const text = '📍 We are here';
+        ctx.font = '600 11px Poppins, sans-serif';
+        const textMetrics = ctx.measureText(text);
+        const badgePadX = 10;
+        const badgeHeight = 22;
+        const badgeWidth = textMetrics.width + badgePadX * 2;
+        const badgeX = xPos - badgeWidth / 2;
+        const badgeY = top + 6;
+        const radius = 6;
+        const arrowHeight = 5;
+
+        // 2. Subtle vertical demarcation guide line down to x-axis
+        ctx.beginPath();
+        ctx.setLineDash([4, 3]);
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(30, 208, 231, 0.45)';
+        ctx.moveTo(xPos, badgeY + badgeHeight + arrowHeight);
+        ctx.lineTo(xPos, bottom);
+        ctx.stroke();
+
+        // 3. Badge background with subtle cyan glow
+        ctx.setLineDash([]);
+        ctx.shadowColor = 'rgba(30, 208, 231, 0.35)';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = '#0b0f17';
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, radius);
+        } else {
+          ctx.rect(badgeX, badgeY, badgeWidth, badgeHeight);
+        }
+        ctx.fill();
+
+        // 4. Badge border
+        ctx.shadowBlur = 0;
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#1ED0E7';
+        ctx.stroke();
+
+        // 5. Downward pointer arrow
+        ctx.beginPath();
+        ctx.fillStyle = '#1ED0E7';
+        ctx.moveTo(xPos - 5, badgeY + badgeHeight);
+        ctx.lineTo(xPos + 5, badgeY + badgeHeight);
+        ctx.lineTo(xPos, badgeY + badgeHeight + arrowHeight);
+        ctx.closePath();
+        ctx.fill();
+
+        // 6. Badge text
+        ctx.fillStyle = '#BEFBFF';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, xPos, badgeY + badgeHeight / 2 + 1);
+
+        ctx.restore();
+      }
+    };
+
     makeChart('chartCovenant', {
       type: 'bar',
       data: {
@@ -2531,7 +2606,11 @@ function update() {
         scales: {
           x: {
             grid: { color: 'rgba(255,255,255,0.04)' },
-            ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', maxRotation: 45 }
+            ticks: {
+              font: ctx => (covPeriods[ctx.index] === latestActualPeriod ? { family: 'Poppins', size: 10, weight: '700' } : { family: 'Poppins', size: 10 }),
+              color: ctx => (covPeriods[ctx.index] === latestActualPeriod ? '#1ED0E7' : '#686C73'),
+              maxRotation: 45
+            }
           },
           yLiquidity: {
             type: 'linear',
@@ -2571,7 +2650,8 @@ function update() {
             suggestedMax: Math.ceil(maxRatio * 1.15)
           }
         }
-      }
+      },
+      plugins: [weAreHerePlugin]
     });
   }
 
