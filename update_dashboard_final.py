@@ -1533,13 +1533,16 @@ def parse_covenant_csv(csv_path):
             liquidity = parse_amt_knok(row[10] if len(row) > 10 else "")
             threshold = parse_pct(row[11] if len(row) > 11 else "", 80.0)
             requirement = parse_amt_knok(row[12] if len(row) > 12 else "", 125000.0)
+            tnas_ar = row[2].strip() if len(row) > 2 else ""
+            is_actual = bool(tnas_ar and tnas_ar != '-')
 
             data[period] = {
                 'ratio': ratio,
                 'liquidity': round(liquidity, 1) if liquidity is not None else None,
                 'threshold': threshold if threshold is not None else 80.0,
                 'requirement': round(requirement, 1) if requirement is not None else 125000.0,
-                'date': date_str
+                'date': date_str,
+                'is_actual': is_actual
             }
     return data
 
