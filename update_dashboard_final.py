@@ -636,8 +636,8 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
     fx_rate = collateral_data['fx_rate']
     limits = collateral_data['limits']
 
-    as_of_period = collateral_data['as_of_date'][:7] if collateral_data['as_of_date'] else ""
-    cash_coll_today = cash_collateral.get(as_of_period, 0.0) if as_of_period else 0.0
+    # Cash collateral baseline month is 2026-06 (matching Panel 2B)
+    cash_coll_baseline = cash_collateral.get('2026-06', 41638.0)
 
     cash_after_collateral = {}
     for period, cash_pos in monthly_cash.items():
@@ -651,7 +651,7 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
         limit = limits.get(period, 200000.0)
 
         excess = max(0.0, utilization - limit)
-        coll_increase = cash_collateral.get(period, 0.0) - cash_coll_today
+        coll_increase = cash_collateral.get(period, 0.0) - cash_coll_baseline
 
         cash_after_collateral[period] = cash_pos - excess - coll_increase
 
@@ -1104,7 +1104,8 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
             "Cash After Collateral"
         ]
         
-        cash_coll_today = cash_collateral.get(as_of_period, 0.0) if as_of_period else 0.0
+        # Cash collateral baseline month is 2026-06 (matching Panel 2B)
+        cash_coll_baseline = cash_collateral.get('2026-06', 41638.0)
         
         for r_idx, label in enumerate(row_labels):
             row_num = r_idx + 1
@@ -1137,7 +1138,7 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
                 excess = max(0.0, utilization - limit)
                 
                 cash_coll = cash_collateral.get(p_ym, 0.0)
-                coll_change = cash_coll - cash_coll_today
+                coll_change = cash_coll - cash_coll_baseline
                 
                 # Formula matching HTML: cash_after = cash_pos - excess - coll_change
                 cash_after = cash_pos - excess - coll_change
