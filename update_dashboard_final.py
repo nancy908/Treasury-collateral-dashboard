@@ -469,6 +469,7 @@ def parse_fpa_csv(csv_path):
                 if re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
                     fpa_data[date_str] = {
                         'BU26': get_col_val(row, ['bu26', 'budget26']),
+                        'BU27': get_col_val(row, ['bu27base', 'bu27', 'budget27base', 'budget27']),
                         'FC1.5': get_col_val(row, ['fc15', 'fc1.5']),
                         'FC1.7': get_col_val(row, ['fc17', 'fc1.7']),
                         'Actual': get_col_val(row, ['actual', 'actuals']),
@@ -519,25 +520,25 @@ def bootstrap_cash_flow(treasury, fpa, current_month=None):
             if val > 0:
                 monthly_cash[month_str] = val
                 cash_sources[month_str] = "WCFF"
+
+        # Rule (3): From 2026-12 and onwards -> use BU27 Base figures
+        elif month_str >= '2026-12':
+            val = values.get('BU27', 0.0)
+            if val > 0:
+                monthly_cash[month_str] = val
+                cash_sources[month_str] = "BU27 Base"
+            else:
+                val = values.get('FC1.7', 0.0) or values.get('FC1.5', 0.0) or values.get('BU26', 0.0)
+                if val > 0:
+                    monthly_cash[month_str] = val
+                    cash_sources[month_str] = "FC 1.5" if values.get('FC1.5') else "Budget26"
                 
-        # Rule (3): Future months in 2026 -> use BU26 from CFF FP&A (rename to Budget26)
+        # Rule (4): Other future months in 2026 (before 2026-12) -> use BU26 from CFF FP&A (rename to Budget26)
         elif month_str.startswith('2026-'):
             val = values.get('BU26', 0.0)
             if val > 0:
                 monthly_cash[month_str] = val
                 cash_sources[month_str] = "Budget26"
-                
-        # Rule (4): Future months in 2027 and later -> use FC 1.7 from CFF FP&A (fallback to FC 1.5)
-        elif month_str >= '2027-01':
-            val = values.get('FC1.7', 0.0)
-            if val > 0:
-                monthly_cash[month_str] = val
-                cash_sources[month_str] = "FC 1.7"
-            else:
-                val = values.get('FC1.5', 0.0)
-                if val > 0:
-                    monthly_cash[month_str] = val
-                    cash_sources[month_str] = "FC 1.5"
 
     return monthly_cash, cash_sources
 
