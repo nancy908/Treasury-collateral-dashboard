@@ -1202,7 +1202,7 @@
     <div class="simulation-views-bar-left">
       <span class="simulation-views-dot"></span>
       <span class="simulation-views-title">Simulation cash position</span>
-      <span class="simulation-views-subtitle">Assume +100,000,000 NOK more funding · Lifted Cash After Collateral</span>
+      <span class="simulation-views-subtitle">Assume OKR investments · Cash After Collateral</span>
     </div>
     <div class="simulation-views-bar-right">
       <span id="simulation-views-badge" class="simulation-views-badge">
@@ -1215,13 +1215,13 @@
   <div id="simulation-views-container" class="simulation-views-grid collapsed">
     <div class="panel panel-hero" style="margin-top: 0; grid-column: 1 / -1;">
       <div class="panel-tag">Simulation <span class="forecast-badge" style="background:rgba(30,208,231,0.12); color:#BEFBFF; border-color:rgba(30,208,231,0.3);">● Actual &amp; ⟳ Forecast</span></div>
-      <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>Simulation: DNB + Atradius EUR vs Guarantee Line &amp; Cash after collateral (+100m NOK funding) · Actual &amp; Forecast</div>
+      <div class="panel-title"><span class="dot" style="background:var(--tibber-blue)"></span>Simulation: DNB + Atradius EUR vs Guarantee Line &amp; Cash after collateral (OKR investments) · Actual &amp; Forecast</div>
       <div class="chart-wrap chart-wrap-hero"><canvas id="chartSimulation"></canvas></div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-dnb-nok)"></div>DNB Guarantee</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-atradius)"></div>Atradius EUR Guarantee (conv.)</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--c-limit); opacity:.7"></div>DNB+Atradius Guarantee Line</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash-after)"></div>Cash after collateral (+100m)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--c-cash-after)"></div>Cash after collateral (OKR investments)</div>
         <div class="legend-item"><div class="legend-dot" style="background:#EF4444; width: 8px; height: 8px; border-radius: 50%;"></div>Below Covenant (&lt; 125m)</div>
         <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>Covenant</div>
         <div class="legend-item" style="margin-left:auto; font-size:10px; color:#94a3b8;"><span style="display:inline-block;width:9px;height:9px;background:#1ED0E7;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Solid (Bar/Line): Actual | <span style="display:inline-block;width:9px;height:9px;background:rgba(56,189,248,0.4);border:1px dashed #38BDF8;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Lighter / Dashed: Forecast</div>
@@ -1446,6 +1446,38 @@ const CASH_AFTER_COLLATERAL = {
   "2027-09": 316402,
   "2027-10": 229251,
   "2027-11": 280852,
+  "2027-12": 621363
+};
+const SIM_CASH_OVERRIDES = {
+  "2026-09": 240017,
+  "2026-10": 261757,
+  "2026-11": 364220,
+  "2026-12": 658107
+};
+const SIM_CASH_AFTER_COLLATERAL = {
+  "2026-01": 479429,
+  "2026-02": 876436,
+  "2026-03": 942323,
+  "2026-04": 697984,
+  "2026-05": 806291,
+  "2026-06": 548217,
+  "2026-07": 480289,
+  "2026-08": 352982,
+  "2026-09": 146375,
+  "2026-10": 82793,
+  "2026-11": 114942,
+  "2026-12": 355266,
+  "2027-01": 480202,
+  "2027-02": 756401,
+  "2027-03": 785507,
+  "2027-04": 745445,
+  "2027-05": 615126,
+  "2027-06": 475944,
+  "2027-07": 405034,
+  "2027-08": 346135,
+  "2027-09": 316403,
+  "2027-10": 229252,
+  "2027-11": 280853,
   "2027-12": 621363
 };
 const CREDIT_LIMIT = {
@@ -1840,8 +1872,38 @@ function update() {
     { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
   ]}, options: chart2Opts });
 
-  // --- Simulation Chart: Simulation cash position (+100,000,000 NOK funding) ---
-  const simCashAfterArr = cashAfterArr.map(v => v !== null ? v + 100000 : null);
+  // --- Simulation Chart: Simulation cash position (OKR investments) ---
+  const simCashPosOverrides = (typeof SIM_CASH_OVERRIDES !== 'undefined') ? SIM_CASH_OVERRIDES : {
+    '2026-09': 240017,
+    '2026-10': 261757,
+    '2026-11': 364220,
+    '2026-12': 658107
+  };
+
+  const simCashAfterArr = labels.map((p, i) => {
+    if (typeof SIM_CASH_AFTER_COLLATERAL !== 'undefined' && SIM_CASH_AFTER_COLLATERAL[p] !== undefined) {
+      return SIM_CASH_AFTER_COLLATERAL[p];
+    }
+    if (MONTHLY_CASH_FORECAST[p] === undefined) return null;
+    const simCashPos = simCashPosOverrides[p] !== undefined ? simCashPosOverrides[p] : MONTHLY_CASH_FORECAST[p];
+    
+    let utilization = 0;
+    if (FORECAST[p]) {
+      const fd = FORECAST[p];
+      const dnbNok = fd.dnbNok || 0;
+      const dnbEur = (fd.dnbEurLocal || 0) * fx;
+      const marex = (fd.marexEurLocal || 0) * fx;
+      const atra = (fd.atraLocal || 0) * fx;
+      utilization = dnbNok + dnbEur + marex + atra;
+    }
+    const limit = CREDIT_LIMIT[p] !== undefined ? CREDIT_LIMIT[p] : dnbLine;
+    const excess = Math.max(0, utilization - limit);
+
+    const cashColl = CASH_COLLATERAL[p] || 0;
+    const collChange = cashColl - cashCollToday;
+
+    return Math.round(simCashPos - excess - collChange);
+  });
   const simCreditLimitArr = d.creditLimitArr;
   const peakSimCash = Math.max(...simCashAfterArr.filter(x => x !== null));
   const peakSimLimit = Math.max(...simCreditLimitArr);
@@ -1887,7 +1949,7 @@ function update() {
       title: ctx => {
         const p = ctx[0].label;
         const type = p <= asOfYM ? 'Actual' : 'Forecast';
-        return `${p} (${type}) · Simulation (+100m NOK)`;
+        return `${p} (${type}) · Simulation (OKR investments)`;
       },
       label: ctx => {
         const val = ctx.raw;
@@ -1936,7 +1998,7 @@ function update() {
     },
     { label: 'DNB+Atradius Guarantee Line', data: simCreditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit' },
     {
-      label: 'Cash after collateral (+100m)',
+      label: 'Cash after collateral (OKR investments)',
       data: simCashAfterArr,
       type: 'line',
       borderColor: '#10B981',

@@ -655,6 +655,30 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
 
         cash_after_collateral[period] = cash_pos - excess - coll_increase
 
+    # Simulation Cash Position & Cash After Collateral (OKR investments)
+    sim_cash_overrides = {
+        '2026-09': 240017.0,
+        '2026-10': 261757.0,
+        '2026-11': 364220.0,
+        '2026-12': 658107.0,
+    }
+    sim_cash_after_collateral = {}
+    for period, cash_pos in monthly_cash.items():
+        sim_pos = sim_cash_overrides.get(period, cash_pos)
+        fd = forecast_dict.get(period, {})
+        dnb_nok = fd.get('dnbNok', 0.0)
+        dnb_eur = fd.get('dnbEurLocal', 0.0) * fx_rate
+        marex = fd.get('marexEurLocal', 0.0) * fx_rate
+        atra = fd.get('atraLocal', 0.0) * fx_rate
+
+        utilization = dnb_nok + dnb_eur + marex + atra
+        limit = limits.get(period, 200000.0)
+
+        excess = max(0.0, utilization - limit)
+        coll_increase = cash_collateral.get(period, 0.0) - cash_coll_baseline
+
+        sim_cash_after_collateral[period] = round(sim_pos - excess - coll_increase)
+
     # Build complete data block
     today_dnb_json = json.dumps(collateral_data['today_dnb'])
     actuals_obj = format_forecast_block(collateral_data['actuals'])
@@ -672,6 +696,8 @@ const HISTORY_MAREX_LOCAL = {history_marex};
 const MONTHLY_CASH_FORECAST = {format_forecast_js(monthly_cash)};
 const CASH_COLLATERAL = {format_forecast_js(cash_collateral)};
 const CASH_AFTER_COLLATERAL = {format_forecast_js(cash_after_collateral)};
+const SIM_CASH_OVERRIDES = {format_forecast_js(sim_cash_overrides)};
+const SIM_CASH_AFTER_COLLATERAL = {format_forecast_js(sim_cash_after_collateral)};
 const CREDIT_LIMIT = {format_forecast_js(collateral_data['limits'])};
 const CASH_SOURCES = {format_sources_js(cash_sources)};
 const EL_VOLUME_DATE = "{collateral_data.get('el_volume_date', '')}";
