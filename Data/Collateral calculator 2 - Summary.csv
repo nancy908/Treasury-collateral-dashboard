@@ -1,5 +1,5 @@
 ,,,,,,,,,,,,,,,,,,,,,,,,,,,,Utilized amount,Credit line,,,,,,,,,,,,EUR/NOK,11.230,,,El. volume – last updated:,2026-07-02
-,,,,Forecast,,,,,,Limit,,,,,,,Actual,,,,,,,,,,,,,,,,,,,,,,,,Utilized today (kNOK),"187,807",,,El. price – last updated:,2026-09-03
+,,,,Forecast,,,,,,Limit,,,,,,,Actual,,,,,,,,,,,,,,,,,,,,,,,,Utilized today (kNOK),"199,037",,,El. price – last updated:,2026-09-03
 Period,Guarantee type,Beneficiary,Currency,Utilized amount (k),Utilized amount (kNOK),,Period,Guarantee type,Currency,Guarantee line (k),Guarantee line (kNOK),,Period,Guarantee type,Beneficiary,Currency,Utilized amount (k),Utilized amount (kNOK),,,,,,,,Update date,KPI,Level,Benchmark,Currency,Utilization rate,Headroom,,Period,Beneficiary,Currency,Invoice amount (k),,DNB guarantee,Beneficiary,Currency,Amount (kNOK),Amount (kEUR),Expiry date,,
 2026-01-01,DNB NOK,Mind Energy,NOK,"29,471","29,471",,2026-01-01,DNB NOK,NOK,"200,000","200,000",,2024-01-01,DNB NOK,Mind Energy,NOK,"16,300","16,300",,,,,,,,2026-05-01,DNB NOK,#N/A,"134,888",NOK,#N/A,#N/A,,2026-01-01,Mind Energy,NOK,"250,535",,DNB NOK,Mind Energy,NOK,"17,000",,,,
 2026-02-01,DNB NOK,Mind Energy,NOK,"26,337","26,337",,2026-02-01,DNB NOK,NOK,"197,754","197,754",,2024-02-01,DNB NOK,Mind Energy,NOK,"16,300","16,300",,,,,,,,2026-05-01,DNB EUR,#N/A,#REF!,NOK,#N/A,#REF!,,2026-02-01,Mind Energy,NOK,"559,984",,DNB NOK,Skagerak,NOK,"79,000",,,,
@@ -10,7 +10,7 @@ Period,Guarantee type,Beneficiary,Currency,Utilized amount (k),Utilized amount (
 2026-07-01,DNB NOK,Mind Energy,NOK,"7,207","7,207",,2026-07-01,DNB NOK,NOK,"130,846","130,846",,2024-07-01,DNB NOK,Mind Energy,NOK,"16,300","16,300",,,,,,,,,,,,,,,,2026-02-01,Skagerak,NOK,"290,931",,DNB EUR,BayWa,EUR,"8,423",750,2027-08-13,,
 2026-08-01,DNB NOK,Mind Energy,NOK,"8,088","8,088",,2026-08-01,DNB NOK,NOK,"111,193","111,193",,2024-08-01,DNB NOK,Mind Energy,NOK,"16,300","16,300",,,,,,,,,,,,,,,,2026-03-01,Skagerak,NOK,"237,214",,DNB EUR,Amprion,EUR,"6,716",598,2027-04-22,,
 2026-09-01,DNB NOK,Mind Energy,NOK,"16,294","16,294",,2026-09-01,DNB NOK,NOK,"83,351","83,351",,2024-09-01,DNB NOK,Mind Energy,NOK,"16,300","16,300",,,,,,,,,,,,,,,,2026-04-01,Skagerak,NOK,"194,322",,DNB EUR,TransnetBW,EUR,"2,920",260,2027-04-29,,
-2026-10-01,DNB NOK,Mind Energy,NOK,"28,080","28,080",,2026-10-01,DNB NOK,NOK,"40,792","40,792",,2024-10-01,DNB NOK,Mind Energy,NOK,"25,000","25,000",,,,,,,,,,,,,,,,2026-05-01,Skagerak,NOK,,,DNB EUR,Marex,EUR,"11,230","1,000",2027-06-09,,
+2026-10-01,DNB NOK,Mind Energy,NOK,"28,080","28,080",,2026-10-01,DNB NOK,NOK,"40,792","40,792",,2024-10-01,DNB NOK,Mind Energy,NOK,"25,000","25,000",,,,,,,,,,,,,,,,2026-05-01,Skagerak,NOK,,,DNB EUR,Marex,EUR,"22,460","2,000",2027-06-09,,
 2026-11-01,DNB NOK,Mind Energy,NOK,"37,843","37,843",,2026-11-01,DNB NOK,NOK,"-8,745","-8,745",,2024-11-01,DNB NOK,Mind Energy,NOK,"25,000","25,000",,,,,,,,,,,,,,,,2026-01-01,AXPO,EUR,"4,119",,DNB EUR,Libra Energy,EUR,"1,123",100,2027-07-03,,
 2026-12-01,DNB NOK,Mind Energy,NOK,"44,587","44,587",,2026-12-01,DNB NOK,NOK,"-50,508","-50,508",,2024-12-01,DNB NOK,Mind Energy,NOK,"25,000","25,000",,,,,,,,,,,,10.789,2026-05-21,,,2026-02-01,AXPO,EUR,"4,797",,,,,,,,,
 2027-01-01,DNB NOK,Mind Energy,NOK,"56,420","56,420",,2027-01-01,DNB NOK,NOK,"-64,903","-64,903",,2025-01-01,DNB NOK,Mind Energy,NOK,"25,000","25,000",,,,,,,,,,,,,,,,2026-03-01,AXPO,EUR,"3,368",,,,,,,,,
@@ -137,7 +137,7 @@ Period,Guarantee type,Beneficiary,Currency,Utilized amount (k),Utilized amount (
 2027-02-01,DNB EUR,Nord Pool DE,EUR,200,"2,246",,,,,,,,2026-06-01,DNB EUR,Marex,EUR,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2027-03-01,DNB EUR,Nord Pool DE,EUR,200,"2,246",,,,,,,,2026-07-01,DNB EUR,Marex,EUR,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2027-04-01,DNB EUR,Nord Pool DE,EUR,200,"2,246",,,,,,,,2026-08-01,DNB EUR,Marex,EUR,"1,000","11,230",,,,,,,,,,,,,,,,,,,,,,,,,,,,
-2027-05-01,DNB EUR,Nord Pool DE,EUR,200,"2,246",,,,,,,,2026-09-01,DNB EUR,Marex,EUR,"1,000","11,230",,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2027-05-01,DNB EUR,Nord Pool DE,EUR,200,"2,246",,,,,,,,2026-09-01,DNB EUR,Marex,EUR,"2,000","22,460",,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2027-06-01,DNB EUR,Nord Pool DE,EUR,200,"2,246",,,,,,,,2024-01-01,DNB EUR,Nord Pool DE,EUR,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2027-07-01,DNB EUR,Nord Pool DE,EUR,200,"2,246",,,,,,,,2024-02-01,DNB EUR,Nord Pool DE,EUR,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 2027-08-01,DNB EUR,Nord Pool DE,EUR,200,"2,246",,,,,,,,2024-03-01,DNB EUR,Nord Pool DE,EUR,0,0,,,,,,,,,,,,,,,,,,,,,,,,,,,,
