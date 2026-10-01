@@ -861,7 +861,7 @@
     </svg>
     <div>
       <div class="logo-text">tibber <span>collateral</span></div>
-      <div class="header-sub">Forecast - History - Utilization - As of: 2026-09-30</div>
+      <div class="header-sub">Forecast - History - Utilization - As of: 2026-10-01</div>
     </div>
   </div>
   <div class="header-info" id="updateInfo">
@@ -875,7 +875,7 @@
   <div class="kpi">
     <div class="kpi-label">TODAY DNB GUARANTEE UTILIZED</div>
     <div class="kpi-value" id="kpi-utilized">199,037</div>
-    <div class="kpi-sub">kNOK (Sep actuals)</div>
+    <div class="kpi-sub">kNOK (Oct actuals)</div>
   </div>
   <div class="kpi">
     <div class="kpi-label">DNB GUARANTEE LINE</div>
@@ -1355,10 +1355,8 @@ const MONTHLY_CASH_FORECAST = {
   "2026-06": 548217,
   "2026-07": 481142,
   "2026-08": 398181,
-  "2026-09": 301527,
   "2026-10": 314829,
   "2026-11": 475868,
-  "2026-12": 703671,
   "2027-01": 812736,
   "2027-02": 1038705,
   "2027-03": 1012288,
@@ -1431,10 +1429,8 @@ const CASH_AFTER_COLLATERAL = {
   "2026-06": 548217,
   "2026-07": 480289,
   "2026-08": 352982,
-  "2026-09": 207884,
   "2026-10": 135865,
   "2026-11": 226589,
-  "2026-12": 400830,
   "2027-01": 480201,
   "2027-02": 756400,
   "2027-03": 785506,
@@ -1448,11 +1444,11 @@ const CASH_AFTER_COLLATERAL = {
   "2027-11": 280852,
   "2027-12": 621363
 };
-const SIM_CASH_OVERRIDES = {
-  "2026-09": 240017,
-  "2026-10": 261757,
-  "2026-11": 364220,
-  "2026-12": 658107
+const OKR_DEDUCTIONS = {
+  "2026-09": 16890,
+  "2026-10": 34958,
+  "2026-11": 42331,
+  "2026-12": 45564
 };
 const SIM_CASH_AFTER_COLLATERAL = {
   "2026-01": 479429,
@@ -1463,10 +1459,8 @@ const SIM_CASH_AFTER_COLLATERAL = {
   "2026-06": 548217,
   "2026-07": 480289,
   "2026-08": 352982,
-  "2026-09": 146375,
-  "2026-10": 82793,
-  "2026-11": 114942,
-  "2026-12": 355266,
+  "2026-10": 100907,
+  "2026-11": 184259,
   "2027-01": 480202,
   "2027-02": 756401,
   "2027-03": 785507,
@@ -1515,10 +1509,8 @@ const CASH_SOURCES = {
   "2026-06": "Actual",
   "2026-07": "Actual",
   "2026-08": "Actual",
-  "2026-09": "WCFF",
   "2026-10": "WCFF",
   "2026-11": "WCFF",
-  "2026-12": "BU27 Base",
   "2027-01": "BU27 Base",
   "2027-02": "BU27 Base",
   "2027-03": "BU27 Base",
@@ -1873,36 +1865,26 @@ function update() {
   ]}, options: chart2Opts });
 
   // --- Simulation Chart: Simulation cash position (OKR investments) ---
-  const simCashPosOverrides = (typeof SIM_CASH_OVERRIDES !== 'undefined') ? SIM_CASH_OVERRIDES : {
-    '2026-09': 240017,
-    '2026-10': 261757,
-    '2026-11': 364220,
-    '2026-12': 658107
+  // Always deduct specified OKR investment amounts compared to Panel 2 Cash After Collateral:
+  // Sep: -16,890,000 NOK (-16,890 kNOK)
+  // Oct: -34,958,000 NOK (-34,958 kNOK)
+  // Nov: -42,331,000 NOK (-42,331 kNOK)
+  // Dec: -45,564,000 NOK (-45,564 kNOK)
+  const okrDeductions = (typeof OKR_DEDUCTIONS !== 'undefined') ? OKR_DEDUCTIONS : {
+    '2026-09': 16890,
+    '2026-10': 34958,
+    '2026-11': 42331,
+    '2026-12': 45564
   };
 
   const simCashAfterArr = labels.map((p, i) => {
-    if (typeof SIM_CASH_AFTER_COLLATERAL !== 'undefined' && SIM_CASH_AFTER_COLLATERAL[p] !== undefined) {
-      return SIM_CASH_AFTER_COLLATERAL[p];
-    }
-    if (MONTHLY_CASH_FORECAST[p] === undefined) return null;
-    const simCashPos = simCashPosOverrides[p] !== undefined ? simCashPosOverrides[p] : MONTHLY_CASH_FORECAST[p];
-    
-    let utilization = 0;
-    if (FORECAST[p]) {
-      const fd = FORECAST[p];
-      const dnbNok = fd.dnbNok || 0;
-      const dnbEur = (fd.dnbEurLocal || 0) * fx;
-      const marex = (fd.marexEurLocal || 0) * fx;
-      const atra = (fd.atraLocal || 0) * fx;
-      utilization = dnbNok + dnbEur + marex + atra;
-    }
-    const limit = CREDIT_LIMIT[p] !== undefined ? CREDIT_LIMIT[p] : dnbLine;
-    const excess = Math.max(0, utilization - limit);
+    const baseAfter = (typeof cashAfterArr !== 'undefined' && cashAfterArr[i] !== null && cashAfterArr[i] !== undefined)
+      ? cashAfterArr[i]
+      : ((typeof CASH_AFTER_COLLATERAL !== 'undefined' && CASH_AFTER_COLLATERAL[p] !== undefined) ? CASH_AFTER_COLLATERAL[p] : null);
 
-    const cashColl = CASH_COLLATERAL[p] || 0;
-    const collChange = cashColl - cashCollToday;
-
-    return Math.round(simCashPos - excess - collChange);
+    if (baseAfter === null || baseAfter === undefined) return null;
+    const deduction = okrDeductions[p] || 0;
+    return Math.round(baseAfter - deduction);
   });
   const simCreditLimitArr = d.creditLimitArr;
   const peakSimCash = Math.max(...simCashAfterArr.filter(x => x !== null));
@@ -1959,7 +1941,9 @@ function update() {
         const type = p <= asOfYM ? 'Actual' : 'Forecast';
         if (ctx.dataset.label.includes('Cash after collateral')) {
           const breachNote = val < 125000 ? '  ⚠️ Below Covenant (< 125m)' : '  ✅ Above Covenant';
-          return ` ${ctx.dataset.label} (${type}): ${formatted}${breachNote}`;
+          const ded = okrDeductions[p];
+          const dedNote = ded ? ` (OKR ded: -${(ded/1000).toFixed(1)}m)` : '';
+          return ` ${ctx.dataset.label} (${type}): ${formatted}${dedNote}${breachNote}`;
         }
         return ` ${ctx.dataset.label}: ${formatted}`;
       }
