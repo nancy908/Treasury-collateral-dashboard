@@ -1920,13 +1920,27 @@ function update() {
     },
     formatter: (_, ctx) => {
       const total = d.dnbTotalArr[ctx.dataIndex] + d.atraArr[ctx.dataIndex];
-      return (total / 1000).toFixed(2) + 'm';
+      const totalStr = (total / 1000).toFixed(2) + 'm';
+      const p = labels[ctx.dataIndex];
+      const ded = okrDeductions[p];
+      if (ded) {
+        return [totalStr, `(acc. -${(ded / 1000).toFixed(2)}m)`];
+      }
+      return totalStr;
     },
     anchor: 'end',
     align: 'end',
+    textAlign: 'center',
     offset: 4,
     color: '#ffffff',
-    font: { family: 'Poppins', size: 10, weight: '700' },
+    font: ctx => {
+      const p = labels[ctx.dataIndex];
+      return {
+        family: 'Poppins',
+        size: okrDeductions[p] ? 8.5 : 10,
+        weight: '700'
+      };
+    },
   };
 
   simChartOpts.plugins.tooltip = {
