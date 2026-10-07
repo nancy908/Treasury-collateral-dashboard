@@ -1612,12 +1612,25 @@ function makeScales(stacked, currency) {
   const yTitle = currency === 'NOK' ? 'kNOK' : currency === 'EUR' ? 'kEUR' : (currency || 'kNOK (EUR conv.)');
   return { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', maxRotation: 45 }, stacked: !!stacked }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', callback: v => (v/1000).toFixed(0) + 'k' }, title: { display: true, text: yTitle, color: '#686C73', font: { family: 'Poppins', size: 10, weight: '600' }, padding: { bottom: 4 } }, stacked: !!stacked } };
 }
-function getLastActualYM() {
+function getLastCashActualYM() {
   const actualMonths = (typeof CASH_SOURCES !== 'undefined') ? Object.keys(CASH_SOURCES).filter(p => CASH_SOURCES[p] === 'Actual').sort() : [];
   return actualMonths.length > 0 ? actualMonths[actualMonths.length - 1] : '2026-09';
 }
-function makeOpts(stacked, currency) {
-  const lastActualYM = getLastActualYM();
+function getGuaranteeLastActualYM() {
+  if (typeof ACTUALS !== 'undefined') {
+    const actMonths = Object.keys(ACTUALS).filter(p => {
+      const a = ACTUALS[p];
+      return a && (a.dnbNok + a.dnbEurLocal + a.marexEurLocal + a.atraLocal + (a.cashSkaNok || 0) + (a.cashBnpLocal || 0) + (a.cashPvnedLocal || 0) + (a.cashAxpoLocal || 0) > 0);
+    }).sort();
+    if (actMonths.length > 0) return actMonths[actMonths.length - 1];
+  }
+  return '2026-10';
+}
+function getLastActualYM() {
+  return getLastCashActualYM();
+}
+function makeOpts(stacked, currency, isGuar = false) {
+  const lastActualYM = isGuar ? getGuaranteeLastActualYM() : getLastCashActualYM();
   const curUnit = currency === 'EUR' ? 'kEUR' : 'kNOK';
   return {
     responsive: true,
@@ -1674,11 +1687,18 @@ function update() {
     : (todayYM >= '2026-10' ? 300000 : dnbLine);
   document.getElementById('kpi2').textContent = fmt(currentLimit);
 
-  const lastActualYM = getLastActualYM();
-  const isActualMonth = p => p <= lastActualYM;
-  const actBg = (actCol, fcCol) => labels.map(p => isActualMonth(p) ? actCol : fcCol);
-  const actBorder = (actBorderCol, fcBorderCol) => labels.map(p => isActualMonth(p) ? actBorderCol : fcBorderCol);
-  const breachPeriods = d.periods.map((p, i) => ({ p, excess: d.dnbTotalArr[i] - d.creditLimitArr[i] })).filter(x => x.p > lastActualYM && x.excess > 0);
+  const lastCashActualYM = getLastCashActualYM();
+  const lastGuarActualYM = getGuaranteeLastActualYM();
+  const isCashActualMonth = p => p <= lastCashActualYM;
+  const isGuarActualMonth = p => p <= lastGuarActualYM;
+  const guarBg = (actCol, fcCol) => labels.map(p => isGuarActualMonth(p) ? actCol : fcCol);
+  const guarBorder = (actBorderCol, fcBorderCol) => labels.map(p => isGuarActualMonth(p) ? actBorderCol : fcBorderCol);
+  const cashBg = (actCol, fcCol) => labels.map(p => isCashActualMonth(p) ? actCol : fcCol);
+  const cashBorder = (actBorderCol, fcBorderCol) => labels.map(p => isCashActualMonth(p) ? actBorderCol : fcBorderCol);
+  const actBg = cashBg;
+  const actBorder = cashBorder;
+  const lastActualYM = lastCashActualYM;
+  const breachPeriods = d.periods.map((p, i) => ({ p, excess: d.dnbTotalArr[i] - d.creditLimitArr[i] })).filter(x => x.p > lastGuarActualYM && x.excess > 0);
   const breachEl = document.getElementById('kpiBreach');
   const breachSubEl = document.getElementById('kpiBreachSub');
   if (breachPeriods.length > 0) {
@@ -1776,21 +1796,21 @@ function update() {
     {
       label: 'DNB NOK',
       data: d.dnbNokArr,
-      backgroundColor: actBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
-      borderColor: actBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
+      backgroundColor: guarBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
+      borderColor: guarBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
       borderWidth: 1,
       stack: 's'
     },
     {
       label: 'DNB EUR',
       data: d.dnbEurArr.map((v, i) => v + d.marexArr[i]),
-      backgroundColor: actBg('rgba(190,251,255,0.75)', 'rgba(147,197,253,0.40)'),
-      borderColor: actBorder('rgba(190,251,255,0.90)', 'rgba(147,197,253,0.85)'),
+      backgroundColor: guarBg('rgba(190,251,255,0.75)', 'rgba(147,197,253,0.40)'),
+      borderColor: guarBorder('rgba(190,251,255,0.90)', 'rgba(147,197,253,0.85)'),
       borderWidth: 1,
       stack: 's'
     },
     { label: 'Guarantee Line', data: d.dnbLineArr, type: 'line', borderColor: '#FF5A5A', borderDash: [4,3], borderWidth: 1.5, pointRadius: 0, fill: false },
-  ]}, options: makeOpts(true, 'NOK') });
+  ]}, options: makeOpts(true, 'NOK', true) });
 
   const chart2Opts = makeOpts(true, 'NOK');
   chart2Opts.plugins.datalabels = { display: ctx => { if (ctx.datasetIndex !== 1) return false; const dnb = d.dnbTotalArr[ctx.dataIndex]; const atra = d.atraArr[ctx.dataIndex]; return (dnb + atra) > 0; }, formatter: (_, ctx) => { const total = d.dnbTotalArr[ctx.dataIndex] + d.atraArr[ctx.dataIndex]; return (total / 1000).toFixed(2) + 'm'; }, anchor: 'end', align: 'end', offset: 4, color: '#ffffff', font: { family: 'Poppins', size: 10, weight: '700' }, };
@@ -2074,70 +2094,70 @@ function update() {
     {
       label: 'Skagerak (NOK)',
       data: d.cashSkaArr,
-      backgroundColor: actBg('rgba(240,218,254,0.85)', 'rgba(244,114,182,0.40)'),
-      borderColor: actBorder('rgba(240,218,254,0.95)', 'rgba(244,114,182,0.85)'),
+      backgroundColor: guarBg('rgba(240,218,254,0.85)', 'rgba(244,114,182,0.40)'),
+      borderColor: guarBorder('rgba(240,218,254,0.95)', 'rgba(244,114,182,0.85)'),
       borderWidth: 1,
       stack: 's'
     },
     {
       label: 'BNP SEPA EUR (conv.)',
       data: d.cashBnpArr,
-      backgroundColor: actBg('rgba(139,75,190,0.85)', 'rgba(168,85,247,0.40)'),
-      borderColor: actBorder('rgba(139,75,190,0.95)', 'rgba(168,85,247,0.85)'),
+      backgroundColor: guarBg('rgba(139,75,190,0.85)', 'rgba(168,85,247,0.40)'),
+      borderColor: guarBorder('rgba(139,75,190,0.95)', 'rgba(168,85,247,0.85)'),
       borderWidth: 1,
       stack: 's'
     },
     {
       label: 'PVNED EUR (conv.)',
       data: d.cashPvnedArr,
-      backgroundColor: actBg('rgba(73,15,108,0.85)', 'rgba(109,40,217,0.40)'),
-      borderColor: actBorder('rgba(73,15,108,0.95)', 'rgba(109,40,217,0.85)'),
+      backgroundColor: guarBg('rgba(73,15,108,0.85)', 'rgba(109,40,217,0.40)'),
+      borderColor: guarBorder('rgba(73,15,108,0.95)', 'rgba(109,40,217,0.85)'),
       borderWidth: 1,
       stack: 's'
     },
     {
       label: 'AXPO EUR (conv.)',
       data: d.cashAxpoArr,
-      backgroundColor: actBg('rgba(251,146,60,0.85)', 'rgba(251,146,60,0.40)'),
-      borderColor: actBorder('rgba(251,146,60,0.95)', 'rgba(251,146,60,0.85)'),
+      backgroundColor: guarBg('rgba(251,146,60,0.85)', 'rgba(251,146,60,0.40)'),
+      borderColor: guarBorder('rgba(251,146,60,0.95)', 'rgba(251,146,60,0.85)'),
       borderWidth: 1,
       stack: 's'
     },
-  ]}, options: makeOpts(true, 'NOK') });
+  ]}, options: makeOpts(true, 'NOK', true) });
   makeChart('chart4', { type: 'bar', data: { labels, datasets: [
     {
       label: 'DNB NOK',
       data: d.dnbNokArr,
-      backgroundColor: actBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
-      borderColor: actBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
+      backgroundColor: guarBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
+      borderColor: guarBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
       borderWidth: 1,
       stack: 's'
     },
     {
       label: 'DNB EUR (conv.)',
       data: d.dnbEurArr.map((v, i) => v + d.marexArr[i]),
-      backgroundColor: actBg('rgba(190,251,255,0.70)', 'rgba(147,197,253,0.40)'),
-      borderColor: actBorder('rgba(190,251,255,0.90)', 'rgba(147,197,253,0.85)'),
+      backgroundColor: guarBg('rgba(190,251,255,0.70)', 'rgba(147,197,253,0.40)'),
+      borderColor: guarBorder('rgba(190,251,255,0.90)', 'rgba(147,197,253,0.85)'),
       borderWidth: 1,
       stack: 's'
     },
     {
       label: 'Atradius EUR (conv.)',
       data: d.atraArr,
-      backgroundColor: actBg('rgba(200,109,255,0.75)', 'rgba(217,70,239,0.40)'),
-      borderColor: actBorder('rgba(200,109,255,0.90)', 'rgba(217,70,239,0.85)'),
+      backgroundColor: guarBg('rgba(200,109,255,0.75)', 'rgba(217,70,239,0.40)'),
+      borderColor: guarBorder('rgba(200,109,255,0.90)', 'rgba(217,70,239,0.85)'),
       borderWidth: 1,
       stack: 's'
     },
     {
       label: 'Cash (conv.)',
       data: d.cashTotalArr,
-      backgroundColor: actBg('rgba(73,15,108,0.85)', 'rgba(109,40,217,0.40)'),
-      borderColor: actBorder('rgba(73,15,108,0.95)', 'rgba(109,40,217,0.85)'),
+      backgroundColor: guarBg('rgba(73,15,108,0.85)', 'rgba(109,40,217,0.40)'),
+      borderColor: guarBorder('rgba(73,15,108,0.95)', 'rgba(109,40,217,0.85)'),
       borderWidth: 1,
       stack: 's'
     },
-  ]}, options: makeOpts(true, 'NOK') });
+  ]}, options: makeOpts(true, 'NOK', true) });
 
   // Country Breakdown Charts
   if (typeof COUNTRY_DATA !== 'undefined') {
@@ -2147,7 +2167,7 @@ function update() {
         if (!cData) return 0;
         const act = cData.actual ? cData.actual[p] : null;
         const fc = cData.forecast ? cData.forecast[p] : null;
-        const hasAct = p <= lastActualYM && act && (Object.values(act).reduce((a, b) => a + b, 0) > 0);
+        const hasAct = p <= lastGuarActualYM && act && (Object.values(act).reduce((a, b) => a + b, 0) > 0);
         const src = hasAct ? act : fc;
         return src ? (src[field] || 0) : 0;
       });
@@ -2162,46 +2182,46 @@ function update() {
           {
             label: 'Mind Energy',
             data: getCountryVal('norway', 'mindEnergy'),
-            backgroundColor: actBg('rgba(2, 132, 199, 0.85)', 'rgba(2, 132, 199, 0.40)'),
-            borderColor: actBorder('rgba(2, 132, 199, 0.95)', 'rgba(2, 132, 199, 0.85)'),
+            backgroundColor: guarBg('rgba(2, 132, 199, 0.85)', 'rgba(2, 132, 199, 0.40)'),
+            borderColor: guarBorder('rgba(2, 132, 199, 0.95)', 'rgba(2, 132, 199, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'Skagerak',
             data: getCountryVal('norway', 'skagerak'),
-            backgroundColor: actBg('rgba(30, 208, 231, 0.85)', 'rgba(30, 208, 231, 0.40)'),
-            borderColor: actBorder('rgba(30, 208, 231, 0.95)', 'rgba(30, 208, 231, 0.85)'),
+            backgroundColor: guarBg('rgba(30, 208, 231, 0.85)', 'rgba(30, 208, 231, 0.40)'),
+            borderColor: guarBorder('rgba(30, 208, 231, 0.95)', 'rgba(30, 208, 231, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'Skagerak cash collateral',
             data: getCountryVal('norway', 'skagerakCash'),
-            backgroundColor: actBg('rgba(200, 109, 255, 0.85)', 'rgba(200, 109, 255, 0.40)'),
-            borderColor: actBorder('rgba(200, 109, 255, 0.95)', 'rgba(200, 109, 255, 0.85)'),
+            backgroundColor: guarBg('rgba(200, 109, 255, 0.85)', 'rgba(200, 109, 255, 0.40)'),
+            borderColor: guarBorder('rgba(200, 109, 255, 0.95)', 'rgba(200, 109, 255, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'Nord Pool',
             data: getCountryVal('norway', 'nordPool'),
-            backgroundColor: actBg('rgba(6, 182, 212, 0.85)', 'rgba(6, 182, 212, 0.40)'),
-            borderColor: actBorder('rgba(6, 182, 212, 0.95)', 'rgba(6, 182, 212, 0.85)'),
+            backgroundColor: guarBg('rgba(6, 182, 212, 0.85)', 'rgba(6, 182, 212, 0.40)'),
+            borderColor: guarBorder('rgba(6, 182, 212, 0.95)', 'rgba(6, 182, 212, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'eSett',
             data: getCountryVal('norway', 'eSett'),
-            backgroundColor: actBg('rgba(56, 189, 248, 0.85)', 'rgba(56, 189, 248, 0.40)'),
-            borderColor: actBorder('rgba(56, 189, 248, 0.95)', 'rgba(56, 189, 248, 0.85)'),
+            backgroundColor: guarBg('rgba(56, 189, 248, 0.85)', 'rgba(56, 189, 248, 0.40)'),
+            borderColor: guarBorder('rgba(56, 189, 248, 0.95)', 'rgba(56, 189, 248, 0.85)'),
             borderWidth: 1,
             stack: 's'
           }
         ]
       },
-      options: makeOpts(true, 'NOK')
+      options: makeOpts(true, 'NOK', true)
     });
 
     // Chart Germany (kEUR)
@@ -2213,86 +2233,86 @@ function update() {
           {
             label: 'AXPO',
             data: getCountryVal('germany', 'axpo'),
-            backgroundColor: actBg('rgba(126, 34, 206, 0.85)', 'rgba(126, 34, 206, 0.40)'),
-            borderColor: actBorder('rgba(126, 34, 206, 0.95)', 'rgba(126, 34, 206, 0.85)'),
+            backgroundColor: guarBg('rgba(126, 34, 206, 0.85)', 'rgba(126, 34, 206, 0.40)'),
+            borderColor: guarBorder('rgba(126, 34, 206, 0.95)', 'rgba(126, 34, 206, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'AXPO cash collateral',
             data: getCountryVal('germany', 'axpoCash'),
-            backgroundColor: actBg('rgba(168, 85, 247, 0.85)', 'rgba(168, 85, 247, 0.40)'),
-            borderColor: actBorder('rgba(168, 85, 247, 0.95)', 'rgba(168, 85, 247, 0.85)'),
+            backgroundColor: guarBg('rgba(168, 85, 247, 0.85)', 'rgba(168, 85, 247, 0.40)'),
+            borderColor: guarBorder('rgba(168, 85, 247, 0.95)', 'rgba(168, 85, 247, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'BayWa',
             data: getCountryVal('germany', 'bayWa'),
-            backgroundColor: actBg('rgba(200, 109, 255, 0.85)', 'rgba(200, 109, 255, 0.40)'),
-            borderColor: actBorder('rgba(200, 109, 255, 0.95)', 'rgba(200, 109, 255, 0.85)'),
+            backgroundColor: guarBg('rgba(200, 109, 255, 0.85)', 'rgba(200, 109, 255, 0.40)'),
+            borderColor: guarBorder('rgba(200, 109, 255, 0.95)', 'rgba(200, 109, 255, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'Marex',
             data: getCountryVal('germany', 'marex'),
-            backgroundColor: actBg('rgba(232, 121, 249, 0.85)', 'rgba(232, 121, 249, 0.40)'),
-            borderColor: actBorder('rgba(232, 121, 249, 0.95)', 'rgba(232, 121, 249, 0.85)'),
+            backgroundColor: guarBg('rgba(232, 121, 249, 0.85)', 'rgba(232, 121, 249, 0.40)'),
+            borderColor: guarBorder('rgba(232, 121, 249, 0.95)', 'rgba(232, 121, 249, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'Amprion',
             data: getCountryVal('germany', 'amprion'),
-            backgroundColor: actBg('rgba(59, 130, 246, 0.85)', 'rgba(59, 130, 246, 0.40)'),
-            borderColor: actBorder('rgba(59, 130, 246, 0.95)', 'rgba(59, 130, 246, 0.85)'),
+            backgroundColor: guarBg('rgba(59, 130, 246, 0.85)', 'rgba(59, 130, 246, 0.40)'),
+            borderColor: guarBorder('rgba(59, 130, 246, 0.95)', 'rgba(59, 130, 246, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'TransnetBW',
             data: getCountryVal('germany', 'transnetBw'),
-            backgroundColor: actBg('rgba(96, 165, 250, 0.85)', 'rgba(96, 165, 250, 0.40)'),
-            borderColor: actBorder('rgba(96, 165, 250, 0.95)', 'rgba(96, 165, 250, 0.85)'),
+            backgroundColor: guarBg('rgba(96, 165, 250, 0.85)', 'rgba(96, 165, 250, 0.40)'),
+            borderColor: guarBorder('rgba(96, 165, 250, 0.95)', 'rgba(96, 165, 250, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'TenneT',
             data: getCountryVal('germany', 'tenneT'),
-            backgroundColor: actBg('rgba(2, 132, 199, 0.85)', 'rgba(2, 132, 199, 0.40)'),
-            borderColor: actBorder('rgba(2, 132, 199, 0.95)', 'rgba(2, 132, 199, 0.85)'),
+            backgroundColor: guarBg('rgba(2, 132, 199, 0.85)', 'rgba(2, 132, 199, 0.40)'),
+            borderColor: guarBorder('rgba(2, 132, 199, 0.95)', 'rgba(2, 132, 199, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: '50Hertz',
             data: getCountryVal('germany', 'fiftyHertz'),
-            backgroundColor: actBg('rgba(6, 182, 212, 0.85)', 'rgba(6, 182, 212, 0.40)'),
-            borderColor: actBorder('rgba(6, 182, 212, 0.95)', 'rgba(6, 182, 212, 0.85)'),
+            backgroundColor: guarBg('rgba(6, 182, 212, 0.85)', 'rgba(6, 182, 212, 0.40)'),
+            borderColor: guarBorder('rgba(6, 182, 212, 0.95)', 'rgba(6, 182, 212, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'Nord Pool DE',
             data: getCountryVal('germany', 'nordPoolDe'),
-            backgroundColor: actBg('rgba(30, 208, 231, 0.85)', 'rgba(30, 208, 231, 0.40)'),
-            borderColor: actBorder('rgba(30, 208, 231, 0.95)', 'rgba(30, 208, 231, 0.85)'),
+            backgroundColor: guarBg('rgba(30, 208, 231, 0.85)', 'rgba(30, 208, 231, 0.40)'),
+            borderColor: guarBorder('rgba(30, 208, 231, 0.95)', 'rgba(30, 208, 231, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'BNP SEPA cash collateral',
             data: getCountryVal('germany', 'bnpSepaCash'),
-            backgroundColor: actBg('rgba(244, 63, 94, 0.85)', 'rgba(244, 63, 94, 0.40)'),
-            borderColor: actBorder('rgba(244, 63, 94, 0.95)', 'rgba(244, 63, 94, 0.85)'),
+            backgroundColor: guarBg('rgba(244, 63, 94, 0.85)', 'rgba(244, 63, 94, 0.40)'),
+            borderColor: guarBorder('rgba(244, 63, 94, 0.95)', 'rgba(244, 63, 94, 0.85)'),
             borderWidth: 1,
             stack: 's'
           }
         ]
       },
-      options: makeOpts(true, 'EUR')
+      options: makeOpts(true, 'EUR', true)
     });
 
     // Chart Netherlands (kEUR)
@@ -2304,22 +2324,22 @@ function update() {
           {
             label: 'PVNED (Cash collateral)',
             data: getCountryVal('netherlands', 'pvned'),
-            backgroundColor: actBg('rgba(16, 185, 129, 0.85)', 'rgba(16, 185, 129, 0.40)'),
-            borderColor: actBorder('rgba(16, 185, 129, 0.95)', 'rgba(16, 185, 129, 0.85)'),
+            backgroundColor: guarBg('rgba(16, 185, 129, 0.85)', 'rgba(16, 185, 129, 0.40)'),
+            borderColor: guarBorder('rgba(16, 185, 129, 0.95)', 'rgba(16, 185, 129, 0.85)'),
             borderWidth: 1,
             stack: 's'
           },
           {
             label: 'Libra Energy',
             data: getCountryVal('netherlands', 'libraEnergy'),
-            backgroundColor: actBg('rgba(245, 158, 11, 0.85)', 'rgba(245, 158, 11, 0.40)'),
-            borderColor: actBorder('rgba(245, 158, 11, 0.95)', 'rgba(245, 158, 11, 0.85)'),
+            backgroundColor: guarBg('rgba(245, 158, 11, 0.85)', 'rgba(245, 158, 11, 0.40)'),
+            borderColor: guarBorder('rgba(245, 158, 11, 0.95)', 'rgba(245, 158, 11, 0.85)'),
             borderWidth: 1,
             stack: 's'
           }
         ]
       },
-      options: makeOpts(true, 'EUR')
+      options: makeOpts(true, 'EUR', true)
     });
   }
 
@@ -2330,9 +2350,9 @@ function update() {
   const forecastLine = allPeriods.map(p => { const i = d.periods.indexOf(p); return i >= 0 ? d.dnbTotalForecastArr[i] : null; });
   const historyLine = allPeriods.map(p => histDNB[p] ?? null);
   makeChart('chart5', { type: 'line', data: { labels: allPeriods, datasets: [
-    { label: 'Forecast', data: forecastLine, borderColor: '#1ED0E7', backgroundColor: 'rgba(30,208,231,0.06)', fill: true, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2, segment: { borderDash: ctx => allPeriods[ctx.p1DataIndex] > lastActualYM ? [4,3] : [] } },
+    { label: 'Forecast', data: forecastLine, borderColor: '#1ED0E7', backgroundColor: 'rgba(30,208,231,0.06)', fill: true, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2, segment: { borderDash: ctx => allPeriods[ctx.p1DataIndex] > lastGuarActualYM ? [4,3] : [] } },
     { label: 'Actual', data: historyLine, borderColor: '#686C73', backgroundColor: 'rgba(104,108,115,0.04)', fill: false, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 1.5 },
-  ]}, options: makeOpts(false, 'NOK') });
+  ]}, options: makeOpts(false, 'NOK', true) });
   const overlapping = fcPeriods.filter(p => histDNB[p] !== undefined);
   const tbody = document.getElementById('devBody');
   tbody.innerHTML = '';
