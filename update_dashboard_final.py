@@ -1268,18 +1268,15 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
             dev = fc_val - hist_val
             dev_pct = (dev / hist_val * 100) if hist_val else 0.0
             
-            trend = "-"
-            if r_idx > 0:
-                prev_p = overlapping[r_idx - 1]
-                prev_fc = dnb_total_arr[periods.index(prev_p)]
-                prev_hist = hist_dnb[prev_p]
-                prev_dev = prev_fc - prev_hist
-                if dev > prev_dev + 500:
-                    trend = "Rising"
-                elif dev < prev_dev - 500:
-                    trend = "Falling"
-                else:
-                    trend = "Stable"
+            if hist_val > fc_val:
+                trend = "Over-utilized"
+                trend_color = RGBColor(255, 90, 90)
+            elif hist_val < fc_val:
+                trend = "Under-utilized"
+                trend_color = RGBColor(30, 208, 231)
+            else:
+                trend = "-"
+                trend_color = RGBColor(104, 108, 115)
                     
             dev_str = f"+{dev:,.0f} (+{dev_pct:.1f}%)" if dev > 0 else (f"{dev:,.0f} ({dev_pct:.1f}%)" if dev < 0 else "0 (0.0%)")
             dev_color = RGBColor(255, 90, 90) if dev > 0 else (RGBColor(30, 208, 231) if dev < 0 else RGBColor(104, 108, 115))
@@ -1301,11 +1298,16 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
                 p.alignment = PP_ALIGN.CENTER if c_idx > 0 else PP_ALIGN.LEFT
                 p.font.size = Pt(10)
                 p.font.name = 'Segoe UI'
-                p.font.color.rgb = RGBColor(22, 25, 29) if c_idx != 3 else dev_color
-                if c_idx == 0:
-                    p.font.bold = True
                 if c_idx == 3:
+                    p.font.color.rgb = dev_color
                     p.font.bold = True
+                elif c_idx == 4:
+                    p.font.color.rgb = trend_color
+                    p.font.bold = True
+                else:
+                    p.font.color.rgb = RGBColor(22, 25, 29)
+                    if c_idx == 0:
+                        p.font.bold = True
 
     # ----------------------------------------------------
     # SLIDE 5: Supporting Views Breakdown

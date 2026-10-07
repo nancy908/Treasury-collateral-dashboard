@@ -392,6 +392,7 @@
     padding: 0.15rem 0.5rem;
     border-radius: 20px;
     letter-spacing: 0.04em;
+    white-space: nowrap;
   }
 
   .chip-blue { background: rgba(30,208,231,0.12); color: var(--tibber-blue); }
@@ -2352,15 +2353,15 @@ function update() {
     const dev = fcVal - histVal;
     const devPct = histVal ? dev / histVal * 100 : 0;
     let trend = '-';
-    if (i > 0) {
-      const prevP = overlapping[i - 1];
-      const prevDev = d.dnbTotalForecastArr[d.periods.indexOf(prevP)] - histDNB[prevP];
-      if (dev > prevDev + 500) trend = 'Rising';
-      else if (dev < prevDev - 500) trend = 'Falling';
-      else trend = 'Stable';
+    let chipCls = 'chip-stable';
+    if (histVal > fcVal) {
+      trend = 'Over-utilized';
+      chipCls = 'chip-red';
+    } else if (histVal < fcVal) {
+      trend = 'Under-utilized';
+      chipCls = 'chip-blue';
     }
     const cls = dev > 0 ? 'over' : (dev < 0 ? 'under' : '');
-    const chipCls = trend === 'Rising' ? 'chip-red' : (trend === 'Falling' ? 'chip-blue' : 'chip-stable');
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${p}</td><td>${fmt(fcVal)}</td><td>${fmt(histVal)}</td><td class="${cls}">${dev >= 0 ? '+' : ''}${fmt(dev)} (${devPct >= 0 ? '+' : ''}${devPct.toFixed(1)}%)</td><td>${trend !== '-' ? `<span class="chip ${chipCls}">${trend}</span>` : '-'}</td>`;
     tbody.appendChild(tr);
