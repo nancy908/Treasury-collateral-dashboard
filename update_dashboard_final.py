@@ -382,6 +382,15 @@ def parse_collateral_csv(csv_path):
         'netherlands': {'forecast': dict(netherlands_fc), 'actual': dict(netherlands_act)}
     }
 
+    # Guarantee line is 300,000 kNOK starting from 2026-10 onwards (200,000 kNOK prior)
+    for p in forecast.keys():
+        if p >= '2026-10':
+            if p not in limits or limits[p] < 300000.0:
+                limits[p] = 300000.0
+        else:
+            if p not in limits:
+                limits[p] = 200000.0
+
     return {
         'fx_rate': fx_rate,
         'utilized_today': utilized_today,
@@ -637,7 +646,7 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
         atra = fd.get('atraLocal', 0.0) * fx_rate
 
         utilization = dnb_nok + dnb_eur + marex + atra
-        limit = limits.get(period, 200000.0)
+        limit = limits.get(period, 300000.0 if period >= '2026-10' else 200000.0)
 
         excess = max(0.0, utilization - limit)
         coll_increase = cash_collateral.get(period, 0.0) - cash_coll_baseline
@@ -706,6 +715,16 @@ const COUNTRY_DATA = {country_data_json};
     html_content = re.sub(
         r'(id="kpi-utilized"[^>]*>)[^<]*',
         lambda m: m.group(1) + utilized_str,
+        html_content
+    )
+
+    # Update KPI2 (DNB Guarantee Line)
+    as_of_period = (collateral_data.get('as_of_date') or '')[:7] or datetime.now().strftime("%Y-%m")
+    current_limit = limits.get(as_of_period, 300000.0 if as_of_period >= '2026-10' else 200000.0)
+    current_limit_str = '{:,}'.format(round(current_limit))
+    html_content = re.sub(
+        r'(id="kpi2"[^>]*>)[^<]*',
+        lambda m: m.group(1) + current_limit_str,
         html_content
     )
 
@@ -907,7 +926,7 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
         cash_total_arr.append(cash_total)
         grand_total_arr.append(dnb_total + atra + cash_total)
         
-        limit = limits.get(p, 200000.0)
+        limit = limits.get(p, 300000.0 if p >= '2026-10' else 200000.0)
         credit_limit_arr.append(limit)
 
     as_of_date = collateral_data.get('as_of_date', 'N/A')
@@ -967,7 +986,7 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
     if has_logo:
         slide2.shapes.add_picture(logo_path, Inches(11.2), Inches(0.4), width=Inches(1.5))
         
-    limit_val = limits.get(as_of_period, 200000.0) if as_of_period else 200000.0
+    limit_val = limits.get(as_of_period, 300000.0 if as_of_period >= '2026-10' else 200000.0) if as_of_period else 300000.0
     cash_coll_val = cash_collateral.get(as_of_period, 0.0) if as_of_period else 0.0
     
     # Compute Breach KPI
@@ -1147,7 +1166,7 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
                 marex = fd.get('marexEurLocal', 0.0) * fx
                 atra = fd.get('atraLocal', 0.0) * fx
                 utilization = dnb_nok + dnb_eur + marex + atra
-                limit = limits.get(p_ym, 200000.0)
+                limit = limits.get(p_ym, 300000.0 if p_ym >= '2026-10' else 200000.0)
                 excess = max(0.0, utilization - limit)
                 
                 cash_coll = cash_collateral.get(p_ym, 0.0)

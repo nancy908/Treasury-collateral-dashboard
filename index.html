@@ -880,7 +880,7 @@
   </div>
   <div class="kpi">
     <div class="kpi-label">DNB GUARANTEE LINE</div>
-    <div class="kpi-value" id="kpi2" style="color:var(--tibber-blue)">200,000</div>
+    <div class="kpi-value" id="kpi2" style="color:var(--tibber-blue)">300,000</div>
     <div class="kpi-sub">kNOK</div>
   </div>
   <div class="kpi">
@@ -1592,8 +1592,8 @@ function computeData(fx, dnbLine) {
     cashSkaArr.push(cashSka); cashBnpArr.push(cashBnp); cashPvnedArr.push(cashPvned); cashAxpoArr.push(cashAxpo);
     dnbTotalArr.push(dnbTotal); dnbAtraArr.push(dnbTotal + atra);
     cashTotalArr.push(cashTotal); grandTotalArr.push(dnbTotal + atra + cashTotal);
-    dnbLineArr.push(dnbLine);
-    const limit = (typeof CREDIT_LIMIT !== 'undefined' && CREDIT_LIMIT[p] !== undefined) ? CREDIT_LIMIT[p] : dnbLine;
+    const limit = (typeof CREDIT_LIMIT !== 'undefined' && CREDIT_LIMIT[p] !== undefined) ? CREDIT_LIMIT[p] : (p >= '2026-10' ? 300000 : dnbLine);
+    dnbLineArr.push(limit);
     creditLimitArr.push(limit);
 
     const fcDnbTotal = f.dnbNok + (f.dnbEurLocal + f.marexEurLocal) * fx;
@@ -1669,20 +1669,10 @@ function update() {
   const labels = d.periods;
 
   const todayYM = new Date().toISOString().slice(0, 7);
-  let currentLimit = dnbLine;
-  if (typeof CREDIT_LIMIT !== 'undefined') {
-    if (CREDIT_LIMIT[todayYM] !== undefined) {
-      currentLimit = CREDIT_LIMIT[todayYM];
-    } else if (d.periods.length > 0) {
-      for (const p of d.periods) {
-        if (CREDIT_LIMIT[p] !== undefined) {
-          currentLimit = CREDIT_LIMIT[p];
-          break;
-        }
-      }
-    }
-  }
-  document.getElementById('kpi2').textContent = fmt(dnbLine);
+  let currentLimit = (typeof CREDIT_LIMIT !== 'undefined' && CREDIT_LIMIT[todayYM] !== undefined)
+    ? CREDIT_LIMIT[todayYM]
+    : (todayYM >= '2026-10' ? 300000 : dnbLine);
+  document.getElementById('kpi2').textContent = fmt(currentLimit);
 
   const lastActualYM = getLastActualYM();
   const isActualMonth = p => p <= lastActualYM;
@@ -1742,7 +1732,7 @@ function update() {
         utilization = dnbNok + dnbEur + marex + atra;
       }
       
-      const limit = CREDIT_LIMIT[p] !== undefined ? CREDIT_LIMIT[p] : dnbLine;
+      const limit = (typeof CREDIT_LIMIT !== 'undefined' && CREDIT_LIMIT[p] !== undefined) ? CREDIT_LIMIT[p] : (p >= '2026-10' ? 300000 : dnbLine);
       const excess = Math.max(0, utilization - limit);
       
       const cashColl = CASH_COLLATERAL[p] || 0;
