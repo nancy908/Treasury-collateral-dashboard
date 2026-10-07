@@ -1431,15 +1431,15 @@ const CASH_COLLATERAL = {
   "2027-12": 49800
 };
 const CASH_AFTER_COLLATERAL = {
-  "2026-01": 479429,
-  "2026-02": 876435,
-  "2026-03": 788398,
-  "2026-04": 240627,
-  "2026-05": 782036,
+  "2026-01": 519558,
+  "2026-02": 891184,
+  "2026-03": 785383,
+  "2026-04": 228064,
+  "2026-05": 771973,
   "2026-06": 532535,
-  "2026-07": 361966,
-  "2026-08": 324476,
-  "2026-09": 126934,
+  "2026-07": 362819,
+  "2026-08": 369675,
+  "2026-09": 221072,
   "2026-10": 198667,
   "2026-11": 289839,
   "2026-12": 452386,
@@ -1467,15 +1467,15 @@ const OKR_DEDUCTIONS = {
   "2026-12": 45564
 };
 const SIM_CASH_AFTER_COLLATERAL = {
-  "2026-01": 479429,
-  "2026-02": 876436,
-  "2026-03": 788399,
-  "2026-04": 240627,
-  "2026-05": 782036,
+  "2026-01": 519558,
+  "2026-02": 891184,
+  "2026-03": 785383,
+  "2026-04": 228064,
+  "2026-05": 771973,
   "2026-06": 532535,
-  "2026-07": 361966,
-  "2026-08": 324476,
-  "2026-09": 110045,
+  "2026-07": 362819,
+  "2026-08": 369675,
+  "2026-09": 204182,
   "2026-10": 163709,
   "2026-11": 247509,
   "2026-12": 406822,
@@ -1611,8 +1611,12 @@ function makeScales(stacked, currency) {
   const yTitle = currency === 'NOK' ? 'kNOK' : currency === 'EUR' ? 'kEUR' : (currency || 'kNOK (EUR conv.)');
   return { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', maxRotation: 45 }, stacked: !!stacked }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { family: 'Poppins', size: 10 }, color: '#686C73', callback: v => (v/1000).toFixed(0) + 'k' }, title: { display: true, text: yTitle, color: '#686C73', font: { family: 'Poppins', size: 10, weight: '600' }, padding: { bottom: 4 } }, stacked: !!stacked } };
 }
+function getLastActualYM() {
+  const actualMonths = (typeof CASH_SOURCES !== 'undefined') ? Object.keys(CASH_SOURCES).filter(p => CASH_SOURCES[p] === 'Actual').sort() : [];
+  return actualMonths.length > 0 ? actualMonths[actualMonths.length - 1] : '2026-09';
+}
 function makeOpts(stacked, currency) {
-  const asOfYM = document.body.innerHTML.match(/As of:\s*(\d{4}-\d{2}-\d{2})/)?.[1].slice(0, 7) || new Date().toISOString().slice(0, 7);
+  const lastActualYM = getLastActualYM();
   const curUnit = currency === 'EUR' ? 'kEUR' : 'kNOK';
   return {
     responsive: true,
@@ -1630,7 +1634,7 @@ function makeOpts(stacked, currency) {
         callbacks: {
           title: ctx => {
             const p = ctx[0].label;
-            const type = p <= asOfYM ? 'Actual' : 'Forecast';
+            const type = p <= lastActualYM ? 'Actual' : 'Forecast';
             return `${p} (${type})`;
           },
           label: ctx => ` ${ctx.dataset.label}: ${Math.round(ctx.raw).toLocaleString()} ${curUnit}`
@@ -1679,10 +1683,11 @@ function update() {
   }
   document.getElementById('kpi2').textContent = fmt(dnbLine);
 
-  const asOfYM = document.body.innerHTML.match(/As of:\s*(\d{4}-\d{2}-\d{2})/)?.[1].slice(0, 7) || todayYM;
-  const actBg = (actCol, fcCol) => labels.map(p => p <= asOfYM ? actCol : fcCol);
-  const actBorder = (actBorderCol, fcBorderCol) => labels.map(p => p <= asOfYM ? actBorderCol : fcBorderCol);
-  const breachPeriods = d.periods.map((p, i) => ({ p, excess: d.dnbTotalArr[i] - d.creditLimitArr[i] })).filter(x => x.p >= asOfYM && x.excess > 0);
+  const lastActualYM = getLastActualYM();
+  const isActualMonth = p => p <= lastActualYM;
+  const actBg = (actCol, fcCol) => labels.map(p => isActualMonth(p) ? actCol : fcCol);
+  const actBorder = (actBorderCol, fcBorderCol) => labels.map(p => isActualMonth(p) ? actBorderCol : fcBorderCol);
+  const breachPeriods = d.periods.map((p, i) => ({ p, excess: d.dnbTotalArr[i] - d.creditLimitArr[i] })).filter(x => x.p > lastActualYM && x.excess > 0);
   const breachEl = document.getElementById('kpiBreach');
   const breachSubEl = document.getElementById('kpiBreachSub');
   if (breachPeriods.length > 0) {
@@ -1723,6 +1728,8 @@ function update() {
       
       const hasCash = MONTHLY_CASH_FORECAST[p] !== undefined;
       const cashPos = MONTHLY_CASH_FORECAST[p] || 0;
+      const sourceVal = (typeof CASH_SOURCES !== 'undefined') ? (CASH_SOURCES[p] || '-') : '-';
+      const isActual = sourceVal === 'Actual' || p <= lastActualYM;
       
       let utilization = 0;
       if (FORECAST[p]) {
@@ -1740,16 +1747,21 @@ function update() {
       const cashColl = CASH_COLLATERAL[p] || 0;
       const collChange = cashColl - cashCollToday;
       
-      const cashAfter = cashPos - excess - collChange;
+      // For actual months: Cash After Collateral = Cash Position
+      const cashAfter = isActual ? cashPos : (cashPos - excess - collChange);
       
       if (hasCash) {
         const isPosBreach = cashPos < 125000;
         cashPosRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; font-weight: ${isPosBreach ? '700' : 'normal'}; color: ${isPosBreach ? '#EF4444' : 'inherit'};">${fmt(cashPos)}</td>`;
-        excessRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;" class="${excess > 0 ? 'over' : ''}">${excess > 0 ? '+' : ''}${fmt(excess)}</td>`;
-        collChangeRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;" class="${collChange > 0 ? 'over' : (collChange < 0 ? 'under' : '')}">${collChange > 0 ? '+' : ''}${fmt(collChange)}</td>`;
+        if (isActual) {
+          excessRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; color: var(--tibber-dark-grey);">-</td>`;
+          collChangeRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; color: var(--tibber-dark-grey);">-</td>`;
+        } else {
+          excessRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;" class="${excess > 0 ? 'over' : ''}">${excess > 0 ? '+' : ''}${fmt(excess)}</td>`;
+          collChangeRow += `<td style="text-align: center; padding: 0.35rem 0.75rem;" class="${collChange > 0 ? 'over' : (collChange < 0 ? 'under' : '')}">${collChange > 0 ? '+' : ''}${fmt(collChange)}</td>`;
+        }
         const isCashBreach = cashAfter < 125000;
         cashAfterRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; font-weight: 700; color: ${isCashBreach ? '#EF4444' : 'var(--tibber-blue)'};">${fmt(cashAfter)}</td>`;
-        const sourceVal = (typeof CASH_SOURCES !== 'undefined') ? (CASH_SOURCES[p] || '-') : '-';
         cashSourceRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; font-style: italic; color: #a1a1aa;">${sourceVal}</td>`;
       } else {
         cashPosRow += `<td style="text-align: center; padding: 0.35rem 0.75rem; color: var(--tibber-dark-grey);">-</td>`;
@@ -1799,11 +1811,11 @@ function update() {
   // Highlight points below covenant (< 125,000 kNOK) with Red dots, distinguish actual vs forecast
   const cashPointColors = cashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#EF4444';
-    return labels[i] > asOfYM ? '#34D399' : '#10B981';
+    return labels[i] > lastActualYM ? '#34D399' : '#10B981';
   });
   const cashPointBorderColors = cashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#FFFFFF';
-    return labels[i] > asOfYM ? '#34D399' : '#10B981';
+    return labels[i] > lastActualYM ? '#34D399' : '#10B981';
   });
   const cashPointRadii = cashAfterArr.map(v => (v !== null && v < 125000) ? 6 : 4);
   const cashPointHoverRadii = cashAfterArr.map(v => (v !== null && v < 125000) ? 8 : 6);
@@ -1818,7 +1830,7 @@ function update() {
     callbacks: {
       title: ctx => {
         const p = ctx[0].label;
-        const type = p <= asOfYM ? 'Actual' : 'Forecast';
+        const type = p <= lastActualYM ? 'Actual' : 'Forecast';
         return `${p} (${type})`;
       },
       label: ctx => {
@@ -1826,7 +1838,7 @@ function update() {
         if (val === null || val === undefined) return ` ${ctx.dataset.label}: -`;
         const formatted = `${Math.round(val).toLocaleString()} kNOK (${(val / 1000).toFixed(1)}m)`;
         const p = ctx.label;
-        const type = p <= asOfYM ? 'Actual' : 'Forecast';
+        const type = p <= lastActualYM ? 'Actual' : 'Forecast';
         if (ctx.dataset.label === 'Cash after collateral') {
           const breachNote = val < 125000 ? '  ⚠️ Below Covenant (< 125m)' : '';
           return ` ${ctx.dataset.label} (${type}): ${formatted}${breachNote}`;
@@ -1885,8 +1897,8 @@ function update() {
       yAxisID: 'y',
       stack: 'cash',
       segment: {
-        borderColor: ctx => labels[ctx.p1DataIndex] > asOfYM ? '#34D399' : '#10B981',
-        borderDash: ctx => labels[ctx.p1DataIndex] > asOfYM ? [8, 4] : undefined,
+        borderColor: ctx => labels[ctx.p1DataIndex] > lastActualYM ? '#34D399' : '#10B981',
+        borderDash: ctx => labels[ctx.p1DataIndex] > lastActualYM ? [8, 4] : undefined,
       }
     },
     { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
@@ -1920,11 +1932,11 @@ function update() {
 
   const simCashPointColors = simCashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#EF4444';
-    return labels[i] > asOfYM ? '#34D399' : '#10B981';
+    return labels[i] > lastActualYM ? '#34D399' : '#10B981';
   });
   const simCashPointBorderColors = simCashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#FFFFFF';
-    return labels[i] > asOfYM ? '#34D399' : '#10B981';
+    return labels[i] > lastActualYM ? '#34D399' : '#10B981';
   });
   const simCashPointRadii = simCashAfterArr.map(v => (v !== null && v < 125000) ? 6 : 4);
   const simCashPointHoverRadii = simCashAfterArr.map(v => (v !== null && v < 125000) ? 8 : 6);
@@ -1972,7 +1984,7 @@ function update() {
     callbacks: {
       title: ctx => {
         const p = ctx[0].label;
-        const type = p <= asOfYM ? 'Actual' : 'Forecast';
+        const type = p <= lastActualYM ? 'Actual' : 'Forecast';
         return `${p} (${type}) · Simulation (OKR investments)`;
       },
       label: ctx => {
@@ -1980,7 +1992,7 @@ function update() {
         if (val === null || val === undefined) return ` ${ctx.dataset.label}: -`;
         const formatted = `${Math.round(val).toLocaleString()} kNOK (${(val / 1000).toFixed(1)}m)`;
         const p = ctx.label;
-        const type = p <= asOfYM ? 'Actual' : 'Forecast';
+        const type = p <= lastActualYM ? 'Actual' : 'Forecast';
         if (ctx.dataset.label.includes('Cash after collateral')) {
           const breachNote = val < 125000 ? '  ⚠️ Below Covenant (< 125m)' : '  ✅ Above Covenant';
           const ded = okrDeductions[p];
@@ -2041,8 +2053,8 @@ function update() {
       yAxisID: 'y',
       stack: 'cash',
       segment: {
-        borderColor: ctx => labels[ctx.p1DataIndex] > asOfYM ? '#34D399' : '#10B981',
-        borderDash: ctx => labels[ctx.p1DataIndex] > asOfYM ? [8, 4] : undefined,
+        borderColor: ctx => labels[ctx.p1DataIndex] > lastActualYM ? '#34D399' : '#10B981',
+        borderDash: ctx => labels[ctx.p1DataIndex] > lastActualYM ? [8, 4] : undefined,
       }
     },
     { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
@@ -2144,7 +2156,7 @@ function update() {
         if (!cData) return 0;
         const act = cData.actual ? cData.actual[p] : null;
         const fc = cData.forecast ? cData.forecast[p] : null;
-        const hasAct = p <= asOfYM && act && (Object.values(act).reduce((a, b) => a + b, 0) > 0);
+        const hasAct = p <= lastActualYM && act && (Object.values(act).reduce((a, b) => a + b, 0) > 0);
         const src = hasAct ? act : fc;
         return src ? (src[field] || 0) : 0;
       });
@@ -2327,7 +2339,7 @@ function update() {
   const forecastLine = allPeriods.map(p => { const i = d.periods.indexOf(p); return i >= 0 ? d.dnbTotalForecastArr[i] : null; });
   const historyLine = allPeriods.map(p => histDNB[p] ?? null);
   makeChart('chart5', { type: 'line', data: { labels: allPeriods, datasets: [
-    { label: 'Forecast', data: forecastLine, borderColor: '#1ED0E7', backgroundColor: 'rgba(30,208,231,0.06)', fill: true, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2, segment: { borderDash: ctx => allPeriods[ctx.p1DataIndex] > asOfYM ? [4,3] : [] } },
+    { label: 'Forecast', data: forecastLine, borderColor: '#1ED0E7', backgroundColor: 'rgba(30,208,231,0.06)', fill: true, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2, segment: { borderDash: ctx => allPeriods[ctx.p1DataIndex] > lastActualYM ? [4,3] : [] } },
     { label: 'Actual', data: historyLine, borderColor: '#686C73', backgroundColor: 'rgba(104,108,115,0.04)', fill: false, tension: 0.3, pointRadius: 3, pointHoverRadius: 5, borderWidth: 1.5 },
   ]}, options: makeOpts(false, 'NOK') });
   const overlapping = fcPeriods.filter(p => histDNB[p] !== undefined);

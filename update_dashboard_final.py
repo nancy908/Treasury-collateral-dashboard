@@ -642,7 +642,10 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
         excess = max(0.0, utilization - limit)
         coll_increase = cash_collateral.get(period, 0.0) - cash_coll_baseline
 
-        cash_after_collateral[period] = cash_pos - excess - coll_increase
+        if cash_sources.get(period) == 'Actual' or period <= '2026-09':
+            cash_after_collateral[period] = cash_pos
+        else:
+            cash_after_collateral[period] = cash_pos - excess - coll_increase
 
     # Simulation Cash After Collateral (OKR investments):
     # Always deduct specified OKR investment amounts compared to Panel 2 Cash After Collateral:
@@ -827,8 +830,10 @@ def make_white_logo(original_path, white_path):
     except Exception as e:
         print(f"Warning: failed to make white logo: {e}")
 
-def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx_path):
+def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx_path, cash_sources=None):
     """Generate modern, professionally styled slide deck for the collateral dashboard"""
+    if cash_sources is None:
+        cash_sources = {}
     prs = Presentation()
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
@@ -1148,8 +1153,12 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
                 cash_coll = cash_collateral.get(p_ym, 0.0)
                 coll_change = cash_coll - cash_coll_baseline
                 
-                # Formula matching HTML: cash_after = cash_pos - excess - coll_change
-                cash_after = cash_pos - excess - coll_change
+                # Formula matching HTML: cash_after = cash_pos - excess - coll_change (or cash_pos if Actual)
+                is_actual = (cash_sources.get(p_ym) == 'Actual') or (p_ym <= '2026-09')
+                if is_actual:
+                    cash_after = cash_pos
+                else:
+                    cash_after = cash_pos - excess - coll_change
                 
                 val_str = ""
                 cell_color = RGBColor(104, 108, 115)
@@ -1161,16 +1170,22 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
                         cell_color = RGBColor(255, 90, 90)
                         is_bold = True
                 elif r_idx == 1:
-                    val_str = f"+{excess:,.0f}" if excess > 0 else "-"
-                    if excess > 0:
-                        cell_color = RGBColor(255, 90, 90)
-                        is_bold = True
+                    if is_actual:
+                        val_str = "-"
+                    else:
+                        val_str = f"+{excess:,.0f}" if excess > 0 else "-"
+                        if excess > 0:
+                            cell_color = RGBColor(255, 90, 90)
+                            is_bold = True
                 elif r_idx == 2:
-                    val_str = f"+{coll_change:,.0f}" if coll_change > 0 else (f"{coll_change:,.0f}" if coll_change < 0 else "0")
-                    if coll_change > 0:
-                        cell_color = RGBColor(255, 90, 90)
-                    elif coll_change < 0:
-                        cell_color = RGBColor(16, 185, 129)
+                    if is_actual:
+                        val_str = "-"
+                    else:
+                        val_str = f"+{coll_change:,.0f}" if coll_change > 0 else (f"{coll_change:,.0f}" if coll_change < 0 else "0")
+                        if coll_change > 0:
+                            cell_color = RGBColor(255, 90, 90)
+                        elif coll_change < 0:
+                            cell_color = RGBColor(16, 185, 129)
                 elif r_idx == 3:
                     val_str = f"{cash_after:,.0f}"
                     if cash_after < 125000:
@@ -1848,7 +1863,7 @@ def main():
 
     pptx_path = os.path.join(script_dir, "collateral_dashboard.pptx")
     print(f"\nGenerating PPTX Presentation...")
-    generate_pptx_dashboard(collateral_data, monthly_cash, collateral_data['cash_collateral'], pptx_path)
+    generate_pptx_dashboard(collateral_data, monthly_cash, collateral_data['cash_collateral'], pptx_path, cash_sources)
     print(f"[OK] PPTX written")
 
     # Copy files to Shared Drive if accessible
