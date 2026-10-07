@@ -469,7 +469,8 @@ def parse_fpa_csv(csv_path):
                 if re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
                     fpa_data[date_str] = {
                         'BU26': get_col_val(row, ['bu26', 'budget26']),
-                        'BU27': get_col_val(row, ['bu27base', 'bu27', 'budget27base', 'budget27']),
+                        'BU27': get_col_val(row, ['bu27', 'bu27base']),
+                        'BUD27': get_col_val(row, ['bud27', 'budget27']),
                         'FC1.5': get_col_val(row, ['fc15', 'fc1.5']),
                         'FC1.7': get_col_val(row, ['fc17', 'fc1.7']),
                         'Actual': get_col_val(row, ['actual', 'actuals']),
@@ -485,42 +486,15 @@ def bootstrap_cash_flow(treasury, fpa, current_month=None):
     monthly_cash = {}
     cash_sources = {}
 
-    if not current_month:
-        current_month = "2026-08"
-
-    # Determine current 3 months (current, current + 1, current + 2)
-    try:
-        import datetime
-        current_date = datetime.datetime.strptime(current_month + "-01", "%Y-%m-%d").date()
-        current_3_months = []
-        for i in range(3):
-            m = current_date.month + i
-            y = current_date.year
-            if m > 12:
-                m -= 12
-                y += 1
-            current_3_months.append(f"{y}-{m:02d}")
-    except:
-        current_3_months = ["2026-08", "2026-09", "2026-10"]
-
-    # Process FP&A data to populate monthly cash positions and sources based on rules
+    # Process FP&A data to populate monthly cash positions and sources based on rules:
+    # 1. 2026-01 to 2026-09: use Actual
+    # 2. 2026-10, 2026-11, 2026-12: use WCFF
+    # 3. 2027-01 onwards: use BUD27
     for date_str, values in fpa.items():
         month_str = date_str[:7]
         
-        # Rule (1): From 2026-12 and onwards -> use BU27 Base figures
-        if month_str >= '2026-12':
-            val = values.get('BU27', 0.0)
-            if val > 0:
-                monthly_cash[month_str] = val
-                cash_sources[month_str] = "BU27 Base"
-            else:
-                val = values.get('FC1.7', 0.0) or values.get('FC1.5', 0.0) or values.get('BU26', 0.0)
-                if val > 0:
-                    monthly_cash[month_str] = val
-                    cash_sources[month_str] = "Budget26"
-
-        # Rule (2): Earlier than current month -> use Actual from CFF FP&A (if no actual, fallback to WCFF/BU26)
-        elif month_str < current_month:
+        # Rule (1): Earlier than or equal to 2026-09 -> use Actual from CFF FP&A
+        if month_str <= '2026-09':
             val = values.get('Actual', 0.0)
             if val > 0:
                 monthly_cash[month_str] = val
@@ -530,20 +504,30 @@ def bootstrap_cash_flow(treasury, fpa, current_month=None):
                 if val > 0:
                     monthly_cash[month_str] = val
                     cash_sources[month_str] = "WCFF" if values.get('WCFF') else "Budget26"
-                
-        # Rule (3): Current 3 months (before 2026-12) -> use WCFF from CFF FP&A
-        elif month_str in current_3_months:
-            val = values.get('WCFF', 0.0) or values.get('BU26', 0.0)
-            if val > 0:
-                monthly_cash[month_str] = val
-                cash_sources[month_str] = "WCFF" if values.get('WCFF') else "Budget26"
 
-        # Rule (4): Other future months in 2026 (before 2026-12) -> use BU26 from CFF FP&A (rename to Budget26)
-        elif month_str.startswith('2026-'):
-            val = values.get('BU26', 0.0)
+        # Rule (2): 2026-10, 2026-11, 2026-12 -> use WCFF from CFF FP&A
+        elif month_str in ['2026-10', '2026-11', '2026-12']:
+            val = values.get('WCFF', 0.0)
             if val > 0:
                 monthly_cash[month_str] = val
-                cash_sources[month_str] = "Budget26"
+                cash_sources[month_str] = "WCFF"
+            else:
+                val = values.get('BUD27', 0.0) or values.get('BU27', 0.0) or values.get('BU26', 0.0)
+                if val > 0:
+                    monthly_cash[month_str] = val
+                    cash_sources[month_str] = "WCFF"
+
+        # Rule (3): 2027-01 onwards -> use BUD27 from CFF FP&A
+        elif month_str >= '2027-01':
+            val = values.get('BUD27', 0.0) or values.get('BU27', 0.0)
+            if val > 0:
+                monthly_cash[month_str] = val
+                cash_sources[month_str] = "BUD27"
+            else:
+                val = values.get('FC1.7', 0.0) or values.get('FC1.5', 0.0) or values.get('BU26', 0.0)
+                if val > 0:
+                    monthly_cash[month_str] = val
+                    cash_sources[month_str] = "Budget26"
 
     return monthly_cash, cash_sources
 
