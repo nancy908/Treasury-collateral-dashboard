@@ -1822,11 +1822,11 @@ function update() {
   // Highlight points below covenant (< 125,000 kNOK) with Red dots, distinguish actual vs forecast
   const cashPointColors = cashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#EF4444';
-    return labels[i] > lastActualYM ? '#34D399' : '#10B981';
+    return labels[i] > lastGuarActualYM ? '#34D399' : '#10B981';
   });
   const cashPointBorderColors = cashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#FFFFFF';
-    return labels[i] > lastActualYM ? '#34D399' : '#10B981';
+    return labels[i] > lastGuarActualYM ? '#34D399' : '#10B981';
   });
   const cashPointRadii = cashAfterArr.map(v => (v !== null && v < 125000) ? 6 : 4);
   const cashPointHoverRadii = cashAfterArr.map(v => (v !== null && v < 125000) ? 8 : 6);
@@ -1841,7 +1841,7 @@ function update() {
     callbacks: {
       title: ctx => {
         const p = ctx[0].label;
-        const type = p <= lastActualYM ? 'Actual' : 'Forecast';
+        const type = p <= lastGuarActualYM ? 'Actual' : 'Forecast';
         return `${p} (${type})`;
       },
       label: ctx => {
@@ -1849,7 +1849,7 @@ function update() {
         if (val === null || val === undefined) return ` ${ctx.dataset.label}: -`;
         const formatted = `${Math.round(val).toLocaleString()} kNOK (${(val / 1000).toFixed(1)}m)`;
         const p = ctx.label;
-        const type = p <= lastActualYM ? 'Actual' : 'Forecast';
+        const type = p <= lastGuarActualYM ? 'Actual' : 'Forecast';
         if (ctx.dataset.label === 'Cash after collateral') {
           const breachNote = val < 125000 ? '  ⚠️ Below Covenant (< 125m)' : '';
           return ` ${ctx.dataset.label} (${type}): ${formatted}${breachNote}`;
@@ -1874,8 +1874,8 @@ function update() {
     {
       label: 'DNB Guarantee',
       data: d.dnbTotalArr,
-      backgroundColor: actBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
-      borderColor: actBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
+      backgroundColor: guarBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
+      borderColor: guarBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
       borderWidth: 1,
       stack: 's',
       yAxisID: 'y'
@@ -1883,8 +1883,8 @@ function update() {
     {
       label: 'Atradius EUR Guarantee',
       data: d.atraArr,
-      backgroundColor: actBg('rgba(200,109,255,0.75)', 'rgba(217,70,239,0.40)'),
-      borderColor: actBorder('rgba(200,109,255,0.90)', 'rgba(217,70,239,0.85)'),
+      backgroundColor: guarBg('rgba(200,109,255,0.75)', 'rgba(217,70,239,0.40)'),
+      borderColor: guarBorder('rgba(200,109,255,0.90)', 'rgba(217,70,239,0.85)'),
       borderWidth: 1,
       stack: 's',
       yAxisID: 'y'
@@ -1908,8 +1908,8 @@ function update() {
       yAxisID: 'y',
       stack: 'cash',
       segment: {
-        borderColor: ctx => labels[ctx.p1DataIndex] > lastActualYM ? '#34D399' : '#10B981',
-        borderDash: ctx => labels[ctx.p1DataIndex] > lastActualYM ? [8, 4] : undefined,
+        borderColor: ctx => labels[ctx.p1DataIndex] > lastGuarActualYM ? '#34D399' : '#10B981',
+        borderDash: ctx => labels[ctx.p1DataIndex] > lastGuarActualYM ? [8, 4] : undefined,
       }
     },
     { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
@@ -1943,11 +1943,11 @@ function update() {
 
   const simCashPointColors = simCashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#EF4444';
-    return labels[i] > lastActualYM ? '#34D399' : '#10B981';
+    return labels[i] > lastGuarActualYM ? '#34D399' : '#10B981';
   });
   const simCashPointBorderColors = simCashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#FFFFFF';
-    return labels[i] > lastActualYM ? '#34D399' : '#10B981';
+    return labels[i] > lastGuarActualYM ? '#34D399' : '#10B981';
   });
   const simCashPointRadii = simCashAfterArr.map(v => (v !== null && v < 125000) ? 6 : 4);
   const simCashPointHoverRadii = simCashAfterArr.map(v => (v !== null && v < 125000) ? 8 : 6);
@@ -1995,7 +1995,7 @@ function update() {
     callbacks: {
       title: ctx => {
         const p = ctx[0].label;
-        const type = p <= lastActualYM ? 'Actual' : 'Forecast';
+        const type = p <= lastGuarActualYM ? 'Actual' : 'Forecast';
         return `${p} (${type}) · Simulation (OKR investments)`;
       },
       label: ctx => {
@@ -2003,7 +2003,7 @@ function update() {
         if (val === null || val === undefined) return ` ${ctx.dataset.label}: -`;
         const formatted = `${Math.round(val).toLocaleString()} kNOK (${(val / 1000).toFixed(1)}m)`;
         const p = ctx.label;
-        const type = p <= lastActualYM ? 'Actual' : 'Forecast';
+        const type = p <= lastGuarActualYM ? 'Actual' : 'Forecast';
         if (ctx.dataset.label.includes('Cash after collateral')) {
           const breachNote = val < 125000 ? '  ⚠️ Below Covenant (< 125m)' : '  ✅ Above Covenant';
           const ded = okrDeductions[p];
@@ -2030,8 +2030,8 @@ function update() {
     {
       label: 'DNB Guarantee',
       data: d.dnbTotalArr,
-      backgroundColor: actBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
-      borderColor: actBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
+      backgroundColor: guarBg('rgba(30,208,231,0.85)', 'rgba(56,189,248,0.40)'),
+      borderColor: guarBorder('rgba(30,208,231,0.95)', 'rgba(56,189,248,0.85)'),
       borderWidth: 1,
       stack: 's',
       yAxisID: 'y'
@@ -2039,8 +2039,8 @@ function update() {
     {
       label: 'Atradius EUR Guarantee',
       data: d.atraArr,
-      backgroundColor: actBg('rgba(200,109,255,0.75)', 'rgba(217,70,239,0.40)'),
-      borderColor: actBorder('rgba(200,109,255,0.90)', 'rgba(217,70,239,0.85)'),
+      backgroundColor: guarBg('rgba(200,109,255,0.75)', 'rgba(217,70,239,0.40)'),
+      borderColor: guarBorder('rgba(200,109,255,0.90)', 'rgba(217,70,239,0.85)'),
       borderWidth: 1,
       stack: 's',
       yAxisID: 'y'
@@ -2064,8 +2064,8 @@ function update() {
       yAxisID: 'y',
       stack: 'cash',
       segment: {
-        borderColor: ctx => labels[ctx.p1DataIndex] > lastActualYM ? '#34D399' : '#10B981',
-        borderDash: ctx => labels[ctx.p1DataIndex] > lastActualYM ? [8, 4] : undefined,
+        borderColor: ctx => labels[ctx.p1DataIndex] > lastGuarActualYM ? '#34D399' : '#10B981',
+        borderDash: ctx => labels[ctx.p1DataIndex] > lastGuarActualYM ? [8, 4] : undefined,
       }
     },
     { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
