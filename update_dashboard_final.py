@@ -1673,33 +1673,70 @@ def parse_cash_position_history_csv(csv_path):
     data['bank_balance']['by_entity'] = by_entity
     data['bank_balance']['group_total'] = group_total
 
-    # --- 2. Parse Section 2: Forecast vs Actual & Deviation (Cols K-O) ---
+    # --- 2. Parse Section 2: Forecast vs Actual & Deviation (Cols K-P) ---
     f_dates = []
     f_weeks = []
     f_actuals = []
     f_forecasts = []
+    f_forecasts_1w = []
+    f_forecasts_2w = []
+    f_forecasts_3w = []
     f_deviations = []
 
-    for r in rows[3:]:
-        if len(r) > 10 and r[10].strip():
-            d_str = r[10].strip()
+    # Dynamic header lookup in early rows
+    sec2_col_date = 10
+    sec2_col_week = 11
+    sec2_col_actual = 12
+    sec2_col_1w = 13
+    sec2_col_2w = 14
+    sec2_col_3w = 15
+    header_row_idx = 2
+
+    for r_i, r in enumerate(rows[:6]):
+        for c_i, cell in enumerate(r):
+            c_clean = cell.strip().lower()
+            if 'actual cash position' in c_clean:
+                sec2_col_actual = c_i
+                header_row_idx = r_i
+            elif '1w forecast' in c_clean or ('forecast' in c_clean and '1w' in c_clean):
+                sec2_col_1w = c_i
+            elif '2w forecast' in c_clean or ('forecast' in c_clean and '2w' in c_clean):
+                sec2_col_2w = c_i
+            elif '3w forecast' in c_clean or ('forecast' in c_clean and '3w' in c_clean):
+                sec2_col_3w = c_i
+            elif c_i < 12 and c_clean == 'date' and c_i >= 8:
+                sec2_col_date = c_i
+            elif c_i < 13 and c_clean == 'week' and c_i >= 9:
+                sec2_col_week = c_i
+
+    for r in rows[header_row_idx + 1:]:
+        if len(r) > sec2_col_date and r[sec2_col_date].strip():
+            d_str = r[sec2_col_date].strip()
             if not re.match(r'^\d{4}-\d{2}-\d{2}$', d_str):
                 continue
-            wk = r[11].strip() if len(r) > 11 else ""
-            act = parse_amt(r[12]) if len(r) > 12 else None
-            fc = parse_amt(r[13]) if len(r) > 13 else None
-            dev = (act - fc) if (act is not None and fc is not None) else None
+            wk = r[sec2_col_week].strip() if len(r) > sec2_col_week else ""
+            act = parse_amt(r[sec2_col_actual]) if len(r) > sec2_col_actual else None
+            fc_1w = parse_amt(r[sec2_col_1w]) if len(r) > sec2_col_1w else None
+            fc_2w = parse_amt(r[sec2_col_2w]) if len(r) > sec2_col_2w else None
+            fc_3w = parse_amt(r[sec2_col_3w]) if len(r) > sec2_col_3w else None
+            dev = (act - fc_1w) if (act is not None and fc_1w is not None) else None
 
             f_dates.append(d_str)
             f_weeks.append(wk)
             f_actuals.append(round(act, 2) if act is not None else None)
-            f_forecasts.append(round(fc, 2) if fc is not None else None)
+            f_forecasts.append(round(fc_1w, 2) if fc_1w is not None else None)
+            f_forecasts_1w.append(round(fc_1w, 2) if fc_1w is not None else None)
+            f_forecasts_2w.append(round(fc_2w, 2) if fc_2w is not None else None)
+            f_forecasts_3w.append(round(fc_3w, 2) if fc_3w is not None else None)
             f_deviations.append(round(dev, 2) if dev is not None else None)
 
     data['forecast_vs_actual']['dates'] = f_dates
     data['forecast_vs_actual']['weeks'] = f_weeks
     data['forecast_vs_actual']['actual'] = f_actuals
     data['forecast_vs_actual']['forecast'] = f_forecasts
+    data['forecast_vs_actual']['forecast_1w'] = f_forecasts_1w
+    data['forecast_vs_actual']['forecast_2w'] = f_forecasts_2w
+    data['forecast_vs_actual']['forecast_3w'] = f_forecasts_3w
     data['forecast_vs_actual']['deviation'] = f_deviations
 
     return data
