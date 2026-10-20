@@ -142,6 +142,7 @@ def parse_collateral_csv(csv_path):
             period = to_ym(period_val)
             if not period:
                 continue
+
                 
             if period not in forecast:
                 forecast[period] = {
@@ -158,8 +159,8 @@ def parse_collateral_csv(csv_path):
                 
             gtype_lower = gtype.lower()
             ben_lower = beneficiary.lower()
-            if 'libra' in ben_lower:
-                continue
+
+
             
             if gtype_lower == 'dnb nok':
                 forecast[period]['dnbNok'] += amt_nok
@@ -197,6 +198,7 @@ def parse_collateral_csv(csv_path):
             period = to_ym(period_val)
             if not period:
                 continue
+
                 
             if period not in actuals:
                 actuals[period] = {
@@ -213,8 +215,8 @@ def parse_collateral_csv(csv_path):
                 
             gtype_lower = gtype.lower()
             ben_lower = beneficiary.lower()
-            if 'libra' in ben_lower:
-                continue
+
+
             
             if gtype_lower == 'dnb nok':
                 actuals[period]['dnbNok'] += amt_nok
@@ -274,13 +276,25 @@ def parse_collateral_csv(csv_path):
                 })
 
     # Dynamically build history dicts from parsed actuals
+    as_of_ym = as_of_date[:7] if as_of_date else '2026-10'
+    if today_dnb and as_of_ym in actuals:
+        td_dnb_nok = sum(parse_num(item['amt_nok']) for item in today_dnb if item['gtype'].lower() == 'dnb nok')
+        td_marex = sum(parse_num(item['amt_keur']) if item['amt_keur'] else (parse_num(item['amt_nok']) / fx_rate) for item in today_dnb if item['gtype'].lower() == 'dnb eur' and 'marex' in item['beneficiary'].lower())
+        td_dnb_eur = sum(parse_num(item['amt_keur']) if item['amt_keur'] else (parse_num(item['amt_nok']) / fx_rate) for item in today_dnb if item['gtype'].lower() == 'dnb eur' and 'marex' not in item['beneficiary'].lower())
+        if td_dnb_nok > 0:
+            actuals[as_of_ym]['dnbNok'] = td_dnb_nok
+        if td_dnb_eur > 0:
+            actuals[as_of_ym]['dnbEurLocal'] = td_dnb_eur
+        if td_marex > 0:
+            actuals[as_of_ym]['marexEurLocal'] = td_marex
+
     history_dnb_nok_only = {}
     history_dnb_eur_local = {}
     history_dnb_nok_base = {}
     history_marex_local = {}
 
     for period, act in actuals.items():
-        as_of_ym = as_of_date[:7] if as_of_date else '2026-08'
+        as_of_ym = as_of_date[:7] if as_of_date else '2026-10'
         if period > as_of_ym:
             continue
             
@@ -387,6 +401,16 @@ def parse_collateral_csv(csv_path):
                     netherlands_act[period]['pvned'] += amt_k
                 elif gtype_l == 'dnb eur' and 'libra' in ben_l:
                     netherlands_act[period]['libraEnergy'] += amt_k
+
+    if today_dnb and as_of_ym in norway_act:
+        for item in today_dnb:
+            if item['gtype'].lower() == 'dnb nok':
+                ben = item['beneficiary'].lower()
+                amt = parse_num(item['amt_nok'])
+                if 'mind energy' in ben: norway_act[as_of_ym]['mindEnergy'] = amt
+                elif 'skagerak' in ben: norway_act[as_of_ym]['skagerak'] = amt
+                elif 'nord pool' in ben and 'de' not in ben: norway_act[as_of_ym]['nordPool'] = amt
+                elif 'esett' in ben: norway_act[as_of_ym]['eSett'] = amt
 
     country_data = {
         'norway': {'forecast': dict(norway_fc), 'actual': dict(norway_act)},
@@ -1574,12 +1598,15 @@ def parse_covenant_csv(csv_path):
         for i, row in enumerate(reader):
             if i == 0 or not row or not row[0].strip():
                 continue
+
             date_str = row[0].strip()
             if not re.match(r'^\d{4}-\d{2}', date_str):
                 continue
+
             period = date_str[:7]
             if period > '2027-12':
                 continue
+
 
             def parse_pct(val_str, default=None):
                 if not val_str: return default
@@ -1732,6 +1759,7 @@ def parse_cash_position_history_csv(csv_path):
             d_str = r[sec2_col_date].strip()
             if not re.match(r'^\d{4}-\d{2}-\d{2}$', d_str):
                 continue
+
             wk = r[sec2_col_week].strip() if len(r) > sec2_col_week else ""
             act = parse_amt(r[sec2_col_actual]) if len(r) > sec2_col_actual else None
             fc_1w = parse_amt(r[sec2_col_1w]) if len(r) > sec2_col_1w else None
