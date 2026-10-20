@@ -1613,7 +1613,7 @@ const CASH_AFTER_COLLATERAL = {
   "2026-07": 362819,
   "2026-08": 369675,
   "2026-09": 221072,
-  "2026-10": 157166,
+  "2026-10": 343908,
   "2026-11": 272488,
   "2026-12": 451901,
   "2027-01": 570259,
@@ -1649,7 +1649,7 @@ const SIM_CASH_AFTER_COLLATERAL = {
   "2026-07": 362819,
   "2026-08": 369675,
   "2026-09": 204182,
-  "2026-10": 122208,
+  "2026-10": 308950,
   "2026-11": 230158,
   "2026-12": 406337,
   "2027-01": 570260,
@@ -1787,7 +1787,7 @@ function makeScales(stacked, currency) {
 }
 function getLastCashActualYM() {
   const actualMonths = (typeof CASH_SOURCES !== 'undefined') ? Object.keys(CASH_SOURCES).filter(p => CASH_SOURCES[p] === 'Actual').sort() : [];
-  return actualMonths.length > 0 ? actualMonths[actualMonths.length - 1] : '2026-09';
+  if (actualMonths.length > 0) { const last = actualMonths[actualMonths.length - 1]; return last >= '2026-10' ? last : '2026-10'; } return '2026-10';
 }
 function getGuaranteeLastActualYM() {
   if (typeof ACTUALS !== 'undefined') {
@@ -1913,7 +1913,7 @@ function update() {
       const hasCash = MONTHLY_CASH_FORECAST[p] !== undefined;
       const cashPos = MONTHLY_CASH_FORECAST[p] || 0;
       const sourceVal = (typeof CASH_SOURCES !== 'undefined') ? (CASH_SOURCES[p] || '-') : '-';
-      const isActual = sourceVal === 'Actual' || p <= lastActualYM;
+      const isActual = sourceVal === 'Actual' || p <= lastActualYM || p <= '2026-10';
       
       let utilization = 0;
       if (FORECAST[p]) {

@@ -687,7 +687,8 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
         excess = max(0.0, utilization - limit)
         coll_increase = cash_collateral.get(period, 0.0) - cash_coll_baseline
 
-        if cash_sources.get(period) == 'Actual' or period <= '2026-09':
+        as_of_ym = (collateral_data.get('as_of_date') or '2026-10')[:7]
+        if cash_sources.get(period) == 'Actual' or period <= as_of_ym or period <= '2026-10':
             cash_after_collateral[period] = cash_pos
         else:
             cash_after_collateral[period] = cash_pos - excess - coll_increase
@@ -1215,7 +1216,8 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
                 coll_change = cash_coll - cash_coll_baseline
                 
                 # Formula matching HTML: cash_after = cash_pos - excess - coll_change (or cash_pos if Actual)
-                is_actual = (cash_sources.get(p_ym) == 'Actual') or (p_ym <= '2026-09')
+                as_of_ym = (collateral_data.get('as_of_date') or '2026-10')[:7]
+                is_actual = (cash_sources.get(p_ym) == 'Actual') or (p_ym <= as_of_ym) or (p_ym <= '2026-10')
                 if is_actual:
                     cash_after = cash_pos
                 else:
