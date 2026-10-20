@@ -149,6 +149,7 @@ def parse_collateral_csv(csv_path):
                     'dnbEurLocal': 0.0,
                     'marexEurLocal': 0.0,
                     'atraLocal': 0.0,
+                    'cashMindNok': 0.0,
                     'cashSkaNok': 0.0,
                     'cashBnpLocal': 0.0,
                     'cashPvnedLocal': 0.0,
@@ -174,8 +175,10 @@ def parse_collateral_csv(csv_path):
                     forecast[period]['cashBnpLocal'] += amt_k
                 elif ben_lower == 'pvned':
                     forecast[period]['cashPvnedLocal'] += amt_k
-                elif ben_lower == 'skagerak':
+                elif 'skagerak' in ben_lower:
                     forecast[period]['cashSkaNok'] += amt_nok
+                elif 'mind' in ben_lower:
+                    forecast[period]['cashMindNok'] += amt_nok
                 elif ben_lower == 'axpo':
                     forecast[period]['cashAxpoLocal'] += amt_k
 
@@ -201,6 +204,7 @@ def parse_collateral_csv(csv_path):
                     'dnbEurLocal': 0.0,
                     'marexEurLocal': 0.0,
                     'atraLocal': 0.0,
+                    'cashMindNok': 0.0,
                     'cashSkaNok': 0.0,
                     'cashBnpLocal': 0.0,
                     'cashPvnedLocal': 0.0,
@@ -226,8 +230,10 @@ def parse_collateral_csv(csv_path):
                     actuals[period]['cashBnpLocal'] += amt_k
                 elif ben_lower == 'pvned':
                     actuals[period]['cashPvnedLocal'] += amt_k
-                elif ben_lower == 'skagerak':
+                elif 'skagerak' in ben_lower:
                     actuals[period]['cashSkaNok'] += amt_nok
+                elif 'mind' in ben_lower:
+                    actuals[period]['cashMindNok'] += amt_nok
                 elif ben_lower == 'axpo':
                     actuals[period]['cashAxpoLocal'] += amt_k
 
@@ -293,11 +299,11 @@ def parse_collateral_csv(csv_path):
     # Norway: kNOK
     # Germany: kEUR
     # Netherlands: kEUR
-    norway_fc = defaultdict(lambda: {'mindEnergy': 0.0, 'skagerak': 0.0, 'skagerakCash': 0.0, 'nordPool': 0.0, 'eSett': 0.0})
+    norway_fc = defaultdict(lambda: {'mindEnergy': 0.0, 'mindEnergyCash': 0.0, 'skagerak': 0.0, 'skagerakCash': 0.0, 'nordPool': 0.0, 'eSett': 0.0})
     germany_fc = defaultdict(lambda: {'axpo': 0.0, 'axpoCash': 0.0, 'bayWa': 0.0, 'marex': 0.0, 'amprion': 0.0, 'transnetBw': 0.0, 'tenneT': 0.0, 'fiftyHertz': 0.0, 'nordPoolDe': 0.0, 'bnpSepaCash': 0.0})
     netherlands_fc = defaultdict(lambda: {'pvned': 0.0, 'libraEnergy': 0.0})
 
-    norway_act = defaultdict(lambda: {'mindEnergy': 0.0, 'skagerak': 0.0, 'skagerakCash': 0.0, 'nordPool': 0.0, 'eSett': 0.0})
+    norway_act = defaultdict(lambda: {'mindEnergy': 0.0, 'mindEnergyCash': 0.0, 'skagerak': 0.0, 'skagerakCash': 0.0, 'nordPool': 0.0, 'eSett': 0.0})
     germany_act = defaultdict(lambda: {'axpo': 0.0, 'axpoCash': 0.0, 'bayWa': 0.0, 'marex': 0.0, 'amprion': 0.0, 'transnetBw': 0.0, 'tenneT': 0.0, 'fiftyHertz': 0.0, 'nordPoolDe': 0.0, 'bnpSepaCash': 0.0})
     netherlands_act = defaultdict(lambda: {'pvned': 0.0, 'libraEnergy': 0.0})
 
@@ -316,8 +322,11 @@ def parse_collateral_csv(csv_path):
                     elif 'skagerak' in ben_l: norway_fc[period]['skagerak'] += amt_nok
                     elif 'nord pool' in ben_l and 'de' not in ben_l: norway_fc[period]['nordPool'] += amt_nok
                     elif 'esett' in ben_l: norway_fc[period]['eSett'] += amt_nok
-                elif gtype_l == 'cash collateral' and 'skagerak' in ben_l:
-                    norway_fc[period]['skagerakCash'] += amt_nok
+                elif gtype_l == 'cash collateral':
+                    if 'skagerak' in ben_l:
+                        norway_fc[period]['skagerakCash'] += amt_nok
+                    elif 'mind' in ben_l:
+                        norway_fc[period]['mindEnergyCash'] += amt_nok
 
                 # Germany (kEUR)
                 if gtype_l == 'dnb eur':
@@ -353,8 +362,11 @@ def parse_collateral_csv(csv_path):
                     elif 'skagerak' in ben_l: norway_act[period]['skagerak'] += amt_nok
                     elif 'nord pool' in ben_l and 'de' not in ben_l: norway_act[period]['nordPool'] += amt_nok
                     elif 'esett' in ben_l: norway_act[period]['eSett'] += amt_nok
-                elif gtype_l == 'cash collateral' and 'skagerak' in ben_l:
-                    norway_act[period]['skagerakCash'] += amt_nok
+                elif gtype_l == 'cash collateral':
+                    if 'skagerak' in ben_l:
+                        norway_act[period]['skagerakCash'] += amt_nok
+                    elif 'mind' in ben_l:
+                        norway_act[period]['mindEnergyCash'] += amt_nok
 
                 # Germany (kEUR)
                 if gtype_l == 'dnb eur':
@@ -570,7 +582,7 @@ def format_forecast_block(forecast_dict):
     for key in sorted(forecast_dict.keys()):
         val = forecast_dict[key]
         parts = []
-        for k in ['dnbNok', 'dnbEurLocal', 'marexEurLocal', 'atraLocal', 'cashSkaNok', 'cashBnpLocal', 'cashPvnedLocal', 'cashAxpoLocal']:
+        for k in ['dnbNok', 'dnbEurLocal', 'marexEurLocal', 'atraLocal', 'cashMindNok', 'cashSkaNok', 'cashBnpLocal', 'cashPvnedLocal', 'cashAxpoLocal']:
             v = val.get(k, 0.0)
             parts.append(f'{k}: {int(round(v))}')
         line = f'  "{key}": {{ ' + ', '.join(parts) + ' },'
@@ -893,9 +905,11 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
     dnb_eur_arr = []
     marex_arr = []
     atra_arr = []
+    cash_mind_arr = []
     cash_ska_arr = []
     cash_bnp_arr = []
     cash_pvned_arr = []
+    cash_axpo_arr = []
     dnb_total_arr = []
     cash_total_arr = []
     grand_total_arr = []
@@ -908,20 +922,24 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
         marex = fd.get('marexEurLocal', 0.0) * fx
         atra = fd.get('atraLocal', 0.0) * fx
         
+        cash_mind = fd.get('cashMindNok', 0.0)
         cash_ska = fd.get('cashSkaNok', 0.0)
         cash_bnp = fd.get('cashBnpLocal', 0.0) * fx
         cash_pvned = fd.get('cashPvnedLocal', 0.0) * fx
+        cash_axpo = fd.get('cashAxpoLocal', 0.0) * fx
         
         dnb_total = dnb_nok + dnb_eur + marex
-        cash_total = cash_ska + cash_bnp + cash_pvned
+        cash_total = cash_mind + cash_ska + cash_bnp + cash_pvned + cash_axpo
         
         dnb_nok_arr.append(dnb_nok)
         dnb_eur_arr.append(dnb_eur)
         marex_arr.append(marex)
         atra_arr.append(atra)
+        cash_mind_arr.append(cash_mind)
         cash_ska_arr.append(cash_ska)
         cash_bnp_arr.append(cash_bnp)
         cash_pvned_arr.append(cash_pvned)
+        cash_axpo_arr.append(cash_axpo)
         dnb_total_arr.append(dnb_total)
         cash_total_arr.append(cash_total)
         grand_total_arr.append(dnb_total + atra + cash_total)
