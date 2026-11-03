@@ -1683,7 +1683,7 @@ const CREDIT_LIMIT = {
   "2026-07": 200000,
   "2026-08": 200000,
   "2026-09": 200000,
-  "2026-10": 300000,
+  "2026-10": 200000,
   "2026-11": 300000,
   "2026-12": 300000,
   "2027-01": 300000,
@@ -1769,7 +1769,7 @@ function computeData(fx, dnbLine) {
     cashMindArr.push(cashMind); cashSkaArr.push(cashSka); cashBnpArr.push(cashBnp); cashPvnedArr.push(cashPvned); cashAxpoArr.push(cashAxpo);
     dnbTotalArr.push(dnbTotal); dnbAtraArr.push(dnbTotal + atra);
     cashTotalArr.push(cashTotal); grandTotalArr.push(dnbTotal + atra + cashTotal);
-    const limit = (typeof CREDIT_LIMIT !== 'undefined' && CREDIT_LIMIT[p] !== undefined) ? CREDIT_LIMIT[p] : (p >= '2026-10' ? 300000 : dnbLine);
+    const limit = (typeof CREDIT_LIMIT !== 'undefined' && CREDIT_LIMIT[p] !== undefined) ? CREDIT_LIMIT[p] : (p >= '2026-11' ? 300000 : dnbLine);
     dnbLineArr.push(limit);
     creditLimitArr.push(limit);
 
@@ -1861,7 +1861,7 @@ function update() {
   const todayYM = new Date().toISOString().slice(0, 7);
   let currentLimit = (typeof CREDIT_LIMIT !== 'undefined' && CREDIT_LIMIT[todayYM] !== undefined)
     ? CREDIT_LIMIT[todayYM]
-    : (todayYM >= '2026-10' ? 300000 : dnbLine);
+    : (todayYM >= '2026-11' ? 300000 : dnbLine);
   document.getElementById('kpi2').textContent = fmt(currentLimit);
 
   const lastCashActualYM = getLastCashActualYM();
@@ -1929,7 +1929,7 @@ function update() {
         utilization = dnbNok + dnbEur + marex + atra;
       }
       
-      const limit = (typeof CREDIT_LIMIT !== 'undefined' && CREDIT_LIMIT[p] !== undefined) ? CREDIT_LIMIT[p] : (p >= '2026-10' ? 300000 : dnbLine);
+      const limit = (typeof CREDIT_LIMIT !== 'undefined' && CREDIT_LIMIT[p] !== undefined) ? CREDIT_LIMIT[p] : (p >= '2026-11' ? 300000 : dnbLine);
       const excess = Math.max(0, utilization - limit);
       
       const cashColl = CASH_COLLATERAL[p] || 0;
