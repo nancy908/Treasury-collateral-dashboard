@@ -1618,7 +1618,7 @@ const CASH_AFTER_COLLATERAL = {
   "2026-08": 369675,
   "2026-09": 221072,
   "2026-10": 164093,
-  "2026-11": 179420,
+  "2026-11": 320301,
   "2026-12": 575853,
   "2027-01": 74026,
   "2027-02": 866791,
@@ -1654,7 +1654,7 @@ const SIM_CASH_AFTER_COLLATERAL = {
   "2026-08": 369675,
   "2026-09": 204182,
   "2026-10": 129135,
-  "2026-11": 137090,
+  "2026-11": 277970,
   "2026-12": 530289,
   "2027-01": 74027,
   "2027-02": 866792,
@@ -1919,8 +1919,9 @@ function update() {
       const sourceVal = (typeof CASH_SOURCES !== 'undefined') ? (CASH_SOURCES[p] || '-') : '-';
       const isActual = sourceVal === 'Actual' || p <= lastActualYM || p <= '2026-10';
       
-      let utilization = 0;
-      if (FORECAST[p]) {
+      const pIdx = d.periods.indexOf(p);
+      const utilization = pIdx >= 0 ? d.dnbAtraArr[pIdx] : 0;
+      if (false && FORECAST[p]) {
         const fd = FORECAST[p];
         const dnbNok = fd.dnbNok || 0;
         const dnbEur = (fd.dnbEurLocal || 0) * fx;
@@ -1936,7 +1937,7 @@ function update() {
       const collChange = cashColl - cashCollToday;
       
       // For actual months: Cash After Collateral = Cash Position
-      const cashAfter = isActual ? cashPos : (cashPos - excess - collChange);
+      const cashAfter = (typeof CASH_AFTER_COLLATERAL !== 'undefined' && CASH_AFTER_COLLATERAL[p] !== undefined) ? CASH_AFTER_COLLATERAL[p] : (isActual ? cashPos : (cashPos - excess - collChange));
       
       if (hasCash) {
         const isPosBreach = cashPos < 125000;
@@ -1986,7 +1987,7 @@ function update() {
       borderWidth: 1,
       stack: 's'
     },
-    { label: 'Guarantee Line', data: d.dnbLineArr, type: 'line', borderColor: '#FF5A5A', borderDash: [4,3], borderWidth: 1.5, pointRadius: 0, fill: false },
+    { label: 'Guarantee Line', data: d.dnbLineArr, type: 'line', borderColor: '#FF5A5A', borderDash: [4,3], borderWidth: 1.5, pointRadius: 0, fill: false, stepped: 'middle' },
   ]}, options: makeOpts(true, 'NOK', true) });
 
   const chart2Opts = makeOpts(true, 'NOK');
@@ -2067,7 +2068,7 @@ function update() {
       stack: 's',
       yAxisID: 'y'
     },
-    { label: 'DNB+Atradius Guarantee Line', data: d.creditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit' },
+    { label: 'DNB+Atradius Guarantee Line', data: d.creditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit', stepped: 'middle' },
     {
       label: 'Cash after collateral',
       data: cashAfterArr,
@@ -2224,7 +2225,7 @@ function update() {
       stack: 's',
       yAxisID: 'y'
     },
-    { label: 'DNB+Atradius Guarantee Line', data: simCreditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit' },
+    { label: 'DNB+Atradius Guarantee Line', data: simCreditLimitArr, type: 'line', borderColor: 'rgba(255,120,120,0.95)', borderWidth: 3, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'limit', stepped: 'middle' },
     {
       label: 'Cash after collateral (OKR investments)',
       data: simCashAfterArr,

@@ -692,8 +692,11 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
     cash_coll_baseline = cash_collateral.get('2026-06', 41638.0)
 
     cash_after_collateral = {}
+    actuals_dict = collateral_data.get('actuals', {})
     for period, cash_pos in monthly_cash.items():
-        fd = forecast_dict.get(period, {})
+        act_d = actuals_dict.get(period, {})
+        has_act = (act_d.get('dnbNok', 0) + act_d.get('dnbEurLocal', 0) + act_d.get('marexEurLocal', 0) + act_d.get('atraLocal', 0)) > 0
+        fd = act_d if has_act else forecast_dict.get(period, {})
         dnb_nok = fd.get('dnbNok', 0.0)
         dnb_eur = fd.get('dnbEurLocal', 0.0) * fx_rate
         marex = fd.get('marexEurLocal', 0.0) * fx_rate
@@ -1220,7 +1223,9 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
                 
                 # Fetch/calculate values
                 cash_pos = monthly_cash.get(p_ym, 0.0)
-                fd = forecast_dict.get(p_ym, {})
+                act_d = collateral_data.get('actuals', {}).get(p_ym, {})
+                has_act = (act_d.get('dnbNok', 0) + act_d.get('dnbEurLocal', 0) + act_d.get('marexEurLocal', 0) + act_d.get('atraLocal', 0)) > 0
+                fd = act_d if has_act else forecast_dict.get(p_ym, {})
                 dnb_nok = fd.get('dnbNok', 0.0)
                 dnb_eur = fd.get('dnbEurLocal', 0.0) * fx
                 marex = fd.get('marexEurLocal', 0.0) * fx
