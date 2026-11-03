@@ -1537,10 +1537,10 @@ const MONTHLY_CASH_FORECAST = {
   "2026-07": 362819,
   "2026-08": 369675,
   "2026-09": 221072,
-  "2026-10": 440194,
+  "2026-10": 164093,
   "2026-11": 412774,
-  "2026-12": 799817,
-  "2027-01": 803917,
+  "2026-12": 779817,
+  "2027-01": 307684,
   "2027-02": 1050219,
   "2027-03": 1023639,
   "2027-04": 808489,
@@ -1617,10 +1617,10 @@ const CASH_AFTER_COLLATERAL = {
   "2026-07": 362819,
   "2026-08": 369675,
   "2026-09": 221072,
-  "2026-10": 440194,
-  "2026-11": 412774,
-  "2026-12": 595853,
-  "2027-01": 570259,
+  "2026-10": 164093,
+  "2026-11": 179420,
+  "2026-12": 575853,
+  "2027-01": 74026,
   "2027-02": 866791,
   "2027-03": 895734,
   "2027-04": 814649,
@@ -1653,10 +1653,10 @@ const SIM_CASH_AFTER_COLLATERAL = {
   "2026-07": 362819,
   "2026-08": 369675,
   "2026-09": 204182,
-  "2026-10": 405236,
-  "2026-11": 370443,
-  "2026-12": 550289,
-  "2027-01": 570260,
+  "2026-10": 129135,
+  "2026-11": 137090,
+  "2026-12": 530289,
+  "2027-01": 74027,
   "2027-02": 866792,
   "2027-03": 895735,
   "2027-04": 814649,
@@ -1709,10 +1709,10 @@ const CASH_SOURCES = {
   "2026-07": "Actual",
   "2026-08": "Actual",
   "2026-09": "Actual",
-  "2026-10": "WCFF",
+  "2026-10": "Actual",
   "2026-11": "WCFF",
   "2026-12": "WCFF",
-  "2027-01": "BUD27",
+  "2027-01": "WCFF",
   "2027-02": "BUD27",
   "2027-03": "BUD27",
   "2027-04": "BUD27",
@@ -1999,11 +1999,11 @@ function update() {
   // Highlight points below covenant (< 125,000 kNOK) with Red dots, distinguish actual vs forecast
   const cashPointColors = cashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#EF4444';
-    return labels[i] > lastGuarActualYM ? '#34D399' : '#10B981';
+    return labels[i] > lastCashActualYM ? '#34D399' : '#10B981';
   });
   const cashPointBorderColors = cashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#FFFFFF';
-    return labels[i] > lastGuarActualYM ? '#34D399' : '#10B981';
+    return labels[i] > lastCashActualYM ? '#34D399' : '#10B981';
   });
   const cashPointRadii = cashAfterArr.map(v => (v !== null && v < 125000) ? 6 : 4);
   const cashPointHoverRadii = cashAfterArr.map(v => (v !== null && v < 125000) ? 8 : 6);
@@ -2029,7 +2029,8 @@ function update() {
         const type = p <= lastGuarActualYM ? 'Actual' : 'Forecast';
         if (ctx.dataset.label === 'Cash after collateral') {
           const breachNote = val < 125000 ? '  ⚠️ Below Covenant (< 125m)' : '';
-          return ` ${ctx.dataset.label} (${type}): ${formatted}${breachNote}`;
+          const cashType = p <= lastCashActualYM ? 'Actual' : 'Forecast';
+          return ` ${ctx.dataset.label} (${cashType}): ${formatted}${breachNote}`;
         }
         return ` ${ctx.dataset.label}: ${formatted}`;
       }
@@ -2085,8 +2086,8 @@ function update() {
       yAxisID: 'y',
       stack: 'cash',
       segment: {
-        borderColor: ctx => labels[ctx.p1DataIndex] > lastGuarActualYM ? '#34D399' : '#10B981',
-        borderDash: ctx => labels[ctx.p1DataIndex] > lastGuarActualYM ? [8, 4] : undefined,
+        borderColor: ctx => labels[ctx.p1DataIndex] > lastCashActualYM ? '#34D399' : '#10B981',
+        borderDash: ctx => labels[ctx.p1DataIndex] > lastCashActualYM ? [8, 4] : undefined,
       }
     },
     { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
@@ -2120,11 +2121,11 @@ function update() {
 
   const simCashPointColors = simCashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#EF4444';
-    return labels[i] > lastGuarActualYM ? '#34D399' : '#10B981';
+    return labels[i] > lastCashActualYM ? '#34D399' : '#10B981';
   });
   const simCashPointBorderColors = simCashAfterArr.map((v, i) => {
     if (v !== null && v < 125000) return '#FFFFFF';
-    return labels[i] > lastGuarActualYM ? '#34D399' : '#10B981';
+    return labels[i] > lastCashActualYM ? '#34D399' : '#10B981';
   });
   const simCashPointRadii = simCashAfterArr.map(v => (v !== null && v < 125000) ? 6 : 4);
   const simCashPointHoverRadii = simCashAfterArr.map(v => (v !== null && v < 125000) ? 8 : 6);
@@ -2185,7 +2186,8 @@ function update() {
           const breachNote = val < 125000 ? '  ⚠️ Below Covenant (< 125m)' : '  ✅ Above Covenant';
           const ded = okrDeductions[p];
           const dedNote = ded ? ` (OKR ded: -${(ded/1000).toFixed(1)}m)` : '';
-          return ` ${ctx.dataset.label} (${type}): ${formatted}${dedNote}${breachNote}`;
+          const cashType = p <= lastCashActualYM ? 'Actual' : 'Forecast';
+          return ` ${ctx.dataset.label} (${cashType}): ${formatted}${dedNote}${breachNote}`;
         }
         return ` ${ctx.dataset.label}: ${formatted}`;
       }
@@ -2241,8 +2243,8 @@ function update() {
       yAxisID: 'y',
       stack: 'cash',
       segment: {
-        borderColor: ctx => labels[ctx.p1DataIndex] > lastGuarActualYM ? '#34D399' : '#10B981',
-        borderDash: ctx => labels[ctx.p1DataIndex] > lastGuarActualYM ? [8, 4] : undefined,
+        borderColor: ctx => labels[ctx.p1DataIndex] > lastCashActualYM ? '#34D399' : '#10B981',
+        borderDash: ctx => labels[ctx.p1DataIndex] > lastCashActualYM ? [8, 4] : undefined,
       }
     },
     { label: 'Covenant', data: covenantArr, type: 'line', borderColor: '#F59E0B', borderDash: [5,5], borderWidth: 2.5, pointRadius: 0, fill: false, datalabels: { display: false }, yAxisID: 'y', stack: 'covenant' },
