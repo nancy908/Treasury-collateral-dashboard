@@ -688,8 +688,10 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
     fx_rate = collateral_data['fx_rate']
     limits = collateral_data['limits']
 
-    # Cash collateral baseline month is 2026-06 (matching Panel 2B)
-    cash_coll_baseline = cash_collateral.get('2026-06', 41638.0)
+    # Cash collateral baseline: current month (2026-11) has change = 0,
+    # from 2026-12 onwards change = forecast cash collateral - current month cash collateral (134,111 kNOK)
+    current_month_ym = (collateral_data.get('as_of_date') or '2026-11')[:7]
+    current_month_collateral = cash_collateral.get(current_month_ym, 134111.0)
 
     cash_after_collateral = {}
     actuals_dict = collateral_data.get('actuals', {})
@@ -706,7 +708,12 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
         limit = limits.get(period, 300000.0 if period >= '2026-11' else 200000.0)
 
         excess = max(0.0, utilization - limit)
-        coll_increase = cash_collateral.get(period, 0.0) - cash_coll_baseline
+        if period <= '2026-10':
+            coll_increase = 0.0
+        elif period == current_month_ym:
+            coll_increase = 0.0
+        else:
+            coll_increase = cash_collateral.get(period, 0.0) - current_month_collateral
 
         if cash_sources.get(period) == 'Actual' or period <= '2026-10':
             cash_after_collateral[period] = cash_pos
@@ -1199,8 +1206,10 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
             "Cash After Collateral"
         ]
         
-        # Cash collateral baseline month is 2026-06 (matching Panel 2B)
-        cash_coll_baseline = cash_collateral.get('2026-06', 41638.0)
+        # Cash collateral baseline: current month (2026-11) has change = 0,
+        # from 2026-12 onwards change = forecast cash collateral - current month cash collateral (134,111 kNOK)
+        current_month_ym = (collateral_data.get('as_of_date') or '2026-11')[:7]
+        current_month_collateral = cash_collateral.get(current_month_ym, 134111.0)
         
         for r_idx, label in enumerate(row_labels):
             row_num = r_idx + 1
@@ -1235,7 +1244,12 @@ def generate_pptx_dashboard(collateral_data, monthly_cash, cash_collateral, pptx
                 excess = max(0.0, utilization - limit)
                 
                 cash_coll = cash_collateral.get(p_ym, 0.0)
-                coll_change = cash_coll - cash_coll_baseline
+                if p_ym <= '2026-10':
+                    coll_change = 0.0
+                elif p_ym == current_month_ym:
+                    coll_change = 0.0
+                else:
+                    coll_change = cash_coll - current_month_collateral
                 
                 # Formula matching HTML: cash_after = cash_pos - excess - coll_change (or cash_pos if Actual)
                 is_actual = (cash_sources.get(p_ym) == 'Actual') or (p_ym <= '2026-10')

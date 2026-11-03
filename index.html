@@ -1618,24 +1618,24 @@ const CASH_AFTER_COLLATERAL = {
   "2026-08": 369675,
   "2026-09": 221072,
   "2026-10": 164093,
-  "2026-11": 320301,
-  "2026-12": 575853,
-  "2027-01": 74026,
-  "2027-02": 866791,
-  "2027-03": 895734,
-  "2027-04": 814649,
-  "2027-05": 675683,
-  "2027-06": 544851,
-  "2027-07": 476933,
-  "2027-08": 449822,
-  "2027-09": 465525,
-  "2027-10": 437065,
-  "2027-11": 515389,
-  "2027-12": 817028,
-  "2028-01": 1065277,
-  "2028-02": 575914,
-  "2028-03": 500224,
-  "2028-04": 866828
+  "2026-11": 412774,
+  "2026-12": 668326,
+  "2027-01": 166499,
+  "2027-02": 959264,
+  "2027-03": 988207,
+  "2027-04": 907122,
+  "2027-05": 768156,
+  "2027-06": 637324,
+  "2027-07": 569406,
+  "2027-08": 542295,
+  "2027-09": 557998,
+  "2027-10": 529538,
+  "2027-11": 607862,
+  "2027-12": 909501,
+  "2028-01": 1157750,
+  "2028-02": 668387,
+  "2028-03": 592697,
+  "2028-04": 959301
 };
 const OKR_DEDUCTIONS = {
   "2026-09": 16890,
@@ -1654,24 +1654,24 @@ const SIM_CASH_AFTER_COLLATERAL = {
   "2026-08": 369675,
   "2026-09": 204182,
   "2026-10": 129135,
-  "2026-11": 277970,
-  "2026-12": 530289,
-  "2027-01": 74027,
-  "2027-02": 866792,
-  "2027-03": 895735,
-  "2027-04": 814649,
-  "2027-05": 675683,
-  "2027-06": 544851,
-  "2027-07": 476933,
-  "2027-08": 449822,
-  "2027-09": 465525,
-  "2027-10": 437066,
-  "2027-11": 515390,
-  "2027-12": 817028,
-  "2028-01": 1065277,
-  "2028-02": 575914,
-  "2028-03": 500224,
-  "2028-04": 866828
+  "2026-11": 370443,
+  "2026-12": 622762,
+  "2027-01": 166500,
+  "2027-02": 959265,
+  "2027-03": 988208,
+  "2027-04": 907122,
+  "2027-05": 768156,
+  "2027-06": 637324,
+  "2027-07": 569406,
+  "2027-08": 542295,
+  "2027-09": 557998,
+  "2027-10": 529539,
+  "2027-11": 607863,
+  "2027-12": 909501,
+  "2028-01": 1157750,
+  "2028-02": 668387,
+  "2028-03": 592697,
+  "2028-04": 959301
 };
 const CREDIT_LIMIT = {
   "2026-01": 200000,
@@ -1901,8 +1901,8 @@ function update() {
   const cashCalcBody = document.getElementById('cashCalcBody');
   if (cashCalcBody) {
     cashCalcBody.innerHTML = '';
-    const todayYM = '2026-06';
-    const cashCollToday = CASH_COLLATERAL[todayYM] || 0;
+    const currentMonthYM = '2026-11';
+    const currentMonthCashColl = CASH_COLLATERAL[currentMonthYM] || 134111;
     
     let headerRow = '<tr><td style="font-weight: 700; color: var(--tibber-dark-grey); border-bottom: 2px solid #1a1e24; position: sticky; left: 0; background: #0f1217; z-index: 2;">Metric</td>';
     let cashPosRow = '<tr><td style="font-weight: 600; color: var(--tibber-dark-grey); position: sticky; left: 0; background: #0f1217; z-index: 2;">Cash Position</td>';
@@ -1934,7 +1934,12 @@ function update() {
       const excess = Math.max(0, utilization - limit);
       
       const cashColl = CASH_COLLATERAL[p] || 0;
-      const collChange = cashColl - cashCollToday;
+      let collChange = 0;
+      if (p > currentMonthYM) {
+        collChange = cashColl - currentMonthCashColl;
+      } else if (p === currentMonthYM) {
+        collChange = 0;
+      }
       
       // For actual months: Cash After Collateral = Cash Position
       const cashAfter = (typeof CASH_AFTER_COLLATERAL !== 'undefined' && CASH_AFTER_COLLATERAL[p] !== undefined) ? CASH_AFTER_COLLATERAL[p] : (isActual ? cashPos : (cashPos - excess - collChange));
