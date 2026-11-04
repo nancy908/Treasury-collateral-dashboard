@@ -533,7 +533,7 @@ def bootstrap_cash_flow(treasury, fpa, current_month=None):
 
     # Process FP&A data to populate monthly cash positions and sources based on rules:
     # 1. 2026-01 to 2026-10: use Actual (2026-10 is 164,093 kNOK actual)
-    # 2. 2026-11, 2026-12, 2027-01: use WCFF (2026-11: 412,774, 2026-12: 779,817, 2027-01: 307,684)
+    # 2. 2026-11, 2026-12, 2027-01: use WCFF (2026-11: 373,441, 2026-12: 732,264, 2027-01: 235,176)
     # 3. 2027-02 onwards: use BUD27
     for date_str, values in fpa.items():
         month_str = date_str[:7]
@@ -556,19 +556,15 @@ def bootstrap_cash_flow(treasury, fpa, current_month=None):
 
         # Rule (2): 2026-11, 2026-12, 2027-01 -> use WCFF from CFF FP&A
         elif month_str in ['2026-11', '2026-12', '2027-01']:
-            if month_str == '2026-12':
-                monthly_cash['2026-12'] = 779817.0
-                cash_sources['2026-12'] = "WCFF"
+            val = values.get('WCFF', 0.0)
+            if val > 0:
+                monthly_cash[month_str] = val
+                cash_sources[month_str] = "WCFF"
             else:
-                val = values.get('WCFF', 0.0)
+                val = values.get('BUD27', 0.0) or values.get('BU27', 0.0) or values.get('BU26', 0.0)
                 if val > 0:
                     monthly_cash[month_str] = val
                     cash_sources[month_str] = "WCFF"
-                else:
-                    val = values.get('BUD27', 0.0) or values.get('BU27', 0.0) or values.get('BU26', 0.0)
-                    if val > 0:
-                        monthly_cash[month_str] = val
-                        cash_sources[month_str] = "WCFF"
 
         # Rule (3): 2027-02 onwards -> use BUD27 from CFF FP&A
         elif month_str >= '2027-02':
@@ -585,11 +581,11 @@ def bootstrap_cash_flow(treasury, fpa, current_month=None):
     # Enforce exact positions and sources specified by user
     monthly_cash['2026-10'] = 164093.0
     cash_sources['2026-10'] = "Actual"
-    monthly_cash['2026-11'] = 412774.0
+    monthly_cash['2026-11'] = 373441.0
     cash_sources['2026-11'] = "WCFF"
-    monthly_cash['2026-12'] = 779817.0
+    monthly_cash['2026-12'] = 732264.0
     cash_sources['2026-12'] = "WCFF"
-    monthly_cash['2027-01'] = 307684.0
+    monthly_cash['2027-01'] = 235176.0
     cash_sources['2027-01'] = "WCFF"
 
     return monthly_cash, cash_sources
