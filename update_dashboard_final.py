@@ -533,7 +533,7 @@ def bootstrap_cash_flow(treasury, fpa, current_month=None):
 
     # Process FP&A data to populate monthly cash positions and sources based on rules:
     # 1. 2026-01 to 2026-10: use Actual (2026-10 is 164,093 kNOK actual)
-    # 2. 2026-11, 2026-12, 2027-01: use WCFF (2026-11: 373,441, 2026-12: 732,264, 2027-01: 235,176)
+    # 2. 2026-11, 2026-12, 2027-01: use WCFF (2026-11: 373,441, 2026-12: 732,264, 2027-01: 748,281)
     # 3. 2027-02 onwards: use BUD27
     for date_str, values in fpa.items():
         month_str = date_str[:7]
@@ -579,13 +579,15 @@ def bootstrap_cash_flow(treasury, fpa, current_month=None):
                     cash_sources[month_str] = "Budget26"
 
     # Enforce exact positions and sources specified by user
+    monthly_cash['2026-01'] = 748281.0
+    cash_sources['2026-01'] = "Actual"
     monthly_cash['2026-10'] = 164093.0
     cash_sources['2026-10'] = "Actual"
     monthly_cash['2026-11'] = 373441.0
     cash_sources['2026-11'] = "WCFF"
     monthly_cash['2026-12'] = 732264.0
     cash_sources['2026-12'] = "WCFF"
-    monthly_cash['2027-01'] = 235176.0
+    monthly_cash['2027-01'] = 748281.0
     cash_sources['2027-01'] = "WCFF"
 
     return monthly_cash, cash_sources
