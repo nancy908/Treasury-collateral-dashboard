@@ -1153,7 +1153,7 @@
           <span id="pie1DrilldownLabel" style="font-size: 0.7rem; color: #FFFFFF; font-weight: 600;"></span>
         </div>
 
-        <div style="position: relative; height: 280px; width: 100%; display: flex; align-items: center; justify-content: center;">
+        <div style="position: relative; height: 280px; width: 100%;">
           <canvas id="chartPieDnb"></canvas>
         </div>
 
@@ -1183,7 +1183,7 @@
           <span id="pie2DrilldownLabel" style="font-size: 0.7rem; color: #FFFFFF; font-weight: 600;"></span>
         </div>
 
-        <div style="position: relative; height: 280px; width: 100%; display: flex; align-items: center; justify-content: center;">
+        <div style="position: relative; height: 280px; width: 100%;">
           <canvas id="chartPieCash"></canvas>
         </div>
 
@@ -2896,7 +2896,7 @@ function update() {
     pie1DrilldownCountry = null;
     pie2DrilldownCountry = null;
     updatePieNavButtons();
-    renderCollateralBreakdownPies();
+                setTimeout(function() { renderCollateralBreakdownPies(); }, 0);
   };
 
   window.setPieBreakdownLevel = function(level) {
@@ -2913,19 +2913,19 @@ function update() {
       if (btnS) btnS.classList.add('active-toggle');
     }
     updatePieNavButtons();
-    renderCollateralBreakdownPies();
+                setTimeout(function() { renderCollateralBreakdownPies(); }, 0);
   };
 
   window.resetPie1Drilldown = function() {
     pie1DrilldownCountry = null;
     updatePieNavButtons();
-    renderCollateralBreakdownPies();
+                setTimeout(function() { renderCollateralBreakdownPies(); }, 0);
   };
 
   window.resetPie2Drilldown = function() {
     pie2DrilldownCountry = null;
     updatePieNavButtons();
-    renderCollateralBreakdownPies();
+                setTimeout(function() { renderCollateralBreakdownPies(); }, 0);
   };
 
   window.renderCollateralBreakdownPies = function() {
@@ -3040,7 +3040,8 @@ function update() {
       }
     }
 
-    if (chartPie1Instance) { try { chartPie1Instance.destroy(); } catch(e){} chartPie1Instance = null; }
+    try {
+      if (chartPie1Instance) { try { chartPie1Instance.destroy(); } catch(e){} chartPie1Instance = null; }
     const canvas1 = document.getElementById('chartPieDnb');
     if (canvas1) {
       const ctx1 = canvas1.getContext('2d');
@@ -3101,12 +3102,16 @@ function update() {
               if (country && breakdown.dnbCountrySuppliers[country] && Object.keys(breakdown.dnbCountrySuppliers[country]).length > 0) {
                 pie1DrilldownCountry = country;
                 updatePieNavButtons();
-    renderCollateralBreakdownPies();
+                setTimeout(function() { renderCollateralBreakdownPies(); }, 0);
               }
             }
           }
         }
       });
+    }
+
+    } catch (errChart1) {
+      console.error('DNB pie render error:', errChart1);
     }
 
     renderPieLegendTable('pie1Legend', dnbLabels, dnbValues, dnbColors, dnbTotal);
@@ -3162,7 +3167,8 @@ function update() {
       }
     }
 
-    if (chartPie2Instance) { try { chartPie2Instance.destroy(); } catch(e){} chartPie2Instance = null; }
+    try {
+      if (chartPie2Instance) { try { chartPie2Instance.destroy(); } catch(e){} chartPie2Instance = null; }
     const canvas2 = document.getElementById('chartPieCash');
     if (canvas2) {
       const ctx2 = canvas2.getContext('2d');
@@ -3223,12 +3229,16 @@ function update() {
               if (country && breakdown.cashCountrySuppliers[country] && Object.keys(breakdown.cashCountrySuppliers[country]).length > 0) {
                 pie2DrilldownCountry = country;
                 updatePieNavButtons();
-    renderCollateralBreakdownPies();
+                setTimeout(function() { renderCollateralBreakdownPies(); }, 0);
               }
             }
           }
         }
       });
+    }
+
+    } catch (errChart2) {
+      console.error('Cash pie render error:', errChart2);
     }
 
     renderPieLegendTable('pie2Legend', cashLabels, cashValues, cashColors, cashTotal);
@@ -3307,7 +3317,7 @@ function update() {
     }
 
     updatePieNavButtons();
-    renderCollateralBreakdownPies();
+                setTimeout(function() { renderCollateralBreakdownPies(); }, 0);
   }
 
   try { initCollateralBreakdownPies(labels); } catch (e) { console.error('Pie init error:', e); }
