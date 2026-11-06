@@ -417,6 +417,7 @@
     .panel-hero, .panel-focus { grid-column: 1; }
     .panel-5-inner { grid-template-columns: 1fr; }
     .kpi-bar { flex-wrap: wrap; }
+    #pieChartsContainer { grid-template-columns: 1fr !important; }
   }
   @media print {
     @page {
@@ -1060,6 +1061,110 @@
           <!-- Dynamically populated rows (transposed) -->
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- ═══ ROW 1.4: COLLATERAL & CASH BREAKDOWN PIE CHARTS ═══ -->
+  <div class="panel panel-hero" id="panel-collateral-breakdown" style="grid-column: 1 / -1; margin-top: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.85rem; margin-bottom: 1rem;">
+      <div>
+        <div class="panel-tag" style="margin-bottom: 0.25rem;">Panel 2C - Breakdown by Country &amp; Supplier</div>
+        <div class="panel-title" style="font-size: 1rem; margin-bottom: 0;">
+          <span class="dot" style="background:var(--tibber-blue)"></span>DNB Guarantee Utilization &amp; Cash Collateral Distribution
+        </div>
+      </div>
+      
+      <!-- Controls Toolbar -->
+      <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+        <!-- Month Selector -->
+        <div style="display: flex; align-items: center; gap: 0.4rem; background: #12161c; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+          <span style="font-size: 0.68rem; color: #8A909A; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Month:</span>
+          <select id="pieMonthSelect" onchange="onPieMonthChange(this.value)" style="background: #1a1e24; color: #FFFFFF; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 3px 8px; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; outline: none;">
+          </select>
+          <span id="pieMonthBadge" class="forecast-badge" style="margin-left: 4px; font-size: 0.6rem;">● Actual</span>
+        </div>
+
+        <!-- Breakdown Level Toggle -->
+        <div class="toggle-btn-group" id="pieViewToggle">
+          <button class="toggle-btn active-toggle" id="btnPieCountry" onclick="setPieBreakdownLevel('country')">By Country (NO / DE / NL)</button>
+          <button class="toggle-btn" id="btnPieSupplier" onclick="setPieBreakdownLevel('supplier')">By Supplier</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sizing Note & Relative Scale Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; font-size: 0.68rem; color: #8A909A; padding: 0 0.25rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="color: #1ED0E7; font-weight: 600;">Proportional Sizing:</span>
+        <span>Pie chart areas are sized proportionally to total NOK equivalent amounts.</span>
+      </div>
+      <div id="pieRelativePill" style="display: inline-flex; align-items: center; gap: 0.6rem; background: #12161c; padding: 3px 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+      </div>
+    </div>
+
+    <!-- 2 Pie Charts Grid -->
+    <div id="pieChartsContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: stretch;">
+      
+      <!-- Chart 1 Card: DNB Guarantee Utilization -->
+      <div style="background: #0d1016; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: #FFFFFF; display: flex; align-items: center; gap: 6px;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: #1ED0E7;"></span>
+              DNB Guarantee Utilization
+            </div>
+            <div style="font-size: 0.65rem; color: #8A909A; margin-top: 2px;" id="pie1Subtitle">Breakdown: Norway · Germany · Netherlands</div>
+          </div>
+          <div style="text-align: right;">
+            <div id="pie1Total" style="font-size: 1.15rem; font-weight: 800; color: #1ED0E7;">- kNOK</div>
+            <div id="pie1TotalSub" style="font-size: 0.65rem; color: #8A909A;">- mNOK</div>
+          </div>
+        </div>
+        
+        <!-- Drilldown breadcrumb -->
+        <div id="pie1Breadcrumb" style="display: none; margin-bottom: 0.6rem; align-items: center; gap: 0.5rem;">
+          <button onclick="resetPie1Drilldown()" style="background: rgba(30,208,231,0.15); border: 1px solid #1ED0E7; color: #1ED0E7; border-radius: 4px; padding: 2px 8px; font-size: 0.65rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">◀ Back to Countries</button>
+          <span id="pie1DrilldownLabel" style="font-size: 0.7rem; color: #FFFFFF; font-weight: 600;"></span>
+        </div>
+
+        <div style="position: relative; height: 280px; width: 100%; display: flex; align-items: center; justify-content: center;">
+          <canvas id="chartPieDnb"></canvas>
+        </div>
+
+        <!-- Custom Legend Table -->
+        <div id="pie1Legend" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.75rem; flex: 1;"></div>
+      </div>
+
+      <!-- Chart 2 Card: Cash Collateral -->
+      <div style="background: #0d1016; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+          <div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: #FFFFFF; display: flex; align-items: center; gap: 6px;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: #F59E0B;"></span>
+              Cash Collateral
+            </div>
+            <div style="font-size: 0.65rem; color: #8A909A; margin-top: 2px;" id="pie2Subtitle">Breakdown: Norway · Germany · Netherlands</div>
+          </div>
+          <div style="text-align: right;">
+            <div id="pie2Total" style="font-size: 1.15rem; font-weight: 800; color: #F59E0B;">- kNOK</div>
+            <div id="pie2TotalSub" style="font-size: 0.65rem; color: #8A909A;">- mNOK</div>
+          </div>
+        </div>
+
+        <!-- Drilldown breadcrumb -->
+        <div id="pie2Breadcrumb" style="display: none; margin-bottom: 0.6rem; align-items: center; gap: 0.5rem;">
+          <button onclick="resetPie2Drilldown()" style="background: rgba(245,158,11,0.15); border: 1px solid #F59E0B; color: #F59E0B; border-radius: 4px; padding: 2px 8px; font-size: 0.65rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">◀ Back to Countries</button>
+          <span id="pie2DrilldownLabel" style="font-size: 0.7rem; color: #FFFFFF; font-weight: 600;"></span>
+        </div>
+
+        <div style="position: relative; height: 280px; width: 100%; display: flex; align-items: center; justify-content: center;">
+          <canvas id="chartPieCash"></canvas>
+        </div>
+
+        <!-- Custom Legend Table -->
+        <div id="pie2Legend" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.75rem; flex: 1;"></div>
+      </div>
+
     </div>
   </div>
 
@@ -2543,6 +2648,592 @@ function update() {
       options: makeOpts(true, 'EUR', true)
     });
   }
+
+  // ========================================================
+  // PANEL 2C: DNB GUARANTEE & CASH COLLATERAL PIE CHARTS
+  // ========================================================
+  const COUNTRY_COLORS = {
+    'Norway': {
+      solid: '#1ED0E7',
+      light: 'rgba(30, 208, 231, 0.45)',
+      border: '#1ED0E7'
+    },
+    'Germany': {
+      solid: '#C86DFF',
+      light: 'rgba(200, 109, 255, 0.45)',
+      border: '#C86DFF'
+    },
+    'Netherlands': {
+      solid: '#10B981',
+      light: 'rgba(16, 185, 129, 0.45)',
+      border: '#10B981'
+    }
+  };
+
+  const SUPPLIER_PALETTE = {
+    // Norway
+    'Mind Energy': { solid: '#0284C7', light: 'rgba(2, 132, 199, 0.45)', border: '#0284C7', country: 'Norway' },
+    'Skagerak': { solid: '#1ED0E7', light: 'rgba(30, 208, 231, 0.45)', border: '#1ED0E7', country: 'Norway' },
+    'Nord Pool': { solid: '#06B6D4', light: 'rgba(6, 182, 212, 0.45)', border: '#06B6D4', country: 'Norway' },
+    'eSett': { solid: '#38BDF8', light: 'rgba(56, 189, 248, 0.45)', border: '#38BDF8', country: 'Norway' },
+    'Mind Energy Cash': { solid: '#0369A1', light: 'rgba(3, 105, 161, 0.45)', border: '#0369A1', country: 'Norway' },
+    'Skagerak Cash': { solid: '#0EA5E9', light: 'rgba(14, 165, 233, 0.45)', border: '#0EA5E9', country: 'Norway' },
+
+    // Germany
+    'AXPO': { solid: '#7E22CE', light: 'rgba(126, 34, 206, 0.45)', border: '#7E22CE', country: 'Germany' },
+    'BayWa': { solid: '#C86DFF', light: 'rgba(200, 109, 255, 0.45)', border: '#C86DFF', country: 'Germany' },
+    'Marex': { solid: '#E879F9', light: 'rgba(232, 121, 249, 0.45)', border: '#E879F9', country: 'Germany' },
+    'Amprion': { solid: '#3B82F6', light: 'rgba(59, 130, 246, 0.45)', border: '#3B82F6', country: 'Germany' },
+    'TransnetBW': { solid: '#60A5FA', light: 'rgba(96, 165, 250, 0.45)', border: '#60A5FA', country: 'Germany' },
+    'TenneT': { solid: '#9333EA', light: 'rgba(147, 51, 234, 0.45)', border: '#9333EA', country: 'Germany' },
+    '50Hertz': { solid: '#A855F7', light: 'rgba(168, 85, 247, 0.45)', border: '#A855F7', country: 'Germany' },
+    'Nord Pool DE': { solid: '#818CF8', light: 'rgba(129, 140, 248, 0.45)', border: '#818CF8', country: 'Germany' },
+    'BNP SEPA': { solid: '#D946EF', light: 'rgba(217, 70, 239, 0.45)', border: '#D946EF', country: 'Germany' },
+    'AXPO Cash': { solid: '#A21CAF', light: 'rgba(162, 28, 175, 0.45)', border: '#A21CAF', country: 'Germany' },
+
+    // Netherlands
+    'PVNED': { solid: '#10B981', light: 'rgba(16, 185, 129, 0.45)', border: '#10B981', country: 'Netherlands' },
+    'Libra Energy': { solid: '#34D399', light: 'rgba(52, 211, 153, 0.45)', border: '#34D399', country: 'Netherlands' }
+  };
+
+  window.getMonthCollateralBreakdown = function(ym) {
+    const fxRate = (typeof BASE_FX !== 'undefined') ? BASE_FX : 11.230;
+    const lastGuarActual = (typeof getGuaranteeLastActualYM === 'function') ? getGuaranteeLastActualYM() : '2026-11';
+    const isActual = ym <= lastGuarActual;
+    
+    const dnbBySupplier = {};
+    const cashBySupplier = {};
+    
+    const dnbByCountry = { 'Norway': 0, 'Germany': 0, 'Netherlands': 0 };
+    const cashByCountry = { 'Norway': 0, 'Germany': 0, 'Netherlands': 0 };
+
+    const dnbCountrySuppliers = { 'Norway': {}, 'Germany': {}, 'Netherlands': {} };
+    const cashCountrySuppliers = { 'Norway': {}, 'Germany': {}, 'Netherlands': {} };
+
+    if (typeof COUNTRY_DATA !== 'undefined') {
+      // 1. Norway (kNOK)
+      const cNo = COUNTRY_DATA.norway;
+      const noSrc = (isActual && cNo.actual && cNo.actual[ym]) ? cNo.actual[ym] : (cNo.forecast ? cNo.forecast[ym] : null);
+      if (noSrc) {
+        if (noSrc.mindEnergy > 0) {
+          dnbBySupplier['Mind Energy'] = noSrc.mindEnergy;
+          dnbByCountry['Norway'] += noSrc.mindEnergy;
+          dnbCountrySuppliers['Norway']['Mind Energy'] = noSrc.mindEnergy;
+        }
+        if (noSrc.skagerak > 0) {
+          dnbBySupplier['Skagerak'] = noSrc.skagerak;
+          dnbByCountry['Norway'] += noSrc.skagerak;
+          dnbCountrySuppliers['Norway']['Skagerak'] = noSrc.skagerak;
+        }
+        if (noSrc.nordPool > 0) {
+          dnbBySupplier['Nord Pool'] = noSrc.nordPool;
+          dnbByCountry['Norway'] += noSrc.nordPool;
+          dnbCountrySuppliers['Norway']['Nord Pool'] = noSrc.nordPool;
+        }
+        if (noSrc.eSett > 0) {
+          dnbBySupplier['eSett'] = noSrc.eSett;
+          dnbByCountry['Norway'] += noSrc.eSett;
+          dnbCountrySuppliers['Norway']['eSett'] = noSrc.eSett;
+        }
+
+        if (noSrc.mindEnergyCash > 0) {
+          cashBySupplier['Mind Energy Cash'] = noSrc.mindEnergyCash;
+          cashByCountry['Norway'] += noSrc.mindEnergyCash;
+          cashCountrySuppliers['Norway']['Mind Energy Cash'] = noSrc.mindEnergyCash;
+        }
+        if (noSrc.skagerakCash > 0) {
+          cashBySupplier['Skagerak Cash'] = noSrc.skagerakCash;
+          cashByCountry['Norway'] += noSrc.skagerakCash;
+          cashCountrySuppliers['Norway']['Skagerak Cash'] = noSrc.skagerakCash;
+        }
+      }
+
+      // 2. Germany (kEUR -> convert to kNOK)
+      const cDe = COUNTRY_DATA.germany;
+      const deSrc = (isActual && cDe.actual && cDe.actual[ym]) ? cDe.actual[ym] : (cDe.forecast ? cDe.forecast[ym] : null);
+      if (deSrc) {
+        const deDnbMap = {
+          'AXPO': deSrc.axpo,
+          'BayWa': deSrc.bayWa,
+          'Marex': deSrc.marex,
+          'Amprion': deSrc.amprion,
+          'TransnetBW': deSrc.transnetBw,
+          'TenneT': deSrc.tenneT,
+          '50Hertz': deSrc.fiftyHertz,
+          'Nord Pool DE': deSrc.nordPoolDe
+        };
+        for (const [sup, valEur] of Object.entries(deDnbMap)) {
+          if (valEur > 0) {
+            const valNok = valEur * fxRate;
+            dnbBySupplier[sup] = valNok;
+            dnbByCountry['Germany'] += valNok;
+            dnbCountrySuppliers['Germany'][sup] = valNok;
+          }
+        }
+
+        if (deSrc.bnpSepaCash > 0) {
+          const valNok = deSrc.bnpSepaCash * fxRate;
+          cashBySupplier['BNP SEPA'] = valNok;
+          cashByCountry['Germany'] += valNok;
+          cashCountrySuppliers['Germany']['BNP SEPA'] = valNok;
+        }
+        if (deSrc.axpoCash > 0) {
+          const valNok = deSrc.axpoCash * fxRate;
+          cashBySupplier['AXPO Cash'] = valNok;
+          cashByCountry['Germany'] += valNok;
+          cashCountrySuppliers['Germany']['AXPO Cash'] = valNok;
+        }
+      }
+
+      // 3. Netherlands (kEUR -> convert to kNOK)
+      const cNl = COUNTRY_DATA.netherlands;
+      const nlSrc = (isActual && cNl.actual && cNl.actual[ym]) ? cNl.actual[ym] : (cNl.forecast ? cNl.forecast[ym] : null);
+      if (nlSrc) {
+        if (nlSrc.libraEnergy > 0) {
+          const valNok = nlSrc.libraEnergy * fxRate;
+          dnbBySupplier['Libra Energy'] = valNok;
+          dnbByCountry['Netherlands'] += valNok;
+          dnbCountrySuppliers['Netherlands']['Libra Energy'] = valNok;
+        }
+
+        if (nlSrc.pvned > 0) {
+          const valNok = nlSrc.pvned * fxRate;
+          cashBySupplier['PVNED'] = valNok;
+          cashByCountry['Netherlands'] += valNok;
+          cashCountrySuppliers['Netherlands']['PVNED'] = valNok;
+        }
+      }
+    }
+
+    const dnbTotal = Object.values(dnbBySupplier).reduce((a, b) => a + b, 0);
+    const cashTotal = Object.values(cashBySupplier).reduce((a, b) => a + b, 0);
+
+    return {
+      ym,
+      isActual,
+      dnbTotal,
+      cashTotal,
+      dnbByCountry,
+      cashByCountry,
+      dnbBySupplier,
+      cashBySupplier,
+      dnbCountrySuppliers,
+      cashCountrySuppliers
+    };
+  };
+
+  window.onPieMonthChange = function(newYm) {
+    selectedPieMonth = newYm;
+    pie1DrilldownCountry = null;
+    pie2DrilldownCountry = null;
+    renderCollateralBreakdownPies();
+  };
+
+  window.setPieBreakdownLevel = function(level) {
+    pieBreakdownLevel = level;
+    pie1DrilldownCountry = null;
+    pie2DrilldownCountry = null;
+    const btnC = document.getElementById('btnPieCountry');
+    const btnS = document.getElementById('btnPieSupplier');
+    if (level === 'country') {
+      if (btnC) btnC.classList.add('active-toggle');
+      if (btnS) btnS.classList.remove('active-toggle');
+    } else {
+      if (btnC) btnC.classList.remove('active-toggle');
+      if (btnS) btnS.classList.add('active-toggle');
+    }
+    renderCollateralBreakdownPies();
+  };
+
+  window.resetPie1Drilldown = function() {
+    pie1DrilldownCountry = null;
+    renderCollateralBreakdownPies();
+  };
+
+  window.resetPie2Drilldown = function() {
+    pie2DrilldownCountry = null;
+    renderCollateralBreakdownPies();
+  };
+
+  window.renderCollateralBreakdownPies = function() {
+    const breakdown = getMonthCollateralBreakdown(selectedPieMonth);
+    const isActual = breakdown.isActual;
+
+    // Update Month Badge
+    const badgeEl = document.getElementById('pieMonthBadge');
+    if (badgeEl) {
+      if (isActual) {
+        badgeEl.textContent = '● Actual';
+        badgeEl.className = 'forecast-badge';
+        badgeEl.style.background = 'rgba(16, 185, 129, 0.15)';
+        badgeEl.style.color = '#10B981';
+        badgeEl.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+      } else {
+        badgeEl.textContent = '⟳ Forecast';
+        badgeEl.className = 'forecast-badge';
+        badgeEl.style.background = 'rgba(30, 208, 231, 0.12)';
+        badgeEl.style.color = '#BEFBFF';
+        badgeEl.style.borderColor = 'rgba(30, 208, 231, 0.3)';
+      }
+    }
+
+    // Update Totals Display
+    const dnbTotal = breakdown.dnbTotal;
+    const cashTotal = breakdown.cashTotal;
+    const totalBoth = dnbTotal + cashTotal;
+
+    const pie1TotalEl = document.getElementById('pie1Total');
+    const pie1TotalSubEl = document.getElementById('pie1TotalSub');
+    if (pie1TotalEl) pie1TotalEl.textContent = fmt(dnbTotal) + ' kNOK';
+    if (pie1TotalSubEl) pie1TotalSubEl.textContent = (dnbTotal / 1000).toFixed(2) + 'm NOK';
+
+    const pie2TotalEl = document.getElementById('pie2Total');
+    const pie2TotalSubEl = document.getElementById('pie2TotalSub');
+    if (pie2TotalEl) pie2TotalEl.textContent = fmt(cashTotal) + ' kNOK';
+    if (pie2TotalSubEl) pie2TotalSubEl.textContent = (cashTotal / 1000).toFixed(2) + 'm NOK';
+
+    // Relative Scale Pill
+    const relPillEl = document.getElementById('pieRelativePill');
+    if (relPillEl) {
+      const dnbPct = totalBoth > 0 ? (dnbTotal / totalBoth * 100).toFixed(1) : 0;
+      const cashPct = totalBoth > 0 ? (cashTotal / totalBoth * 100).toFixed(1) : 0;
+      relPillEl.innerHTML = `
+        <span style="color:#1ED0E7; font-weight:600;">DNB: ${(dnbTotal/1000).toFixed(1)}m (${dnbPct}%)</span>
+        <span style="color:rgba(255,255,255,0.2);">|</span>
+        <span style="color:#F59E0B; font-weight:600;">Cash Collateral: ${(cashTotal/1000).toFixed(1)}m (${cashPct}%)</span>
+      `;
+    }
+
+    // Sizing calculation (Area proportional to total: R = R_base * sqrt(Total / maxTotal))
+    const maxTotal = Math.max(dnbTotal, cashTotal);
+    let dnbRadius = '92%';
+    let cashRadius = '92%';
+    if (maxTotal > 0) {
+      const minScale = 0.38;
+      const dnbScale = dnbTotal > 0 ? Math.max(minScale, Math.sqrt(dnbTotal / maxTotal)) : 0.01;
+      const cashScale = cashTotal > 0 ? Math.max(minScale, Math.sqrt(cashTotal / maxTotal)) : 0.01;
+      dnbRadius = `${Math.round(92 * dnbScale)}%`;
+      cashRadius = `${Math.round(92 * cashScale)}%`;
+    }
+
+    // ----------------------------------------------------
+    // CHART 1: DNB GUARANTEE
+    // ----------------------------------------------------
+    let dnbLabels = [];
+    let dnbValues = [];
+    let dnbColors = [];
+    let dnbBorders = [];
+    const b1El = document.getElementById('pie1Breadcrumb');
+    const b1Label = document.getElementById('pie1DrilldownLabel');
+    const pie1Sub = document.getElementById('pie1Subtitle');
+
+    if (pie1DrilldownCountry) {
+      if (b1El) b1El.style.display = 'flex';
+      if (b1Label) b1Label.textContent = `> ${pie1DrilldownCountry} Suppliers`;
+      if (pie1Sub) pie1Sub.textContent = `Drilldown: ${pie1DrilldownCountry} Suppliers`;
+      const sups = breakdown.dnbCountrySuppliers[pie1DrilldownCountry] || {};
+      for (const [sup, val] of Object.entries(sups)) {
+        if (val > 0) {
+          dnbLabels.push(sup);
+          dnbValues.push(val);
+          const pal = SUPPLIER_PALETTE[sup] || { solid: '#1ED0E7', light: 'rgba(30,208,231,0.45)', border: '#1ED0E7' };
+          dnbColors.push(isActual ? pal.solid : pal.light);
+          dnbBorders.push(pal.border);
+        }
+      }
+    } else if (pieBreakdownLevel === 'supplier') {
+      if (b1El) b1El.style.display = 'none';
+      if (pie1Sub) pie1Sub.textContent = 'All DNB Suppliers';
+      for (const [sup, val] of Object.entries(breakdown.dnbBySupplier)) {
+        if (val > 0) {
+          dnbLabels.push(sup);
+          dnbValues.push(val);
+          const pal = SUPPLIER_PALETTE[sup] || { solid: '#1ED0E7', light: 'rgba(30,208,231,0.45)', border: '#1ED0E7' };
+          dnbColors.push(isActual ? pal.solid : pal.light);
+          dnbBorders.push(pal.border);
+        }
+      }
+    } else {
+      if (b1El) b1El.style.display = 'none';
+      if (pie1Sub) pie1Sub.textContent = 'By Country (click slice to drilldown)';
+      for (const [c, val] of Object.entries(breakdown.dnbByCountry)) {
+        if (val > 0) {
+          dnbLabels.push(c);
+          dnbValues.push(val);
+          const pal = COUNTRY_COLORS[c] || { solid: '#1ED0E7', light: 'rgba(30,208,231,0.45)', border: '#1ED0E7' };
+          dnbColors.push(isActual ? pal.solid : pal.light);
+          dnbBorders.push(pal.border);
+        }
+      }
+    }
+
+    if (chartPie1Instance) chartPie1Instance.destroy();
+    const canvas1 = document.getElementById('chartPieDnb');
+    if (canvas1) {
+      const ctx1 = canvas1.getContext('2d');
+      chartPie1Instance = new Chart(ctx1, {
+        type: 'pie',
+        data: {
+          labels: dnbLabels,
+          datasets: [{
+            data: dnbValues,
+            backgroundColor: dnbColors,
+            borderColor: dnbBorders,
+            borderWidth: 1.5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          radius: dnbRadius,
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              display: ctx => {
+                const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                if (!sum) return false;
+                return (ctx.raw / sum * 100) >= 5;
+              },
+              formatter: (val, ctx) => {
+                const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                return (val / sum * 100).toFixed(1) + '%';
+              },
+              color: '#FFFFFF',
+              font: { family: 'Poppins', size: 10, weight: '700' }
+            },
+            tooltip: {
+              backgroundColor: '#16191D',
+              borderColor: '#1ED0E7',
+              borderWidth: 1,
+              titleFont: { family: 'Poppins', size: 11, weight: '600' },
+              bodyFont: { family: 'Poppins', size: 11 },
+              callbacks: {
+                title: ctx => `${ctx[0].label} (${isActual ? 'Actual' : 'Forecast'} · ${selectedPieMonth})`,
+                label: ctx => {
+                  const val = ctx.raw || 0;
+                  const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = sum > 0 ? (val / sum * 100).toFixed(1) : 0;
+                  return [
+                    ` Amount: ${fmt(val)} kNOK (${(val/1000).toFixed(2)}m NOK)`,
+                    ` Share: ${pct}% of DNB total`
+                  ];
+                }
+              }
+            }
+          },
+          onClick: (evt, elements) => {
+            if (elements.length > 0 && pieBreakdownLevel === 'country' && !pie1DrilldownCountry) {
+              const idx = elements[0].index;
+              const country = dnbLabels[idx];
+              if (country && breakdown.dnbCountrySuppliers[country] && Object.keys(breakdown.dnbCountrySuppliers[country]).length > 0) {
+                pie1DrilldownCountry = country;
+                renderCollateralBreakdownPies();
+              }
+            }
+          }
+        }
+      });
+    }
+
+    renderPieLegendTable('pie1Legend', dnbLabels, dnbValues, dnbColors, dnbTotal);
+
+    // ----------------------------------------------------
+    // CHART 2: CASH COLLATERAL
+    // ----------------------------------------------------
+    let cashLabels = [];
+    let cashValues = [];
+    let cashColors = [];
+    let cashBorders = [];
+    const b2El = document.getElementById('pie2Breadcrumb');
+    const b2Label = document.getElementById('pie2DrilldownLabel');
+    const pie2Sub = document.getElementById('pie2Subtitle');
+
+    if (pie2DrilldownCountry) {
+      if (b2El) b2El.style.display = 'flex';
+      if (b2Label) b2Label.textContent = `> ${pie2DrilldownCountry} Suppliers`;
+      if (pie2Sub) pie2Sub.textContent = `Drilldown: ${pie2DrilldownCountry} Suppliers`;
+      const sups = breakdown.cashCountrySuppliers[pie2DrilldownCountry] || {};
+      for (const [sup, val] of Object.entries(sups)) {
+        if (val > 0) {
+          cashLabels.push(sup);
+          cashValues.push(val);
+          const pal = SUPPLIER_PALETTE[sup] || { solid: '#F59E0B', light: 'rgba(245,158,11,0.45)', border: '#F59E0B' };
+          cashColors.push(isActual ? pal.solid : pal.light);
+          cashBorders.push(pal.border);
+        }
+      }
+    } else if (pieBreakdownLevel === 'supplier') {
+      if (b2El) b2El.style.display = 'none';
+      if (pie2Sub) pie2Sub.textContent = 'All Cash Collateral Suppliers';
+      for (const [sup, val] of Object.entries(breakdown.cashBySupplier)) {
+        if (val > 0) {
+          cashLabels.push(sup);
+          cashValues.push(val);
+          const pal = SUPPLIER_PALETTE[sup] || { solid: '#F59E0B', light: 'rgba(245,158,11,0.45)', border: '#F59E0B' };
+          cashColors.push(isActual ? pal.solid : pal.light);
+          cashBorders.push(pal.border);
+        }
+      }
+    } else {
+      if (b2El) b2El.style.display = 'none';
+      if (pie2Sub) pie2Sub.textContent = 'By Country (click slice to drilldown)';
+      for (const [c, val] of Object.entries(breakdown.cashByCountry)) {
+        if (val > 0) {
+          cashLabels.push(c);
+          cashValues.push(val);
+          const pal = COUNTRY_COLORS[c] || { solid: '#F59E0B', light: 'rgba(245,158,11,0.45)', border: '#F59E0B' };
+          cashColors.push(isActual ? pal.solid : pal.light);
+          cashBorders.push(pal.border);
+        }
+      }
+    }
+
+    if (chartPie2Instance) chartPie2Instance.destroy();
+    const canvas2 = document.getElementById('chartPieCash');
+    if (canvas2) {
+      const ctx2 = canvas2.getContext('2d');
+      chartPie2Instance = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+          labels: cashLabels,
+          datasets: [{
+            data: cashValues,
+            backgroundColor: cashColors,
+            borderColor: cashBorders,
+            borderWidth: 1.5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          radius: cashRadius,
+          plugins: {
+            legend: { display: false },
+            datalabels: {
+              display: ctx => {
+                const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                if (!sum) return false;
+                return (ctx.raw / sum * 100) >= 5;
+              },
+              formatter: (val, ctx) => {
+                const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                return (val / sum * 100).toFixed(1) + '%';
+              },
+              color: '#FFFFFF',
+              font: { family: 'Poppins', size: 10, weight: '700' }
+            },
+            tooltip: {
+              backgroundColor: '#16191D',
+              borderColor: '#F59E0B',
+              borderWidth: 1,
+              titleFont: { family: 'Poppins', size: 11, weight: '600' },
+              bodyFont: { family: 'Poppins', size: 11 },
+              callbacks: {
+                title: ctx => `${ctx[0].label} (${isActual ? 'Actual' : 'Forecast'} · ${selectedPieMonth})`,
+                label: ctx => {
+                  const val = ctx.raw || 0;
+                  const sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                  const pct = sum > 0 ? (val / sum * 100).toFixed(1) : 0;
+                  return [
+                    ` Amount: ${fmt(val)} kNOK (${(val/1000).toFixed(2)}m NOK)`,
+                    ` Share: ${pct}% of Cash Collateral`
+                  ];
+                }
+              }
+            }
+          },
+          onClick: (evt, elements) => {
+            if (elements.length > 0 && pieBreakdownLevel === 'country' && !pie2DrilldownCountry) {
+              const idx = elements[0].index;
+              const country = cashLabels[idx];
+              if (country && breakdown.cashCountrySuppliers[country] && Object.keys(breakdown.cashCountrySuppliers[country]).length > 0) {
+                pie2DrilldownCountry = country;
+                renderCollateralBreakdownPies();
+              }
+            }
+          }
+        }
+      });
+    }
+
+    renderPieLegendTable('pie2Legend', cashLabels, cashValues, cashColors, cashTotal);
+  };
+
+  function renderPieLegendTable(elementId, labels, values, colors, total) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    if (!labels || labels.length === 0 || total === 0) {
+      el.innerHTML = `<div style="text-align: center; color: #8A909A; font-size: 0.7rem; padding: 1rem 0;">No collateral holdings for this period.</div>`;
+      return;
+    }
+
+    let html = `
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.68rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); color: #8A909A; text-transform: uppercase; font-size: 0.58rem; letter-spacing: 0.06em;">
+            <th style="text-align: left; padding: 4px 6px;">Name</th>
+            <th style="text-align: right; padding: 4px 6px;">kNOK</th>
+            <th style="text-align: right; padding: 4px 6px;">mNOK</th>
+            <th style="text-align: right; padding: 4px 6px;">Share</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    for (let i = 0; i < labels.length; i++) {
+      const lbl = labels[i];
+      const val = values[i];
+      const col = colors[i];
+      const pct = total > 0 ? (val / total * 100).toFixed(1) : '0.0';
+
+      html += `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03);">
+          <td style="padding: 4px 6px; display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 2px; background: ${col}; flex-shrink: 0;"></span>
+            <span style="font-weight: 500; color: #FFFFFF;">${lbl}</span>
+          </td>
+          <td style="text-align: right; padding: 4px 6px; font-weight: 600; color: #FFFFFF;">${fmt(val)}</td>
+          <td style="text-align: right; padding: 4px 6px; color: #BEFBFF;">${(val/1000).toFixed(2)}m</td>
+          <td style="text-align: right; padding: 4px 6px; font-weight: 600; color: ${col};">${pct}%</td>
+        </tr>
+      `;
+    }
+
+    html += `</tbody></table>`;
+    el.innerHTML = html;
+  }
+
+  function initCollateralBreakdownPies(labels) {
+    const selectEl = document.getElementById('pieMonthSelect');
+    if (selectEl && labels && labels.length > 0) {
+      selectEl.innerHTML = '';
+      const lastGuarActual = (typeof getGuaranteeLastActualYM === 'function') ? getGuaranteeLastActualYM() : '2026-11';
+      
+      const validPeriods = labels.filter(p => p >= '2026-01' && p <= '2027-12');
+      
+      for (const p of validPeriods) {
+        const opt = document.createElement('option');
+        opt.value = p;
+        const isAct = p <= lastGuarActual;
+        opt.textContent = `${p} (${isAct ? 'Actual' : 'Forecast'})`;
+        selectEl.appendChild(opt);
+      }
+
+      if (validPeriods.includes(selectedPieMonth)) {
+        selectEl.value = selectedPieMonth;
+      } else if (validPeriods.includes(lastGuarActual)) {
+        selectedPieMonth = lastGuarActual;
+        selectEl.value = selectedPieMonth;
+      } else if (validPeriods.length > 0) {
+        selectedPieMonth = validPeriods[0];
+        selectEl.value = selectedPieMonth;
+      }
+    }
+
+    renderCollateralBreakdownPies();
+  }
+
+  initCollateralBreakdownPies(labels);
 
   const histDNB = computeHistoryDNB(fx);
   const histPeriods = Object.keys(histDNB).sort();
