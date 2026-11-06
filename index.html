@@ -419,6 +419,30 @@
     .kpi-bar { flex-wrap: wrap; }
     #pieChartsContainer { grid-template-columns: 1fr !important; }
   }
+
+  .pie-nav-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #BEFBFF;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .pie-nav-btn:hover {
+    background: rgba(30, 208, 231, 0.25);
+    border-color: #1ED0E7;
+    color: #FFFFFF;
+  }
+  .pie-nav-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
   @media print {
     @page {
       size: A4 landscape;
@@ -1077,11 +1101,13 @@
       <!-- Controls Toolbar -->
       <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
         <!-- Month Selector -->
-        <div style="display: flex; align-items: center; gap: 0.4rem; background: #12161c; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-          <span style="font-size: 0.68rem; color: #8A909A; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Month:</span>
-          <select id="pieMonthSelect" onchange="onPieMonthChange(this.value)" style="background: #1a1e24; color: #FFFFFF; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; padding: 3px 8px; font-family: 'Poppins', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; outline: none;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; background: #12161c; padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(30,208,231,0.35); box-shadow: 0 0 12px rgba(30,208,231,0.08);">
+          <span style="font-size: 0.72rem; color: #1ED0E7; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 4px;"><span>📅</span> Select Month:</span>
+          <button type="button" class="pie-nav-btn" id="btnPrevPieMonth" onclick="prevPieMonth()" title="Previous Month">◀</button>
+          <select id="pieMonthSelect" onchange="onPieMonthChange(this.value)" style="background: #1a1e24; color: #FFFFFF; border: 1px solid rgba(30,208,231,0.4); border-radius: 6px; padding: 4px 10px; font-family: 'Poppins', sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; outline: none;">
           </select>
-          <span id="pieMonthBadge" class="forecast-badge" style="margin-left: 4px; font-size: 0.6rem;">● Actual</span>
+          <button type="button" class="pie-nav-btn" id="btnNextPieMonth" onclick="nextPieMonth()" title="Next Month">▶</button>
+          <span id="pieMonthBadge" class="forecast-badge" style="margin-left: 4px; font-size: 0.65rem;">● Actual</span>
         </div>
 
         <!-- Breakdown Level Toggle -->
@@ -2652,6 +2678,17 @@ function update() {
   // ========================================================
   // PANEL 2C: DNB GUARANTEE & CASH COLLATERAL PIE CHARTS
   // ========================================================
+  // State variables for Panel 2C (Breakdown Pie Charts)
+  var selectedPieMonth = (typeof getGuaranteeLastActualYM === 'function') ? getGuaranteeLastActualYM() : '2026-11';
+  var pieBreakdownLevel = 'country';
+  var pie1DrilldownCountry = null;
+  var pie2DrilldownCountry = null;
+  var chartPie1Instance = null;
+  var chartPie2Instance = null;
+
+  window.selectedPieMonth = selectedPieMonth;
+  window.pieBreakdownLevel = pieBreakdownLevel;
+
   const COUNTRY_COLORS = {
     'Norway': {
       solid: '#1ED0E7',
@@ -2822,10 +2859,43 @@ function update() {
     };
   };
 
+  function updatePieNavButtons() {
+    const selectEl = document.getElementById('pieMonthSelect');
+    const btnPrev = document.getElementById('btnPrevPieMonth');
+    const btnNext = document.getElementById('btnNextPieMonth');
+    if (selectEl) {
+      if (btnPrev) btnPrev.disabled = (selectEl.selectedIndex <= 0);
+      if (btnNext) btnNext.disabled = (selectEl.selectedIndex >= selectEl.options.length - 1);
+    }
+  }
+
+  window.prevPieMonth = function() {
+    const selectEl = document.getElementById('pieMonthSelect');
+    if (!selectEl) return;
+    if (selectEl.selectedIndex > 0) {
+      selectEl.selectedIndex--;
+      onPieMonthChange(selectEl.value);
+    }
+  };
+
+  window.nextPieMonth = function() {
+    const selectEl = document.getElementById('pieMonthSelect');
+    if (!selectEl) return;
+    if (selectEl.selectedIndex < selectEl.options.length - 1) {
+      selectEl.selectedIndex++;
+      onPieMonthChange(selectEl.value);
+    }
+  };
+
   window.onPieMonthChange = function(newYm) {
     selectedPieMonth = newYm;
+    window.selectedPieMonth = newYm;
+    const selectEl = document.getElementById('pieMonthSelect');
+    if (selectEl && selectEl.value !== newYm) selectEl.value = newYm;
+    updatePieNavButtons();
     pie1DrilldownCountry = null;
     pie2DrilldownCountry = null;
+    updatePieNavButtons();
     renderCollateralBreakdownPies();
   };
 
@@ -2842,16 +2912,19 @@ function update() {
       if (btnC) btnC.classList.remove('active-toggle');
       if (btnS) btnS.classList.add('active-toggle');
     }
+    updatePieNavButtons();
     renderCollateralBreakdownPies();
   };
 
   window.resetPie1Drilldown = function() {
     pie1DrilldownCountry = null;
+    updatePieNavButtons();
     renderCollateralBreakdownPies();
   };
 
   window.resetPie2Drilldown = function() {
     pie2DrilldownCountry = null;
+    updatePieNavButtons();
     renderCollateralBreakdownPies();
   };
 
@@ -2967,7 +3040,7 @@ function update() {
       }
     }
 
-    if (chartPie1Instance) chartPie1Instance.destroy();
+    if (chartPie1Instance) { try { chartPie1Instance.destroy(); } catch(e){} chartPie1Instance = null; }
     const canvas1 = document.getElementById('chartPieDnb');
     if (canvas1) {
       const ctx1 = canvas1.getContext('2d');
@@ -3027,7 +3100,8 @@ function update() {
               const country = dnbLabels[idx];
               if (country && breakdown.dnbCountrySuppliers[country] && Object.keys(breakdown.dnbCountrySuppliers[country]).length > 0) {
                 pie1DrilldownCountry = country;
-                renderCollateralBreakdownPies();
+                updatePieNavButtons();
+    renderCollateralBreakdownPies();
               }
             }
           }
@@ -3088,7 +3162,7 @@ function update() {
       }
     }
 
-    if (chartPie2Instance) chartPie2Instance.destroy();
+    if (chartPie2Instance) { try { chartPie2Instance.destroy(); } catch(e){} chartPie2Instance = null; }
     const canvas2 = document.getElementById('chartPieCash');
     if (canvas2) {
       const ctx2 = canvas2.getContext('2d');
@@ -3148,7 +3222,8 @@ function update() {
               const country = cashLabels[idx];
               if (country && breakdown.cashCountrySuppliers[country] && Object.keys(breakdown.cashCountrySuppliers[country]).length > 0) {
                 pie2DrilldownCountry = country;
-                renderCollateralBreakdownPies();
+                updatePieNavButtons();
+    renderCollateralBreakdownPies();
               }
             }
           }
@@ -3215,7 +3290,8 @@ function update() {
         const opt = document.createElement('option');
         opt.value = p;
         const isAct = p <= lastGuarActual;
-        opt.textContent = `${p} (${isAct ? 'Actual' : 'Forecast'})`;
+        const isCurrent = (p === lastGuarActual);
+        opt.textContent = isCurrent ? `${p} (Current Month · Actual)` : `${p} (${isAct ? 'Actual' : 'Forecast'})`;
         selectEl.appendChild(opt);
       }
 
@@ -3230,10 +3306,11 @@ function update() {
       }
     }
 
+    updatePieNavButtons();
     renderCollateralBreakdownPies();
   }
 
-  initCollateralBreakdownPies(labels);
+  try { initCollateralBreakdownPies(labels); } catch (e) { console.error('Pie init error:', e); }
 
   const histDNB = computeHistoryDNB(fx);
   const histPeriods = Object.keys(histDNB).sort();
