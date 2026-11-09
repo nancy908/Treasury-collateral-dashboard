@@ -185,6 +185,7 @@ def parse_collateral_csv(csv_path):
 
     # Parse Actuals and merge/overwrite forecast values where actuals exist
     actuals = {}
+    current_month_ym = (as_of_date or '2026-11')[:7]
     for row in rows[3:]:
         if len(row) > 18:
             period_val = row[13].strip()
@@ -196,7 +197,7 @@ def parse_collateral_csv(csv_path):
             if not period_val:
                 continue
             period = to_ym(period_val)
-            if not period:
+            if not period or period > current_month_ym:
                 continue
 
                 
@@ -247,7 +248,7 @@ def parse_collateral_csv(csv_path):
         if len(row) > 18 and 'cash collateral' in str(row[14]).lower():
             period = to_ym(row[13])
             amount_nok = parse_num(row[18])
-            if period:
+            if period and period <= current_month_ym:
                 actual_cash_collateral[period] = actual_cash_collateral.get(period, 0.0) + amount_nok
                 
     for period, amt in actual_cash_collateral.items():
@@ -369,7 +370,7 @@ def parse_collateral_csv(csv_path):
             ben_l = row[15].strip().lower()
             amt_k = parse_num(row[17])
             amt_nok = parse_num(row[18])
-            if period:
+            if period and period <= current_month_ym:
                 # Norway (kNOK)
                 if gtype_l == 'dnb nok':
                     if 'mind energy' in ben_l: norway_act[period]['mindEnergy'] += amt_nok
