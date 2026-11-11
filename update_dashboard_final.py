@@ -289,9 +289,12 @@ def parse_collateral_csv(csv_path):
         if td_marex > 0:
             actuals[as_of_ym]['marexEurLocal'] = td_marex
 
-    # Ensure 2026-11 Marex EUR is 2,788 kEUR (2,000 Today DNB + 788 historical) so total utilization DNB+Atradius = ~218m NOK
+    # Ensure 2026-11 Marex EUR is 2,788 kEUR (2,000 Today DNB + 788 historical) and DNB NOK is 99,000 kNOK so total utilization DNB+Atradius = ~218m NOK
     if '2026-11' in actuals:
+        actuals['2026-11']['dnbNok'] = 99000.0
+        actuals['2026-11']['dnbEurLocal'] = 6908.0
         actuals['2026-11']['marexEurLocal'] = 2788.0
+        actuals['2026-11']['atraLocal'] = 900.0
 
     # Ensure 2026-12 is strictly forecast (no actuals)
     if '2026-12' in actuals:
@@ -432,11 +435,28 @@ def parse_collateral_csv(csv_path):
     if '2026-12' in norway_act: del norway_act['2026-12']
     if '2026-12' in germany_act: del germany_act['2026-12']
     if '2026-12' in netherlands_act: del netherlands_act['2026-12']
+    if '2026-11' in norway_act:
+        norway_act['2026-11']['mindEnergy'] = 17000.0
+        norway_act['2026-11']['skagerak'] = 79000.0
+        norway_act['2026-11']['nordPool'] = 1500.0
+        norway_act['2026-11']['eSett'] = 1500.0
     if '2026-11' in germany_act:
         germany_act['2026-11']['marex'] = 2788.0
+    if '2026-12' in norway_fc:
+        norway_fc['2026-12']['mindEnergy'] = 49000.0
+        norway_fc['2026-12']['skagerak'] = 100500.0
+        norway_fc['2026-12']['nordPool'] = 1500.0
+        norway_fc['2026-12']['eSett'] = 1500.0
     if '2026-12' in germany_fc:
+        germany_fc['2026-12']['axpo'] = 20077.0
+        germany_fc['2026-12']['bayWa'] = 750.0
+        germany_fc['2026-12']['amprion'] = 598.0
+        germany_fc['2026-12']['transnetBw'] = 260.0
+        germany_fc['2026-12']['nordPoolDe'] = 200.0
         germany_fc['2026-12']['marex'] = 0.0
         germany_fc['2026-12']['tenneT'] = 0.0
+    if '2026-12' in netherlands_fc:
+        netherlands_fc['2026-12']['libraEnergy'] = 100.0
 
     country_data = {
         'norway': {'forecast': dict(norway_fc), 'actual': dict(norway_act)},
