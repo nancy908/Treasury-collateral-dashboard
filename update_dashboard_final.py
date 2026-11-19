@@ -629,11 +629,11 @@ def bootstrap_cash_flow(treasury, fpa, current_month=None):
     cash_sources['2026-01'] = "Actual"
     monthly_cash['2026-10'] = 164093.0
     cash_sources['2026-10'] = "Actual"
-    monthly_cash['2026-11'] = 373441.0
+    monthly_cash['2026-11'] = 383226.0
     cash_sources['2026-11'] = "WCFF"
-    monthly_cash['2026-12'] = 732264.0
+    monthly_cash['2026-12'] = 849894.0
     cash_sources['2026-12'] = "WCFF"
-    monthly_cash['2027-01'] = 748281.0
+    monthly_cash['2027-01'] = 843173.0
     cash_sources['2027-01'] = "WCFF"
 
     return monthly_cash, cash_sources
@@ -781,8 +781,12 @@ def update_html(html_content, collateral_data, monthly_cash, cash_collateral, ca
         deduction = okr_deductions.get(period, 0.0)
         sim_cash_after_collateral[period] = round(cash_after - deduction)
 
-    cash_after_collateral['2026-12'] = 671106.0
-    sim_cash_after_collateral['2026-12'] = 625542.0
+    cash_after_collateral['2026-11'] = 383226.0
+    sim_cash_after_collateral['2026-11'] = 340895.0
+    cash_after_collateral['2026-12'] = 875870.0
+    sim_cash_after_collateral['2026-12'] = 830306.0
+    cash_after_collateral['2027-01'] = 695181.0
+    sim_cash_after_collateral['2027-01'] = 695181.0
 
     # Build complete data block
     today_dnb_json = json.dumps(collateral_data['today_dnb'])
